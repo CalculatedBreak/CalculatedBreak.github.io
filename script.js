@@ -102,9 +102,9 @@ const GAME_MODULES = [
   { href: "games/boxing-bros/",             img: "games/boxing-bros/boxing-bros.avif",                                              title: "Wrestle Bros",             cat: "sports"     },
   { href: "games/g-d",                      img: "images/geometry-dash.png",                                                        title: "Geometry Dash",            cat: "action"     },
   { href: "games/smash-karts/",             img: "games/smash-karts/s-k.png",                                                       title: "Smash Karts",              cat: "racing"     },
-  { href: "/games/tiny-fishing",            img: "/games/tiny-fishing/iconTF.png",                                                  title: "Tiny Fishing",             cat: "idle"        },
-  { href: "/games/BlackJack",               img: "/games/BlackJack/Icon.png",                                                       title: "BlackJack",                cat: "card"        },
-  { href: "/games/blumgi-bounce",           img: "/games/blumgi-bounce/icon.jpg",                                                   title: "Blumgi Bounce",            cat: "sports"        },
+  { href: "games/tiny-fishing",            img: "/games/tiny-fishing/iconTF.png",                                                  title: "Tiny Fishing",             cat: "idle"        },
+  { href: "games/BlackJack",               img: "/games/BlackJack/Icon.png",                                                       title: "BlackJack",                cat: "card"        },
+  { href: "games/blumgi-bounce",           img: "/games/blumgi-bounce/icon.jpg",                                                   title: "Blumgi Bounce",            cat: "sports"        },
 
 ].filter(module => module.href.startsWith("games/"));
 
