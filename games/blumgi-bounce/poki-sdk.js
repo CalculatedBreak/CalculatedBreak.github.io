@@ -235,7 +235,7 @@
     if (!k) {
         const e = ( () => {
             
-    return "/blumgi-bounce/poki-sdk-core.js";
+    return "/games/blumgi-bounce/poki-sdk-core.js";
 
         }
         )()
