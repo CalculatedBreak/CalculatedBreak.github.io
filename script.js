@@ -101,7 +101,7 @@ const GAME_MODULES = [
   { href: "games/kart-bros/",               img: "https://store-images.s-microsoft.com/image/apps.50957.14077711198622072.87de44b8-a3b1-4457-9a12-07ae7d1d2d1d.b7f82a68-5baf-43b2-a0f7-bba2ebf39c8c", title: "Kart Bros", cat: "racing" },
   { href: "games/boxing-bros/",             img: "games/boxing-bros/boxing-bros.avif",                                              title: "Wrestle Bros",             cat: "sports"     },
   { href: "games/g-d",                      img: "images/geometry-dash.png",                                                        title: "Geometry Dash",            cat: "action"     },
-  { href: "games/smash-karts/",             img: "games/smash-karts/s-k.png",                                                       title: "Smash Karts",              cat: "racing"     },
+  { href: "games/s-k/",             img: "games/s-k/icon.png",                                                       title: "Smash Karts",              cat: "racing"     },
   { href: "games/tiny-fishing",            img: "/games/tiny-fishing/iconTF.png",                                                  title: "Tiny Fishing",             cat: "idle"        },
   { href: "games/BlackJack",               img: "/games/BlackJack/Icon.png",                                                       title: "BlackJack",                cat: "card"        },
   { href: "games/blumgi-bounce",           img: "/games/blumgi-bounce/icon.jpg",                                                   title: "Blumgi Bounce",            cat: "sports"        },
