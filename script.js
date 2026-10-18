@@ -22,7 +22,7 @@ const GAME_MODULES = [
   { href: "games/slope/",                   img: "images/slope.jpg",                                                                title: "Slope",                    cat: "action"     },
   { href: "games/motox3m2/",                img: "images/motox3m2.jpg",                                                             title: "Moto X3M 2",               cat: "racing"     },
   { href: "games/Idle Breakout/",           img: "games/Idle Breakout/image.png",                                                   title: "Idle Breakout",          cat: "idle"        },
-  { href: "games/getaway-shootout/",        img: "games/getaway-shootout/img/images.jpg",                                           title: "Getaway Shootout",     cat: "multiplayer"},
+  { href: "games/getaway-shootout/",        img: "games/getaway-shootout/images.jpg",                                           title: "Getaway Shootout",     cat: "multiplayer"},
   { href: "games/bitlife/",                 img: "games/bitlife/logo.png",                                                          title: "BitLife",                  cat: "idle"        },
   { href: "games/subway-surfers-ny/",       img: "games/subway-surfers-ny/NewYorkIcon.png",                                         title: "Subway Surfers NY",    cat: "action"     },
   { href: "games/just-fall/",               img: "games/just-fall/unnamed.png",                                                     title: "Just Fall",                cat: "multiplayer"},
