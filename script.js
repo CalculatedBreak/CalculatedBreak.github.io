@@ -109,6 +109,7 @@ const GAME_MODULES = [
   { href: "games/johnny-trigger-sniper",           img: "/images/johnny-trigger-sniper.png",                                                   title: "Johnny Trigger Sniper",            cat: "shooter"        },
   { href: "games/blumgi-racers",           img: "/images/blumgi-racers.jpg",                                                   title: "Blumgi Racer",            cat: "racing"        },
   { href: "games/car-machines",           img: "/images/car-machines.jfif",                                                   title: "Car Machines",            cat: "racing"        },
+  { href: "games/battle-blast",           img: "/images/battle-blast.jpg",                                                   title: "Battle Blast",            cat: "shooter"        },
 
 ].filter(module => module.href.startsWith("games/"));
 
