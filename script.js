@@ -107,6 +107,7 @@ const GAME_MODULES = [
   { href: "games/blumgi-bounce",           img: "/games/blumgi-bounce/icon.jpg",                                                   title: "Blumgi Bounce",            cat: "sports"        },
   { href: "games/gladihoppers",           img: "/images/gladihoppers.png",                                                   title: "Gladihoppers",            cat: "sports"        },
   { href: "games/johnny-trigger-sniper",           img: "/images/johnny-trigger-sniper.png",                                                   title: "Johnny Trigger Sniper",            cat: "shooter"        },
+  { href: "games/blumgi-racers",           img: "/images/blumgi-racers.jpg",                                                   title: "Blumgi Racer",            cat: "racing"        },
 
 ].filter(module => module.href.startsWith("games/"));
 
