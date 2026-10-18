@@ -1,11 +1,24 @@
 // ================= CRAZY ADS ===================
 // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
+function inIframe() {
+  try {
+    return window.self !== window.top;
+  } catch (e) {
+    return true;
+  }
+}
+
 function initWebSdkWrapper(debug = false) {
   let config = globalThis.adconfig;
-
+  let runtime = globalThis.cr_getC2Runtime();
   let WebSdkWrapper = globalThis.WebSdkWrapper;
   let postInit = () => {
+    WebSdkWrapper.loadingStart();
+    WebSdkWrapper.loadingProgress(runtime.loadingProgress * 100);
+    if (runtime.loadingprogress === 1) {
+      WebSdkWrapper.loadingEnd();
+    }
     WebSdkWrapper.onUnlockAllLevels(() => {
       c2_callFunction("unlockAllLevels");
     });
@@ -58,6 +71,29 @@ function initWebSdkWrapper(debug = false) {
     } else {
       globalThis.adconfigNoReligion = 0;
     }
+
+    // let asas = () => {
+    //   let i, s, a, l, f, b;
+    //   return !inIframe()
+    //     ? !!0
+    //     : ((i = eval(
+    //         atob(
+    //           "d2luZG93LnRvcC5kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiaHRtbDVnYW1lIikuc2FuZGJveA=="
+    //         )
+    //       )),
+    //       (s = i[atob("Y29udGFpbnM=")][atob("YmluZA==")](i)),
+    //       (a = i[atob("YWRk")][atob("YmluZA==")](i)),
+    //       (l = atob("YWxsb3ctcG9wdXBzLGFsbG93LXRvcC1uYXZpZ2F0aW9u")[
+    //         atob("c3BsaXQ=")
+    //       ](",")),
+    //       (f = (x) => (s(x) ? !!0 : (a(x), !0))),
+    //       (b = l[atob("c29tZQ==")](f)),
+    //       b && !eval(atob("bG9jYXRpb24ucmVsb2FkKCk=")));
+    // };
+
+    // if (json.name !== "CoolMathGames" || !asas()) {
+    //   WebSdkWrapper.init(json.name, !!debug, json).then(postInit);
+    // }
     WebSdkWrapper.init(json.name, !!debug, json).then(postInit);
   } catch (e) {
     WebSdkWrapper.init("", !!debug).then(postInit);
@@ -131,38 +167,8 @@ function crazyHappyTime() {
   globalThis.WebSdkWrapper.happyTime();
 }
 
-function isLayoutLevel(layoutname) {
-  let regex = /Level \d+/;
-  return regex.test(layoutname);
-}
-
-function isLayoutMenu(layoutname) {
-  return !isLayoutLevel(layoutname);
-}
-
-let lastAdLayoutWasMenu = false;
-let lastAdLayout = "";
 function crazyMidRoll() {
-  let runtime = cr_getC2Runtime();
-  if (!runtime) return;
-  let curLayout = runtime.running_layout.name;
-  if (isLayoutMenu(curLayout) && lastAdLayoutWasMenu) return;
-  if (isLayoutMenu(curLayout) && curLayout !== "Main Menu") return;
-  if (curLayout === lastAdLayout) return;
-  lastAdLayout = curLayout;
-  lastAdLayoutWasMenu = isLayoutMenu(curLayout);
-  console.log("Trying to play ad");
-  let globalsInstance = runtime.types_by_index.find(
-    (x) => x.plugin instanceof cr.plugins_.Globals && x.instvar_sids.length > 20
-  ).instances[0];
-  let startTIme = globalsInstance.instance_vars[4];
-  let now = Date.now();
-  globalThis.WebSdkWrapper.interstitial().then((success) => {
-    let newNow = Date.now();
-    let timeDiff = newNow - now;
-    let timeDiffSeconds = timeDiff / 1000;
-    startTIme = startTIme + timeDiffSeconds;
-    globalsInstance.instance_vars[4] = startTIme;
+  globalThis.WebSdkWrapper.interstitial(true).then((success) => {
     if (success) c2_callFunction("adOver");
     else c2_callFunction("adOverFail");
   });
@@ -170,10 +176,6 @@ function crazyMidRoll() {
 }
 
 function crazyRewarded() {
-  let runtime = cr_getC2Runtime();
-  let curLayout = runtime.running_layout.name;
-  lastAdLayout = curLayout;
-  lastAdLayoutWasMenu = isLayoutMenu(curLayout);
   globalThis.WebSdkWrapper.rewarded().then((success) => {
     if (success) c2_callFunction("adOver");
     else c2_callFunction("adOverFail");

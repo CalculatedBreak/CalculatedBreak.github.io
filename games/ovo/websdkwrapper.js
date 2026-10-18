@@ -9,6 +9,20 @@ globalThis.WebSdkWrapper = (function () {
     js.src = src;
   }
 
+  // prevent canvas from being selectable on IOS
+  (() => {
+    let style = document.createElement("style");
+    style.innerHTML = `
+  canvas {
+	user-select: none !important;
+	-webkit-user-select: none !important;
+	-moz-user-select: none !important;
+	-ms-user-select: none !important;
+  }
+  `;
+    document.head.appendChild(style);
+  })();
+
   window.addEventListener("keydown", (ev) => {
     if (["ArrowDown", "ArrowUp", " "].includes(ev.key)) {
       ev.preventDefault();
@@ -117,7 +131,12 @@ globalThis.WebSdkWrapper = (function () {
       name: "CrazyGames",
       get sdk() {
         if (!sdkContext.crazysdk)
-          sdkContext.crazysdk = globalThis?.CrazyGames?.CrazySDK?.getInstance();
+          sdkContext.crazysdk =
+            globalThis &&
+            globalThis.CrazyGames &&
+            globalThis.CrazyGames.CrazySDK &&
+            globalThis.CrazyGames.CrazySDK.getInstance &&
+            globalThis.CrazyGames.CrazySDK.getInstance();
         return sdkContext.crazysdk;
       },
       scriptSrc: "//sdk.crazygames.com/crazygames-sdk-v1.js",

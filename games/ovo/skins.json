@@ -27,6 +27,15 @@
     "achievement": -1
   },
   {
+    "name": "Pink Guy",
+    "hidden": false,
+    "icon": "frank.png",
+    "skin": "frank",
+    "lang": "pinkguy",
+    "price": 20,
+    "achievement": -1
+  },
+  {
     "name": "OvO+",
     "hidden": true,
     "icon": "ovoplus.png",
@@ -150,6 +159,42 @@
     "skin": "theliljoker",
     "lang": "theliljoker",
     "price": 50,
+    "achievement": -1
+  },
+  {
+    "name": "French",
+    "hidden": false,
+    "icon": "french.png",
+    "skin": "french",
+    "lang": "french",
+    "price": 0,
+    "achievement": -1
+  },
+  {
+    "name": "English",
+    "hidden": false,
+    "icon": "english.png",
+    "skin": "english",
+    "lang": "english",
+    "price": 0,
+    "achievement": -1
+  },
+  {
+    "name": "Spanish",
+    "hidden": false,
+    "icon": "spanish.png",
+    "skin": "spanish",
+    "lang": "spanish",
+    "price": 0,
+    "achievement": -1
+  },
+  {
+    "name": "Brazilian",
+    "hidden": false,
+    "icon": "brazilian.png",
+    "skin": "brazilian",
+    "lang": "brazilian",
+    "price": 0,
     "achievement": -1
   },
   {
