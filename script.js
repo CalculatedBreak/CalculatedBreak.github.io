@@ -105,6 +105,7 @@ const GAME_MODULES = [
   { href: "games/tiny-fishing",            img: "/games/tiny-fishing/iconTF.png",                                                  title: "Tiny Fishing",             cat: "idle"        },
   { href: "games/BlackJack",               img: "/games/BlackJack/Icon.png",                                                       title: "BlackJack",                cat: "card"        },
   { href: "games/blumgi-bounce",           img: "/games/blumgi-bounce/icon.jpg",                                                   title: "Blumgi Bounce",            cat: "sports"        },
+  { href: "games/gladihoppers",           img: "/images/gladihoppers.png",                                                   title: "Gladihoppers",            cat: "sports"        },
 
 ].filter(module => module.href.startsWith("games/"));
 
