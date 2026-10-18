@@ -1,0 +1,53 @@
+{
+    "anchors": [
+        {
+            "id": 1,
+            "category": 1,
+            "part": {
+                "id": 1005
+            }
+        },
+        {
+            "id": 2,
+            "category": 2,
+            "part": {
+                "id": 2008
+            }
+        },
+        {
+            "id": 3,
+            "category": 3,
+            "part": {
+                "id": 3008
+            }
+        },
+        {
+            "id": 4,
+            "category": 4,
+            "part": {
+                "id": 4001
+            }
+        },
+        {
+            "id": 5,
+            "category": 5,
+            "part": {
+                "id": 5000
+            }
+        },
+        {
+            "id": 6,
+            "category": 6,
+            "part": {
+                "id": 6000
+            }
+        },
+        {
+            "id": 7,
+            "category": 7,
+            "part": {
+                "id": 7005
+            }
+        }
+    ]
+}

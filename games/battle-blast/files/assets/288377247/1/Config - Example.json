@@ -1,0 +1,41 @@
+{
+    "name": "Test 001",
+    "anchors": [
+        {
+            "id": 2,
+            "category": 2,
+            "attributes": {
+                "scale": [2,2,2]
+            },
+            "part": {
+                "id": 2001
+            }
+        },
+        {
+            "id": 6,
+            "category": 6,
+            "part": {
+                "id": 6001,
+                "attributes": {
+                    "position": [-0.05,0.1,-0.2],
+                    "rotation": [-45,0,15],
+                    "scale": [3,3,3]
+                }
+            }
+        },
+        {
+            "id": 100,
+            "category": 2,
+            "bone": "HeadBone",
+            "attributes":{
+                "position": [0,0.75,0],
+                "rotation": [180,0,0],
+                "scale": [0.75, 0.75, 0.75]
+            },
+            "part": {
+                "id": 2001
+            }
+        }
+
+    ]
+}
