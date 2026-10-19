@@ -12668,12 +12668,8 @@
                         i()
                     }
                     )),
-                    d.push(re("https://securepubads.g.doubleclick.net/tag/js/gpt.js")),
-                    a ? d.push(Promise.resolve()) : d.push(re("https://imasdk.googleapis.com/js/sdkloader/ima3.js")),
-                    q.familyFriendly || q.nonPersonalized ? (d.push(Promise.resolve(), Promise.resolve(), Promise.resolve()),
-                    q.familyFriendly && qo.enforceFamilyFriendlyFlow(),
-                    G("nonPersonalized", !0),
-                    qo.enforceNonPersonalized()) : d.push(ti(), re("https://a.poki-cdn.com/prebid/prebid_1782721530.js"), re("https://c.amazon-adsystem.com/aax2/apstag.js")),
+                    // Push resolved empty promises so array destructuring doesn't fail
+                    d.push(Promise.resolve(), Promise.resolve(), Promise.resolve(), Promise.resolve(), Promise.resolve()),
                     this.display.setupSlotRenderEndedListener(),
                     Promise.allSettled(d).then(r => {
                         var s;
