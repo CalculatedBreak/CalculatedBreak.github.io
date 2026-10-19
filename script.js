@@ -110,6 +110,7 @@ const GAME_MODULES = [
   { href: "games/blumgi-racers",           img: "/images/blumgi-racers.jpg",                                                   title: "Blumgi Racer",            cat: "racing"        },
   { href: "games/car-machines",           img: "/images/car-machines.jfif",                                                   title: "Car Machines",            cat: "racing"        },
   { href: "games/battle-blast",           img: "/images/battle-blast.jpg",                                                   title: "Battle Blast",            cat: "shooter"        },
+  { href: "games/slice-master",           img: "/images/slice-master.png",                                                   title: "Slice Master",            cat: "action"        },
 
 ].filter(module => module.href.startsWith("games/"));
 
