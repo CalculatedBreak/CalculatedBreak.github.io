@@ -113,6 +113,7 @@ const GAME_MODULES = [
   { href: "games/slice-master",           img: "/images/slice-master.png",                                                   title: "Slice Master",            cat: "action"        },
   { href: "games/marble-run-3d",           img: "/images/marble-run-3d.jpg",                                                   title: "Marble Run 3D",            cat: "racing"        },
   { href: "games/blumgi-castle",           img: "/images/blumgi-castle.png",                                                   title: "Blumgi Castle",            cat: "action"        },
+  { href: "games/dreadhead-parkour",           img: "/images/dreadhead-parkour.png",                                                   title: "Dreadhead Parkour",            cat: "action"        },
 
 ].filter(module => module.href.startsWith("games/"));
 
