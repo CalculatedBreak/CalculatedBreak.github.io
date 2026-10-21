@@ -178,6 +178,8 @@ a { color: var(--cyan); }
 }
 .daily-date { margin: 0 0 4px; color: var(--muted); font-size: .9rem; }
 .daily-modal h2 { margin: 0 0 14px; font-family: var(--display); font-weight: 400; font-size: 1.7rem; color: var(--sun); }
+.daily-img { display: block; max-width: 100%; max-height: 260px; margin: 0 auto 18px; object-fit: contain; border: 3px solid var(--line); border-radius: 14px; background: var(--bg-deep); }
+.daily-img[hidden], .daily-text[hidden] { display: none; }
 .daily-text { margin: 0 0 26px; font-size: 1.15rem; line-height: 1.5; }
 
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
@@ -295,6 +297,7 @@ a { color: var(--cyan); }
       <div class="daily-burst" aria-hidden="true">✨</div>
       <p class="daily-date" id="daily-date"></p>
       <h2 id="daily-title">Message of the day</h2>
+      <img class="daily-img" id="daily-img" alt="" hidden>
       <p class="daily-text" id="daily-text"></p>
       <button type="button" class="btn-play" id="daily-close">Let's play</button>
     </div>
@@ -304,7 +307,15 @@ a { color: var(--cyan); }
   <script src="script.js"></script>
   <script>
   const DAILY_MESSAGES = [
-    "Hello, my name is vyom rahul bhosle",
+    // A message can be plain text:
+    //"Hello, my name is vyom rahul bhosle",
+    { text: "hi my name is arnav", img: "/images/arnav.jpeg" },
+
+    // ...or text + image (img = a file path like "images/hi.png" or a full https:// link):
+    // { text: "Welcome back!", img: "images/welcome.png" },
+
+    // ...or just an image:
+    // { img: "images/banner.jpg", alt: "Event banner" },
   ];
 
   function todayKey() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
@@ -319,7 +330,18 @@ a { color: var(--cyan); }
     const dateText = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
     document.getElementById("daily-date").textContent = dateText;
     document.getElementById("header-date").textContent = dateText;
-    document.getElementById("daily-text").textContent = DAILY_MESSAGES[dayNumber() % DAILY_MESSAGES.length];
+    const entry = DAILY_MESSAGES[dayNumber() % DAILY_MESSAGES.length];
+    const msg = typeof entry === "string" ? { text: entry } : entry;
+    const textEl = document.getElementById("daily-text");
+    const imgEl = document.getElementById("daily-img");
+    textEl.textContent = msg.text || "";
+    textEl.hidden = !msg.text;
+    if (msg.img) {
+      imgEl.alt = msg.alt || "";
+      imgEl.onerror = () => { imgEl.hidden = true; };
+      imgEl.src = msg.img;
+      imgEl.hidden = false;
+    }
 
     function open() { lastFocus = document.activeElement; overlay.hidden = false; closeBtn.focus(); }
     function close() {
