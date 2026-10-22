@@ -3,17 +3,233 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="EduSphere Student Dashboard — Interactive learning modules and virtual simulations.">
-  <title>Student Dashboard | EduSphere Academy</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="EduSphere Game Hub — browser-based games and interactive simulations.">
+  <title>Game Hub | EduSphere</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #170f35;
+  --bg-deep: #0f0925;
+  --panel: #241a4d;
+  --panel-hi: #2f2266;
+  --line: #4636a0;
+  --text: #f4f0ff;
+  --muted: #b3a8e6;
+  --pink: #ff4f9a;
+  --cyan: #3de0ff;
+  --sun: #ffd23f;
+  --radius: 18px;
+  --display: "Bungee", "Impact", sans-serif;
+  --body: "Space Grotesk", system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body.dashboard-page {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--body);
+  color: var(--text);
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(255, 79, 154, .25), transparent 60%),
+    radial-gradient(700px 500px at -5% 105%, rgba(61, 224, 255, .18), transparent 60%),
+    var(--bg-deep);
+  background-attachment: fixed;
+  line-height: 1.55;
+}
+
+a { color: var(--cyan); }
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+
+/* Layout */
+.dashboard-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+.dashboard-main { padding: 36px clamp(20px, 4vw, 56px) 48px; max-width: 1200px; width: 100%; }
+
+/* Sidebar */
+.dashboard-sidebar {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column; gap: 24px;
+  padding: 28px 20px;
+  background: linear-gradient(180deg, var(--panel), var(--bg));
+  border-right: 2px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
+.brand-mark {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  font-family: var(--display); font-size: 1.1rem; color: var(--bg-deep);
+  background: var(--sun); border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--pink);
+  transform: rotate(-6deg);
+}
+.brand-text { font-family: var(--display); font-size: 1.3rem; letter-spacing: .02em; }
+
+.student-profile {
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  background: var(--panel-hi); border: 2px solid var(--line); border-radius: 14px;
+}
+.avatar {
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  font-weight: 700; color: var(--bg-deep);
+  background: linear-gradient(135deg, var(--cyan), var(--pink));
+}
+.student-name { margin: 0; font-weight: 600; }
+.student-id { margin: 0; font-size: .8rem; color: var(--muted); }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.sidebar-link {
+  display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+  border-radius: 12px; border: 2px solid transparent;
+  color: var(--muted); text-decoration: none; font: inherit; font-weight: 500;
+  background: none; cursor: pointer; text-align: left; width: 100%;
+  transition: background .15s, color .15s, transform .15s;
+}
+.sidebar-link:hover { background: var(--panel-hi); color: var(--text); transform: translateX(3px); }
+.sidebar-link--active { color: var(--bg-deep); background: var(--cyan); border-color: var(--cyan); font-weight: 700; }
+.sidebar-link--active:hover { background: var(--cyan); color: var(--bg-deep); }
+.sidebar-icon { font-size: 1.15rem; }
+.sidebar-signout { color: var(--muted); font-size: .9rem; text-decoration: none; padding: 8px 14px; }
+.sidebar-signout:hover { color: var(--pink); }
+
+/* Header */
+.dashboard-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+.eyebrow { margin: 0 0 4px; color: var(--muted); font-size: .9rem; }
+.dashboard-header h1 {
+  margin: 0; font-family: var(--display); font-weight: 400;
+  font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 1; letter-spacing: .01em;
+  color: var(--sun); text-shadow: 4px 4px 0 var(--pink), 8px 8px 0 rgba(61, 224, 255, .35);
+}
+.header-meta { display: flex; align-items: center; gap: 12px; }
+.status-badge {
+  padding: 5px 14px; border-radius: 999px; font-size: .85rem; font-weight: 700;
+  color: var(--bg-deep); background: #5dffa6;
+  box-shadow: 0 0 0 0 rgba(93, 255, 166, .6); animation: pulse 2.2s infinite;
+}
+.header-date { color: var(--muted); font-size: .95rem; }
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(93, 255, 166, .55); }
+  70% { box-shadow: 0 0 0 12px rgba(93, 255, 166, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(93, 255, 166, 0); }
+}
+
+/* Welcome */
+.dashboard-welcome {
+  margin-bottom: 40px; padding: 22px 26px; border-radius: var(--radius);
+  background: linear-gradient(120deg, var(--panel-hi), var(--panel));
+  border: 2px solid var(--line); border-left: 8px solid var(--pink);
+}
+.dashboard-welcome p { margin: 0; max-width: 60ch; color: var(--muted); }
+.dashboard-welcome .welcome-title { color: var(--text); font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
+
+/* Modules */
+.modules-header { margin-bottom: 20px; }
+.modules-header h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.8rem; }
+.section-lead { margin: 4px 0 0; color: var(--muted); }
+
+.module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; }
+.module-card {
+  --accent: var(--cyan);
+  position: relative; display: flex; flex-direction: column; gap: 10px; padding: 22px;
+  background: var(--panel); border: 2px solid var(--line); border-radius: var(--radius);
+  box-shadow: 6px 6px 0 var(--accent);
+  transition: transform .15s, box-shadow .15s;
+}
+.module-card:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--accent); }
+.module-card:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--accent); }
+.module-emoji {
+  display: grid; place-items: center; width: 60px; height: 60px; font-size: 2rem;
+  background: var(--accent); border-radius: 16px; transform: rotate(-4deg);
+}
+.module-tag { align-self: flex-start; padding: 2px 10px; border-radius: 999px; font-size: .78rem; font-weight: 700; color: var(--bg-deep); background: var(--accent); }
+.module-card h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.3rem; }
+.module-card p { margin: 0; color: var(--muted); font-size: .95rem; flex: 1; }
+.btn-play, .module-play {
+  display: inline-block; padding: 12px 22px; border: 0; border-radius: 12px; cursor: pointer;
+  font: 700 1rem var(--body); text-align: center; text-decoration: none;
+  color: var(--bg-deep); background: var(--sun); box-shadow: 0 5px 0 #c99a00;
+  transition: transform .1s, box-shadow .1s;
+}
+.btn-play:hover, .module-play:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #c99a00; }
+.btn-play:active, .module-play:active { transform: translateY(4px); box-shadow: 0 1px 0 #c99a00; }
+
+.dashboard-footer { margin-top: 56px; padding-top: 20px; border-top: 2px dashed var(--line); color: var(--muted); font-size: .9rem; }
+
+/* Daily message popup */
+.daily-overlay {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px;
+  background: rgba(10, 5, 30, .8); backdrop-filter: blur(6px);
+  animation: fade .25s ease-out;
+}
+.daily-overlay[hidden] { display: none; }
+.daily-modal {
+  position: relative; width: min(460px, 100%); padding: 40px 32px 32px; text-align: center;
+  background: linear-gradient(160deg, var(--panel-hi), var(--panel));
+  border: 3px solid var(--sun); border-radius: 24px;
+  box-shadow: 8px 8px 0 var(--pink), 0 30px 80px rgba(0, 0, 0, .6);
+  animation: pop .4s cubic-bezier(.2, 1.4, .4, 1);
+}
+.daily-burst {
+  position: absolute; top: -32px; left: 50%; transform: translateX(-50%);
+  display: grid; place-items: center; width: 64px; height: 64px; font-size: 2rem;
+  background: var(--cyan); border: 3px solid var(--sun); border-radius: 50%;
+}
+.daily-date { margin: 0 0 4px; color: var(--muted); font-size: .9rem; }
+.daily-modal h2 { margin: 0 0 14px; font-family: var(--display); font-weight: 400; font-size: 1.7rem; color: var(--sun); }
+.daily-img { display: block; max-width: 100%; max-height: 260px; margin: 0 auto 18px; object-fit: contain; border: 3px solid var(--line); border-radius: 14px; background: var(--bg-deep); }
+.daily-img[hidden], .daily-text[hidden] { display: none; }
+.daily-text { margin: 0 0 26px; font-size: 1.15rem; line-height: 1.5; }
+
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop { from { opacity: 0; transform: scale(.8) translateY(20px); } to { opacity: 1; transform: none; } }
+
+/* Responsive */
+@media (max-width: 860px) {
+  .dashboard-layout { grid-template-columns: 1fr; }
+  .dashboard-sidebar { position: static; height: auto; border-right: 0; border-bottom: 2px solid var(--line); }
+  .sidebar-nav { flex-direction: row; flex-wrap: wrap; }
+  .sidebar-link { width: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Cards rendered by script.js */
+.module-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px; }
+.module-card { padding: 0; gap: 0; overflow: hidden; cursor: pointer; }
+.module-card[hidden] { display: none; }
+.module-card:nth-child(4n+1) { --accent: var(--cyan); }
+.module-card:nth-child(4n+2) { --accent: var(--pink); }
+.module-card:nth-child(4n+3) { --accent: var(--sun); }
+.module-card:nth-child(4n+4) { --accent: #5dffa6; }
+.module-card-icon { border-bottom: 2px solid var(--line); background: var(--panel-hi) !important; }
+.module-card-body { display: flex; flex-direction: column; gap: 8px; padding: 14px; flex: 1; }
+.module-card h3 { font-size: 1.05rem; line-height: 1.2; flex: 1; }
+.module-tag { text-transform: capitalize; }
+.btn { display: inline-block; padding: 10px 16px; border: 0; border-radius: 12px; cursor: pointer; font: 700 .95rem var(--body); color: var(--bg-deep); background: var(--sun); box-shadow: 0 4px 0 #c99a00; transition: transform .1s, box-shadow .1s; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #c99a00; }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #c99a00; }
+.module-grid--empty { padding: 24px; border: 2px dashed var(--line); border-radius: var(--radius); color: var(--muted); display: block; }
+
+/* Search + filters */
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 22px; }
+.game-search { flex: 1 1 240px; max-width: 360px; padding: 12px 16px; font: 500 1rem var(--body); color: var(--text); background: var(--panel); border: 2px solid var(--line); border-radius: 12px; }
+.game-search::placeholder { color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; flex: 1 1 100%; }
+.chip { padding: 6px 14px; border: 2px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); font: 600 .88rem var(--body); text-transform: capitalize; cursor: pointer; }
+.chip:hover { color: var(--text); border-color: var(--cyan); }
+.chip[aria-pressed="true"] { background: var(--pink); border-color: var(--pink); color: var(--bg-deep); }
+.result-count { margin: 0; color: var(--muted); font-size: .9rem; }
+.no-results { color: var(--muted); padding: 24px; border: 2px dashed var(--line); border-radius: var(--radius); }
+</style>
 </head>
 <body class="dashboard-page">
   <div class="dashboard-layout">
-    <aside class="dashboard-sidebar" aria-label="Student navigation">
-      <a href="index.html" class="brand brand--compact">
+    <aside class="dashboard-sidebar" aria-label="Main navigation">
+      <a href="index.html" class="brand">
         <span class="brand-mark" aria-hidden="true">ES</span>
         <span class="brand-text">EduSphere</span>
       </a>
@@ -22,70 +238,179 @@
         <div class="avatar" aria-hidden="true">AJ</div>
         <div>
           <p class="student-name">Alex Johnson</p>
-          <p class="student-id">ID: ES-2026-8842</p>
+          <p class="student-id">Player ID: ES-2026-8842</p>
         </div>
       </div>
 
       <nav class="sidebar-nav">
-        <a href="#" class="sidebar-link">
-          <span class="sidebar-icon" aria-hidden="true">📖</span>
-          My Courses
-        </a>
-        <a href="#" class="sidebar-link">
-          <span class="sidebar-icon" aria-hidden="true">📊</span>
-          Grades
-        </a>
-        <a href="#modules" class="sidebar-link sidebar-link--active">
-          <span class="sidebar-icon" aria-hidden="true">🧪</span>
-          Interactive Lab Simulations
-        </a>
-        <a href="#" class="sidebar-link">
-          <span class="sidebar-icon" aria-hidden="true">📅</span>
-          Schedule
-        </a>
-        <a href="#" class="sidebar-link">
-          <span class="sidebar-icon" aria-hidden="true">💬</span>
-          Messages
-        </a>
+        <a href="#" class="sidebar-link"><span class="sidebar-icon" aria-hidden="true">📖</span>My Courses</a>
+        <a href="#" class="sidebar-link"><span class="sidebar-icon" aria-hidden="true">📊</span>Grades</a>
+        <a href="#modules" class="sidebar-link sidebar-link--active"><span class="sidebar-icon" aria-hidden="true">🎮</span>Games &amp; Labs</a>
+        <a href="#" class="sidebar-link"><span class="sidebar-icon" aria-hidden="true">📅</span>Schedule</a>
+        <a href="#" class="sidebar-link"><span class="sidebar-icon" aria-hidden="true">💬</span>Messages</a>
+        <button type="button" class="sidebar-link sidebar-button" id="open-daily"><span class="sidebar-icon" aria-hidden="true">✨</span>Today's message</button>
       </nav>
 
-      <a href="index.html" class="sidebar-signout">Sign Out</a>
+      <a href="index.html" class="sidebar-signout">Sign out</a>
     </aside>
 
     <div class="dashboard-main">
       <header class="dashboard-header">
         <div>
           <p class="eyebrow">Spring 2026 · PHYS 210</p>
-          <h1>Student Learning Portal</h1>
+          <h1>Game Hub</h1>
         </div>
         <div class="header-meta">
-          <span class="status-badge">Enrolled</span>
-          <span class="header-date">Wednesday, May 27, 2026</span>
+          <span class="status-badge">Online</span>
+          <span class="header-date" id="header-date">Wednesday, May 27, 2026</span>
         </div>
       </header>
 
       <section class="dashboard-welcome">
-        <p>Welcome back, Alex. Your assigned virtual labs are ready. Select a module below to launch an interactive simulation in a secure fullscreen session.</p>
+        <p class="welcome-title">Ready to play, Alex?</p>
+        <p>Pick a game or simulation below. Each one opens in its own fullscreen session.</p>
       </section>
 
       <section id="modules" class="modules-section">
         <header class="modules-header">
-          <div>
-            <h2>Interactive Learning Modules</h2>
-            <p class="section-lead">Virtual Simulations · Browser-Based Labs</p>
-          </div>
+          <h2>Pick your game</h2>
+          <p class="section-lead">Browser-based, no downloads.</p>
         </header>
-
-        <!-- Cards are injected here by script.js from GAME_MODULES config -->
-        <div id="module-grid" class="module-grid" role="list" aria-label="Interactive learning modules"></div>
+        <div class="toolbar">
+          <input type="search" id="game-search" class="game-search" placeholder="Search games..." aria-label="Search games" autocomplete="off">
+          <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+          <p class="result-count" id="result-count" aria-live="polite"></p>
+        </div>
+        <p class="no-results" id="no-results" hidden>No games match. Try another search or category.</p>
+        <div id="module-grid" class="module-grid" role="list" aria-label="Games and simulations"></div>
       </section>
 
       <footer class="dashboard-footer">
-        <p>Need help? Contact lab support at <a href="mailto:labsupport@edusphere.edu">labsupport@edusphere.edu</a></p>
+        <p>Need help? Email <a href="mailto:labsupport@edusphere.edu">labsupport@edusphere.edu</a></p>
       </footer>
     </div>
   </div>
 
+  <!-- Daily message popup -->
+  <div class="daily-overlay" id="daily-overlay" hidden>
+    <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="daily-title" aria-describedby="daily-text">
+      <div class="daily-burst" aria-hidden="true">✨</div>
+      <p class="daily-date" id="daily-date"></p>
+      <h2 id="daily-title">Message of the day</h2>
+      <img class="daily-img" id="daily-img" alt="" hidden>
+      <p class="daily-text" id="daily-text"></p>
+      <button type="button" class="btn-play" id="daily-close">Let's play</button>
+    </div>
+  </div>
+
+  <!-- Your games live in script.js (GAME_MODULES). Edit that file to add games. -->
   <script src="script.js"></script>
+  <script>
+  const DAILY_MESSAGES = [
+    // A message can be plain text:
+    //"Hello, my name is vyom rahul bhosle",
+    { text: "hi my name is arnav", img: "/images/arnav.jpeg" },
+
+    // ...or text + image (img = a file path like "images/hi.png" or a full https:// link):
+    // { text: "Welcome back!", img: "images/welcome.png" },
+
+    // ...or just an image:
+    // { img: "images/banner.jpg", alt: "Event banner" },
+  ];
+
+  function todayKey() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+  function dayNumber() { const d = new Date(); return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); }
+
+  function setupDailyMessage() {
+    const overlay = document.getElementById("daily-overlay");
+    const closeBtn = document.getElementById("daily-close");
+    const openBtn = document.getElementById("open-daily");
+    const KEY = "daily-message-seen";
+    let lastFocus = null;
+    const dateText = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+    document.getElementById("daily-date").textContent = dateText;
+    document.getElementById("header-date").textContent = dateText;
+    const entry = DAILY_MESSAGES[dayNumber() % DAILY_MESSAGES.length];
+    const msg = typeof entry === "string" ? { text: entry } : entry;
+    const textEl = document.getElementById("daily-text");
+    const imgEl = document.getElementById("daily-img");
+    textEl.textContent = msg.text || "";
+    textEl.hidden = !msg.text;
+    if (msg.img) {
+      imgEl.alt = msg.alt || "";
+      imgEl.onerror = () => { imgEl.hidden = true; };
+      imgEl.src = msg.img;
+      imgEl.hidden = false;
+    }
+
+    function open() { lastFocus = document.activeElement; overlay.hidden = false; closeBtn.focus(); }
+    function close() {
+      overlay.hidden = true;
+      try { localStorage.setItem(KEY, todayKey()); } catch (e) {}
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    closeBtn.addEventListener("click", close);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) close(); });
+    openBtn.addEventListener("click", open);
+
+    let seen = null;
+    try { seen = localStorage.getItem(KEY); } catch (e) {}
+    if (seen !== todayKey()) setTimeout(open, 500);
+  }
+
+  // Search + category filter work on whatever cards script.js renders
+  function setupFilters() {
+    const grid = document.getElementById("module-grid");
+    const search = document.getElementById("game-search");
+    const chipsBox = document.getElementById("chips");
+    const count = document.getElementById("result-count");
+    const none = document.getElementById("no-results");
+    const cards = Array.from(grid.querySelectorAll(".module-card"));
+    if (!cards.length) { document.querySelector(".toolbar").hidden = true; return; }
+
+    const info = cards.map((c) => ({
+      el: c,
+      title: c.querySelector("h3").textContent.toLowerCase(),
+      cat: c.querySelector(".module-tag").textContent.toLowerCase()
+    }));
+    const tally = {};
+    info.forEach((i) => { tally[i.cat] = (tally[i.cat] || 0) + 1; });
+    let activeCat = "all";
+
+    const names = ["all"].concat(Object.keys(tally).sort());
+    names.forEach((name) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.dataset.cat = name;
+      b.textContent = name + " (" + (name === "all" ? cards.length : tally[name]) + ")";
+      b.setAttribute("aria-pressed", name === "all" ? "true" : "false");
+      b.addEventListener("click", () => {
+        activeCat = name;
+        chipsBox.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === b)));
+        apply();
+      });
+      chipsBox.appendChild(b);
+    });
+
+    function apply() {
+      const q = search.value.trim().toLowerCase();
+      let shown = 0;
+      info.forEach((i) => {
+        const ok = (activeCat === "all" || i.cat === activeCat) && (!q || i.title.includes(q));
+        i.el.hidden = !ok;
+        if (ok) shown++;
+      });
+      count.textContent = "Showing " + shown + " of " + cards.length + " games";
+      none.hidden = shown !== 0;
+    }
+    search.addEventListener("input", apply);
+    apply();
+  }
+
+  // Registered after script.js, so cards already exist when this runs
+  document.addEventListener("DOMContentLoaded", () => { setupDailyMessage(); setupFilters(); });
+  </script>
 </body>
 </html>
