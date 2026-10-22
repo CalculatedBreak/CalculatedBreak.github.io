@@ -108,14 +108,14 @@ const GAME_MODULES = [
   { href: "games/gladihoppers",           img: "/images/gladihoppers.png",                                                   title: "Gladihoppers",            cat: "sports"        },
   { href: "games/johnny-trigger-sniper",           img: "/images/johnny-trigger-sniper.png",                                                   title: "Johnny Trigger Sniper",            cat: "shooter"        },
   { href: "games/blumgi-racers",           img: "/images/blumgi-racers.jpg",                                                   title: "Blumgi Racer",            cat: "racing"        },
-  { href: "games/car-machines",           img: "/images/car-machines.jfif",                                                   title: "Car Machines",            cat: "racing"        },
+  { href: "/car-machines/games/car-machines/",           img: "/images/car-machines.jfif",                                                   title: "Car Machines",            cat: "racing"        },
   { href: "games/battle-blast",           img: "/images/battle-blast.jpg",                                                   title: "Battle Blast",            cat: "shooter"        },
   { href: "games/slice-master",           img: "/images/slice-master.png",                                                   title: "Slice Master",            cat: "action"        },
   { href: "games/marble-run-3d",           img: "/images/marble-run-3d.jpg",                                                   title: "Marble Run 3D",            cat: "racing"        },
   { href: "games/blumgi-castle",           img: "/images/blumgi-castle.png",                                                   title: "Blumgi Castle",            cat: "action"        },
   { href: "games/dreadhead-parkour",           img: "/images/dreadhead-parkour.png",                                                   title: "Dreadhead Parkour",            cat: "action"        },
 
-].filter(module => module.href.startsWith("games/"));
+]
 
 /* =============================================================================
    CARD RENDERING
