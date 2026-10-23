@@ -116,6 +116,7 @@ const GAME_MODULES = [
   { href: "games/dreadhead-parkour",           img: "/images/dreadhead-parkour.png",                                                   title: "Dreadhead Parkour",            cat: "action"        },
   { href: "/Level-Devil",           img: "/images/level-devil.webp",                                                   title: "Level Devil",            cat: "action"        },
   { href: "games/plane-wars",           img: "/images/plane-wars.jpg",                                                   title: "Plane Wars",            cat: "shooter"        },
+  { href: "games/morph-balls",           img: "/images/morph-balls.jfif",                                                   title: "Morph Balls",            cat: "sports"        },
 
 ]
 
