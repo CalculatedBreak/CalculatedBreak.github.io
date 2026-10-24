@@ -120,6 +120,7 @@ const GAME_MODULES = [
   { href: "games/wave-rider",           img: "/images/wave-rider.png",                                                   title: "Wave Rider",            cat: "action"        },
   { href: "games/blumgi-paintball",           img: "/images/blumgi-paintball.png",                                                   title: "Blumgi Paintball",            cat: "action"        },
   { href: "games/blumgi-dragon",           img: "/images/blumgi-dragon.jpg",                                                   title: "Blumgi Dragon",            cat: "action"        },
+  { href: "games/blumgi-soccer",           img: "/images/blumgi-soccer.jpg",                                                   title: "Blumgi Soccer",            cat: "sports"        },
 
 ]
 
