@@ -20,7 +20,7 @@ const GAME_MODULES = [
   { href: "games/retro-bowl/",              img: "images/retro-bowl.jpg",                                                           title: "Retro Bowl",               cat: "sports"     },
   { href: "games/drive-mad/",               img: "images/drive-mad.jpg",                                                            title: "Drive Mad",                cat: "racing"     },
   { href: "games/slope/",                   img: "images/slope.jpg",                                                                title: "Slope",                    cat: "action"     },
-  { href: "games/motox3m2/",                img: "images/motox3m2.jpg",                                                             title: "Moto X3M 2",               cat: "racing"     },
+  { href: "games/moto-x3m/",                img: "images/motox3m2.jpg",                                                             title: "Moto X3M 2",               cat: "racing"     },
   { href: "games/Idle Breakout/",           img: "games/Idle Breakout/image.png",                                                   title: "Idle Breakout",          cat: "idle"        },
   { href: "games/getaway-shootout/",        img: "games/getaway-shootout/images.jpg",                                           title: "Getaway Shootout",     cat: "multiplayer"},
   { href: "games/bitlife/",                 img: "games/bitlife/logo.png",                                                          title: "BitLife",                  cat: "idle"        },
