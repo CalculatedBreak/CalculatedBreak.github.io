@@ -16,7 +16,7 @@ const GAME_MODULES = [
   { href: "games/vex7/",                    img: "images/vex7.jpeg",                                                                title: "Vex 7",                    cat: "action"     },
   { href: "games/vex6/",                    img: "images/vex6.jpeg",                                                                title: "Vex 6",                    cat: "action"     },
   { href: "games/minecraft/",               img: "images/mc.png",                                                                   title: "Minecraft",                cat: "action"     },
-  { href: "games/moto-x3m/",                img: "images/moto-x3m.jpg",                                                             title: "Moto X3M",                 cat: "racing"     },
+  { href: "/moto-x3m/",                img: "images/moto-x3m.jpg",                                                             title: "Moto X3M",                 cat: "racing"     },
   { href: "games/retro-bowl/",              img: "images/retro-bowl.jpg",                                                           title: "Retro Bowl",               cat: "sports"     },
   { href: "games/drive-mad/",               img: "images/drive-mad.jpg",                                                            title: "Drive Mad",                cat: "racing"     },
   { href: "games/slope/",                   img: "images/slope.jpg",                                                                title: "Slope",                    cat: "action"     },
