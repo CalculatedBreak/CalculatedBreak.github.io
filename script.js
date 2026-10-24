@@ -118,6 +118,7 @@ const GAME_MODULES = [
   { href: "games/plane-wars",           img: "/images/plane-wars.jpg",                                                   title: "Plane Wars",            cat: "shooter"        },
   { href: "games/morph-balls",           img: "/images/morph-balls.jfif",                                                   title: "Morph Balls",            cat: "sports"        },
   { href: "games/wave-rider",           img: "/images/wave-rider.png",                                                   title: "Wave Rider",            cat: "action"        },
+  { href: "games/blumgi-paintball",           img: "/images/blumgi-paintball.png",                                                   title: "Blumgi Paintball",            cat: "action"        },
 
 ]
 
