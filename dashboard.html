@@ -7,7 +7,6 @@
   <title>Game Hub | EduSphere</title>
 
   <!-- Google tag (gtag.js) -->
-  <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV0H0442XN"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -83,12 +82,13 @@ a { color: var(--cyan); }
   background: var(--panel-hi); border: 2px solid var(--line); border-radius: 14px;
 }
 .avatar {
-  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; flex: none;
   font-weight: 700; color: var(--bg-deep);
   background: linear-gradient(135deg, var(--cyan), var(--pink));
 }
-.student-name { margin: 0; font-weight: 600; }
-.student-id { margin: 0; font-size: .8rem; color: var(--muted); }
+.student-profile > div:last-child { min-width: 0; }
+.student-name { margin: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.student-id { margin: 0; font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
 .sidebar-link {
@@ -102,7 +102,7 @@ a { color: var(--cyan); }
 .sidebar-link--active { color: var(--bg-deep); background: var(--cyan); border-color: var(--cyan); font-weight: 700; }
 .sidebar-link--active:hover { background: var(--cyan); color: var(--bg-deep); }
 .sidebar-icon { font-size: 1.15rem; }
-.sidebar-signout { color: var(--muted); font-size: .9rem; text-decoration: none; padding: 8px 14px; }
+.sidebar-signout { color: var(--muted); font-size: .9rem; text-decoration: none; padding: 8px 14px; background: none; border: 0; font-family: inherit; cursor: pointer; text-align: left; }
 .sidebar-signout:hover { color: var(--pink); }
 
 /* Header */
@@ -236,6 +236,28 @@ a { color: var(--cyan); }
 .chip[aria-pressed="true"] { background: var(--pink); border-color: var(--pink); color: var(--bg-deep); }
 .result-count { margin: 0; color: var(--muted); font-size: .9rem; }
 .no-results { color: var(--muted); padding: 24px; border: 2px dashed var(--line); border-radius: var(--radius); }
+
+/* Login popup (reuses the daily popup look) */
+.auth-modal { text-align: left; }
+.auth-modal h2 { text-align: center; }
+.auth-modal .daily-burst { background: var(--pink); }
+.auth-field { display: block; margin-bottom: 14px; }
+.auth-field[hidden] { display: none; }
+.auth-field span { display: block; margin-bottom: 4px; color: var(--muted); font-size: .9rem; font-weight: 600; }
+.auth-field input {
+  width: 100%; padding: 12px 14px; font: 500 1rem var(--body); color: var(--text);
+  background: var(--bg-deep); border: 2px solid var(--line); border-radius: 12px;
+}
+.auth-status { min-height: 1.4em; margin: 0 0 14px; font-size: .92rem; color: var(--muted); }
+.auth-status.is-error { color: #ff8fb8; }
+.auth-status.is-ok { color: #5dffa6; }
+.auth-submit { width: 100%; }
+.auth-submit:disabled { opacity: .6; cursor: wait; }
+.auth-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 14px; margin-top: 18px; }
+.auth-link { padding: 0; border: 0; background: none; color: var(--cyan); font: 600 .9rem var(--body); cursor: pointer; text-decoration: underline; }
+.auth-link[hidden] { display: none; }
+.auth-close { position: absolute; top: 12px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 1.4rem; line-height: 1; cursor: pointer; }
+.auth-close:hover { color: var(--text); }
   </style>
 </head>
 <body class="dashboard-page">
@@ -247,10 +269,10 @@ a { color: var(--cyan); }
       </a>
 
       <div class="student-profile">
-        <div class="avatar" aria-hidden="true">AJ</div>
+        <div class="avatar" id="user-avatar" aria-hidden="true">?</div>
         <div>
-          <p class="student-name">Alex Johnson</p>
-          <p class="student-id">Player ID: ES-2026-8842</p>
+          <p class="student-name" id="user-name">Guest</p>
+          <p class="student-id" id="user-sub">Sign in to save your progress</p>
         </div>
       </div>
 
@@ -263,7 +285,7 @@ a { color: var(--cyan); }
         <button type="button" class="sidebar-link sidebar-button" id="open-daily"><span class="sidebar-icon" aria-hidden="true">✨</span>Today's message</button>
       </nav>
 
-      <a href="index.html" class="sidebar-signout">Sign out</a>
+      <button type="button" class="sidebar-signout" id="auth-toggle">Sign in</button>
     </aside>
 
     <div class="dashboard-main">
@@ -279,8 +301,8 @@ a { color: var(--cyan); }
       </header>
 
       <section class="dashboard-welcome">
-        <p class="welcome-title">Ready to play, Alex?</p>
-        <p>Pick a game or simulation below. Each one opens in its own fullscreen session.</p>
+        <p class="welcome-title" id="welcome-title">Ready to play?</p>
+        <p id="welcome-text">Pick a game or simulation below. Each one opens in its own fullscreen session.</p>
       </section>
 
       <section id="modules" class="modules-section">
@@ -312,6 +334,31 @@ a { color: var(--cyan); }
       <img class="daily-img" id="daily-img" alt="" hidden>
       <p class="daily-text" id="daily-text"></p>
       <button type="button" class="btn-play" id="daily-close">Let's play</button>
+    </div>
+  </div>
+
+  <!-- Login popup -->
+  <div class="daily-overlay" id="auth-overlay" hidden>
+    <div class="daily-modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div class="daily-burst" aria-hidden="true">🔐</div>
+      <button type="button" class="auth-close" id="auth-close" aria-label="Close">&times;</button>
+      <h2 id="auth-title">Sign in</h2>
+      <form id="auth-form" novalidate>
+        <label class="auth-field" id="auth-email-wrap">
+          <span>Email</span>
+          <input type="email" id="auth-email" autocomplete="email" required>
+        </label>
+        <label class="auth-field" id="auth-password-wrap">
+          <span id="auth-password-label">Password</span>
+          <input type="password" id="auth-password" autocomplete="current-password" minlength="6" required>
+        </label>
+        <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+        <button type="submit" class="btn-play auth-submit" id="auth-submit">Sign in</button>
+      </form>
+      <div class="auth-links">
+        <button type="button" class="auth-link" id="auth-switch"></button>
+        <button type="button" class="auth-link" id="auth-forgot">Forgot password?</button>
+      </div>
     </div>
   </div>
 
@@ -423,6 +470,135 @@ a { color: var(--cyan); }
 
   // Registered after script.js, so cards already exist when this runs
   document.addEventListener("DOMContentLoaded", () => { setupDailyMessage(); setupFilters(); });
+  </script>
+
+  <!-- Login (Supabase email + password) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script>
+  // 1) Paste your own project values (Supabase dashboard > Project Settings > API).
+  //    The anon key is meant to be public; your table's Row Level Security protects the data.
+  const SUPA_URL = "https://calculatedbreak.supabase.co";
+  const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllcnhvaWtjZmV1bGducmRqa3ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NTU5MjQsImV4cCI6MjEwODUzMTkyNH0.30CNvMAFfmUfCVbW8w9QWzvxUWB-Y7L45DENNH-kyvc";
+
+  function setupAuth() {
+    const $ = (id) => document.getElementById(id);
+    const overlay = $("auth-overlay"), form = $("auth-form"), statusEl = $("auth-status");
+    const emailEl = $("auth-email"), passEl = $("auth-password"), submitBtn = $("auth-submit");
+    const switchBtn = $("auth-switch"), forgotBtn = $("auth-forgot"), toggleBtn = $("auth-toggle");
+
+    const configured = SUPA_URL.indexOf("YOUR_") !== 0 && SUPA_KEY.indexOf("YOUR_") !== 0;
+    const lib = window.supabase && window.supabase.createClient;
+    const sb = (configured && lib) ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
+
+    let mode = "signin", user = null, lastFocus = null;
+
+    function say(text, kind) {
+      statusEl.textContent = text || "";
+      statusEl.className = "auth-status" + (kind ? " is-" + kind : "");
+    }
+
+    function setMode(m) {
+      mode = m;
+      const titles = { signin: "Sign in", signup: "Create account", reset: "Reset password", newpass: "Choose a new password" };
+      const buttons = { signin: "Sign in", signup: "Create account", reset: "Send reset link", newpass: "Save password" };
+      $("auth-title").textContent = titles[m];
+      submitBtn.textContent = buttons[m];
+      $("auth-email-wrap").hidden = (m === "newpass");
+      $("auth-password-wrap").hidden = (m === "reset");
+      $("auth-password-label").textContent = (m === "newpass") ? "New password" : "Password";
+      passEl.autocomplete = (m === "signin") ? "current-password" : "new-password";
+      emailEl.required = (m !== "newpass");
+      passEl.required = (m !== "reset");
+      switchBtn.textContent = (m === "signin") ? "Create an account" : "Back to sign in";
+      forgotBtn.hidden = (m !== "signin");
+      switchBtn.hidden = (m === "newpass");
+      say("");
+    }
+
+    function open(m) {
+      lastFocus = document.activeElement;
+      setMode(m || "signin");
+      overlay.hidden = false;
+      if (!sb) say(configured ? "Login could not load. Check your connection and reload." : "Login is not set up yet: add your Supabase URL and key in this file.", "error");
+      (m === "newpass" ? passEl : emailEl).focus();
+    }
+    function close() {
+      overlay.hidden = true;
+      form.reset();
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    function renderUser(u) {
+      user = u || null;
+      const email = user && user.email;
+      const name = email ? email.split("@")[0] : "Guest";
+      $("user-avatar").textContent = email ? email.slice(0, 2).toUpperCase() : "?";
+      $("user-name").textContent = name;
+      $("user-sub").textContent = email || "Sign in to save your progress";
+      $("welcome-title").textContent = user ? "Ready to play, " + name + "?" : "Ready to play?";
+      $("welcome-text").textContent = user
+        ? "Your progress is saved to your account. Pick a game or simulation below."
+        : "Pick a game or simulation below. Sign in to keep your progress on every device.";
+      toggleBtn.textContent = user ? "Sign out" : "Sign in";
+    }
+
+    toggleBtn.addEventListener("click", async () => {
+      if (!user) return open("signin");
+      if (sb) await sb.auth.signOut();
+      renderUser(null);
+    });
+    switchBtn.addEventListener("click", () => setMode(mode === "signin" ? "signup" : "signin"));
+    forgotBtn.addEventListener("click", () => setMode("reset"));
+    $("auth-close").addEventListener("click", close);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) close(); });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!sb) return;
+      const email = emailEl.value.trim(), password = passEl.value;
+      if (mode !== "newpass" && !email) return say("Enter your email address.", "error");
+      if (mode !== "reset" && password.length < 6) return say("Use a password with at least 6 characters.", "error");
+
+      submitBtn.disabled = true;
+      say("Working...");
+      try {
+        if (mode === "signin") {
+          const { error } = await sb.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          close();
+        } else if (mode === "signup") {
+          const { data, error } = await sb.auth.signUp({ email, password });
+          if (error) throw error;
+          if (data.session) close();
+          else { setMode("signin"); say("Account created. Check your email to confirm it, then sign in.", "ok"); }
+        } else if (mode === "reset") {
+          const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+          if (error) throw error;
+          say("If that email has an account, a reset link is on its way.", "ok");
+        } else if (mode === "newpass") {
+          const { error } = await sb.auth.updateUser({ password });
+          if (error) throw error;
+          close();
+        }
+      } catch (err) {
+        say(err && err.message ? err.message : "Something went wrong. Try again.", "error");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    renderUser(null);
+    if (!sb) return;
+
+    // Fires on load (restored session), sign in, sign out, and password-reset links
+    sb.auth.onAuthStateChange((event, session) => {
+      renderUser(session && session.user);
+      if (event === "PASSWORD_RECOVERY") open("newpass");
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", setupAuth);
   </script>
 </body>
 </html>
