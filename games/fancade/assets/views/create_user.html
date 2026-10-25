@@ -1,0 +1,71 @@
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  <link rel="stylesheet" href="common.css">
+
+  <style>
+  </style>
+
+</head>
+
+<body onload="myOnLoad()" id="body" >
+  <script src="common.js"></script>
+  <script>
+    var minWidth = 280;
+    var maxWidth = 485;
+    var sizeLimit18 = 450;
+    var sizeLimit16 = 400;
+    var sizeLimit14 = 350;
+    var sizeLimit8Inv = 320;
+    var widthFraction = 0.85;
+
+    function myOnLoad() {
+      var content = document.getElementById('bordered');
+      content.innerHTML +=
+        getActionButtonsHtml(
+          [
+            {caption: 'Cancel', onClick: 'return webViewCancel()', id:"btncancel"},
+            {caption: 'I agree to the Terms of Use', onClick: 'return attemptCreate()', selected: true, id:"btnok"},
+          ],
+          true);
+      onLoad();
+    }
+
+    function attemptCreate() {
+      var e = document.getElementById("email");
+      var p = document.getElementById("pwd");
+      var p2 = document.getElementById("pwd2");
+      var er = document.getElementById("error_message");
+      er.innerHTML = "";
+      if (p.value !== p2.value) {
+        er.innerHTML = "Passwords don't match!";
+        return;
+      }
+      webViewPostMessage('create_user|' + e.value + '|' + p.value);
+      return webViewClose();
+    }
+  </script>
+
+  <div class="centered" id="content">
+    <div class="backdrop rounded-outer">
+      <div class="border black rounded-middle" id="bordered">
+        <div class="topmost headerface rounded-inner">
+          Create User
+          <br/><a id="error_message"></a>
+        </div>
+        <div class="vertical">
+          <input class="inputfield" type="email" id="email" placeholder="email"/>
+          <input class="inputfield" type="password" id="pwd" placeholder="password" autocomplete="current-password"/>
+          <input class="inputfield" type="password" id="pwd2" placeholder="repeat password"/>
+        </div>
+        <!-- Content appended here on load -->
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

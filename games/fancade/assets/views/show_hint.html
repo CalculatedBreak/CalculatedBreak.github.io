@@ -1,0 +1,56 @@
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  <link rel="stylesheet" href="common.css">
+
+</head>
+
+<body onload="myOnLoad()" id="body" onclick="return webViewCancel()" >
+  <script src="common.js"></script>
+  <script>
+    var minWidth = 250;
+    var maxWidth = 450;
+    var sizeLimit18 = 400;
+    var sizeLimit16 = 350;
+    var sizeLimit14 = 300;
+    var sizeLimit8Inv = 200;
+    var widthFraction = 0.85;
+
+    function myOnLoad() {
+      onLoad();
+    }
+
+    function hintLoaded() {
+      var ph = document.getElementById('placeholder');
+      ph.style.display = 'none';
+      var hintImg = document.getElementById('hint_img');
+      hintImg.style.display = 'block';
+    }
+
+    function setHintInfo(url) {
+      var hintImg = document.getElementById('hint_img');
+      hintImg.src = url;
+      if (hintImg.complete) {
+        hintLoaded();
+      } else {
+        hintImg.addEventListener('load', hintLoaded);
+      }
+    }
+
+  </script>
+
+  <div class="centered" id="content" >
+    <div class="backdrop rounded-outer">
+      <div class="border black rounded-middle" id="bordered">
+        <img id="hint_img" class="rounded-inner" alt="Hint" style="display: none; width: 100%" />
+        <p id="placeholder">Loading hint...</p>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

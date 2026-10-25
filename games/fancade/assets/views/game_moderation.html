@@ -1,0 +1,155 @@
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  <link rel="stylesheet" href="common.css">
+
+  <style>
+
+  </style>
+
+</head>
+
+<body onload="myOnLoad()" id="body">
+
+  <script src="common.js" ></script>
+  <script>
+    var minWidth = 280;
+    var maxWidth = 650;
+    var sizeLimit18 = 600;
+    var sizeLimit16 = 520;
+    var sizeLimit14 = 420;
+    var sizeLimit8Inv = 380;
+    var widthFraction = 0.9;
+
+    var approved = false;
+    var reasonIndex = 0;
+
+    var approveNames = ["1", "0"];
+    var approveStrings = ["Approve", "Reject"];
+    var reasonNames = ["cursing", "offensive", "spam", "other"];
+    var problemNames = ["title", "description", "level name", "game", "other"];
+    var categoryNames = ["none", "game", "script", "demo", "kit"];
+    var qualityNames = ["1", "2", "3", "4", "5"];
+
+    var approvedActives = ["quality", "category"];
+    var rejectedActives = ["rejection", "problem"];
+
+    function setVisible(ids, v) {
+      for (var id of ids) {
+        document.getElementById(id).style.display = v ? "block" : "none";
+      }
+    }
+
+    function updateVisible() {
+      setVisible(rejectedActives, !approved);
+      setVisible(approvedActives, approved);
+      // if (!approved) {
+      //   setVisible(["problem"], reasonNames[reasonIndex] != "clone");
+      // }
+    }
+
+    function setApproval(i, post) {
+      approved = i == 0;
+      updateVisible();
+      return setValue(i, post, "approve", approveNames, "moderation");
+    }
+
+    function setReason(i, post) {
+      reasonIndex = i;
+      updateVisible();
+      return setValue(i, post, "reason", reasonNames, "moderation");
+    }
+
+    function setProblem(i, post) {
+      return setValue(i, post, "problem", problemNames, "moderation");
+    }
+
+    function setCategory(i, post) {
+      return setValue(i, post, "category", categoryNames, "moderation");
+    }
+
+    function setQuality(i, post) {
+      return setValue(i, post, "quality", qualityNames, "moderation");
+    }
+
+    function myOnLoad() {
+      var content = document.getElementById('content');
+      content.innerHTML =
+        getToggleButtonsHtml({
+          topClass: 'centered white-space-no-wrap',
+          header: 'Approval',
+          buttons: approveStrings.map(function (cn, i) {
+            return {
+              prefix: 'approve',
+              caption: capitalizeFirstLetter(cn),
+              onClick: 'return setApproval(' + i + ', true)',
+            };
+          }),
+        }) +
+        getToggleButtonsHtml({
+          id: 'rejection',
+          topClass: 'centered island white-space-no-wrap',
+          header: 'Reason',
+          buttons: reasonNames.map(function (cn, i) {
+            return {
+              prefix: 'reason',
+              caption: capitalizeFirstLetter(cn),
+              onClick: 'return setReason(' + i + ', true)',
+            };
+          }),
+        }) +
+        getToggleButtonsHtml({
+          id: 'problem',
+          topClass: 'centered island white-space-no-wrap',
+          header: 'Place',
+          buttons: problemNames.map(function (cn, i) {
+            return {
+              prefix: 'problem',
+              caption: capitalizeFirstLetter(cn),
+              onClick: 'return setProblem(' + i + ', true)',
+            };
+          }),
+        }) +
+        getToggleButtonsHtml({
+          id: 'category',
+          topClass: 'centered island white-space-no-wrap',
+          header: 'Category',
+          buttons: categoryNames.map(function (cn, i) {
+            return {
+              prefix: 'category',
+              caption: capitalizeFirstLetter(cn),
+              onClick: 'return setCategory(' + i + ', true)',
+            };
+          }),
+        }) +
+        getToggleButtonsHtml({
+          id: 'quality',
+          topClass: 'centered island white-space-no-wrap',
+          header: 'Quality',
+          buttons: qualityNames.map(function (cn, i) {
+            return {
+              prefix: 'quality',
+              caption: capitalizeFirstLetter(cn),
+              onClick: 'return setQuality(' + i + ', true)',
+            };
+          }),
+        }) +
+        getActionButtonsHtml(
+          [
+            {caption: 'Cancel', onClick: 'return webViewCancel()'},
+            {caption: 'Submit', onClick: 'return webViewOk()', selected: true}, 
+          ]);
+      onLoad();
+    }
+
+  </script>
+
+  <div id="content">
+  </div>
+</body>
+
+</html>
