@@ -1,32 +1,29 @@
 /*
- * cloudsave.js - saves a game's localStorage keys to the player's Supabase account.
- *
- * In each game's HTML, put this in <head> BEFORE any game script:
- *   <script>window.CLOUD_SAVE = { slug: "my-game", keys: ["gameSave"] };</script>
+ * cloudsave.js - automatic localStorage sync to the player's Supabase account.
+ * Add to each game's <head>, before any game script:
  *   <script src="/cloudsave.js"></script>
+ * The game's name comes from its folder (/moto-x3m/index.html -> "moto-x3m").
+ * Optional override: <script>window.CLOUD_SAVE = { slug: "my-game" };</script> first.
  *
- * slug   unique name for the game (one cloud save per player per slug)
- * keys   the localStorage key names this game uses (DevTools > Application > Local Storage)
- * prefix optional: also sync every key that starts with this text (e.g. "mygame_")
- *
- * Rules it follows:
- *  - nothing is uploaded until the first read of the account's save has succeeded
- *  - a failed read is never treated as "no save"
- *  - if this device and the account differ, the account wins, and this device's copy is
- *    kept so the player can switch back with one tap
- *  - a save is never uploaded over newer progress from another device
+ * Every game on your site shares ONE localStorage, so this tracks which keys each game
+ * has written and only syncs a game's own keys.
  */
 (function () {
   "use strict";
 
-  // Same values as in game-hub.html (publishable / anon key only, never the secret key)
-  var SUPA_URL = "YOUR_SUPABASE_URL";
-  var SUPA_KEY = "YOUR_SUPABASE_ANON_KEY";
+  var SUPA_URL = "https://yerxoikcfeulgnrdjkyc.supabase.co";
+  var SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllcnhvaWtjZmV1bGducmRqa3ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NTU5MjQsImV4cCI6MjEwODUzMTkyNH0.30CNvMAFfmUfCVbW8w9QWzvxUWB-Y7L45DENNH-kyvc";
   var LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
+  // Leading URL segments to skip before the game folder. 0 for https://name.github.io/game/,
+  // 1 for a project site like https://name.github.io/repo/game/
+  var SKIP = 0;
 
   var cfg = window.CLOUD_SAVE || {};
-  var SLUG = cfg.slug, KEYS = cfg.keys || [], PREFIX = cfg.prefix || "";
-  if (!SLUG || (!KEYS.length && !PREFIX)) { console.warn("[cloudsave] set window.CLOUD_SAVE = { slug, keys } first"); return; }
+  var seg = location.pathname.split("/").filter(Boolean);
+  var SLUG = cfg.slug || (seg[SKIP] || "home").replace(/\.html?$/i, "");
+  try { SLUG = decodeURIComponent(SLUG); } catch (e) {}
+  SLUG = SLUG.replace(/[^A-Za-z0-9_-]/g, "-").slice(0, 100);
+
   if (SUPA_URL.indexOf("YOUR_") === 0 || SUPA_KEY.indexOf("YOUR_") === 0) { console.warn("[cloudsave] add your Supabase URL and key"); return; }
 
   var ls;
@@ -35,15 +32,28 @@
   var MARK = "cloudsave:" + SLUG + ":sync";      // {uid, h}: hash of the save this device last synced
   var BACKUP = "cloudsave:" + SLUG + ":backup";  // {uid, map, shown}: this device's copy before a restore
   var GUARD = "cloudsave:" + SLUG + ":restored"; // sessionStorage: stops a restore/reload loop
-  var MAX = 1024 * 1024;
-  var DEBOUNCE = 4000, POLL = 10000;
+  var OWN = "cloudsave:own";                     // {key: [game slugs that wrote it]}
+  var MAX = 1024 * 1024, DEBOUNCE = 4000, POLL = 10000;
 
-  var rawSet = Storage.prototype.setItem, rawRemove = Storage.prototype.removeItem, rawGet = Storage.prototype.getItem;
+  var rawSet = Storage.prototype.setItem, rawRemove = Storage.prototype.removeItem,
+      rawGet = Storage.prototype.getItem, rawClear = Storage.prototype.clear;
 
-  function isMine(k) {
-    if (typeof k !== "string" || k.indexOf("cloudsave:") === 0 || k.indexOf("sb-") === 0) return false;
-    return KEYS.indexOf(k) !== -1 || (PREFIX !== "" && k.indexOf(PREFIX) === 0);
+  function isSystem(k) {
+    return typeof k !== "string" || k.indexOf("cloudsave:") === 0 || k.indexOf("sb-") === 0 || k.indexOf("GA::") === 0;
   }
+  function readJson(k) { try { return JSON.parse(rawGet.call(ls, k)); } catch (e) { return null; } }
+  function writeJson(k, v) { try { rawSet.call(ls, k, JSON.stringify(v)); } catch (e) {} }
+
+  // ---- which keys belong to this game ----
+  function owners(k) { var o = (readJson(OWN) || {})[k]; return Array.isArray(o) ? o : []; }
+  function owned(k) { return owners(k).indexOf(SLUG) !== -1; }
+  function claim(k) {
+    if (isSystem(k)) return;
+    var all = readJson(OWN) || {}, o = Array.isArray(all[k]) ? all[k] : [];
+    if (o.indexOf(SLUG) === -1) { all[k] = o.concat([SLUG]).slice(-8); writeJson(OWN, all); }
+  }
+  function isMine(k) { return !isSystem(k) && owned(k); }
+
   function snapshot() {
     var o = {};
     for (var i = 0; i < ls.length; i++) {
@@ -59,16 +69,29 @@
     return s.length + "." + h.toString(36);
   }
   function count(o) { return Object.keys(o || {}).length; }
-  // Replace this game's keys with the given copy (raw methods, so our own writes never look like game writes)
+
+  // Replace this game's keys with the given copy. A key shared with another game is never removed.
   function apply(map) {
     for (var i = ls.length - 1; i >= 0; i--) {
       var k = ls.key(i);
-      if (isMine(k) && !Object.prototype.hasOwnProperty.call(map, k)) rawRemove.call(ls, k);
+      if (isMine(k) && owners(k).length === 1 && !Object.prototype.hasOwnProperty.call(map, k)) rawRemove.call(ls, k);
     }
-    for (var key in map) if (Object.prototype.hasOwnProperty.call(map, key) && isMine(key)) rawSet.call(ls, key, map[key]);
+    for (var key in map) {
+      if (Object.prototype.hasOwnProperty.call(map, key) && !isSystem(key)) { rawSet.call(ls, key, map[key]); claim(key); }
+    }
   }
-  function readJson(k) { try { return JSON.parse(rawGet.call(ls, k)); } catch (e) { return null; } }
-  function writeJson(k, v) { try { rawSet.call(ls, k, JSON.stringify(v)); } catch (e) {} }
+
+  // Writes the hooks can't see (localStorage.x = 1) are noticed by comparing with what was there at load
+  var known = {};
+  for (var ki = 0; ki < ls.length; ki++) { var kk = ls.key(ki); if (!isSystem(kk)) known[kk] = rawGet.call(ls, kk); }
+  function claimChanges() {
+    for (var i = 0; i < ls.length; i++) {
+      var k = ls.key(i);
+      if (isSystem(k)) continue;
+      var v = rawGet.call(ls, k);
+      if (known[k] !== v) { known[k] = v; claim(k); }
+    }
+  }
 
   var sb = null, uid = null, ready = false, paused = false, busy = false, wroteDuring = false;
   var lastSynced = null, lastSeen = null, timer = null, watching = false, checkTimer = null;
@@ -77,7 +100,6 @@
   function readMark() { var m = readJson(MARK); return m && m.uid === uid ? m : null; }
   function setMark(h) { writeJson(MARK, { uid: uid, h: h }); }
 
-  // ---- tiny notice ----
   function whenBody(fn) { if (document.body) fn(); else document.addEventListener("DOMContentLoaded", fn, { once: true }); }
   function notice(text, label, onClick) {
     whenBody(function () {
@@ -140,6 +162,7 @@
     busy = true;
     var failed = false;
     try {
+      claimChanges();
       var map = snapshot();
       if (stable(map) !== lastSynced) await upload(map, false);
     } catch (e) { failed = true; warn("upload failed, will retry", e); }
@@ -157,24 +180,37 @@
     timer = setTimeout(flush, DEBOUNCE);
   }
 
-  // ---- watch the game's writes (hooks installed immediately, uploads wait for the first check-in) ----
-  ["setItem", "removeItem", "clear"].forEach(function (name) {
+  // ---- watch the game's writes (hooks go in immediately; uploads wait for the first check-in) ----
+  ["setItem", "removeItem"].forEach(function (name) {
     var orig = Storage.prototype[name];
     Storage.prototype[name] = function (k) {
       var r = orig.apply(this, arguments);
-      try { if (this === ls && (name === "clear" || isMine(k))) changed(); } catch (e) {}
+      try { if (this === ls && !isSystem(k)) { claim(k); known[k] = rawGet.call(ls, k); changed(); } } catch (e) {}
       return r;
     };
   });
+  // clear() removes this game's keys only: not the login session, not other games' saves
+  Storage.prototype.clear = function () {
+    if (this !== ls) return rawClear.apply(this, arguments);
+    for (var i = ls.length - 1; i >= 0; i--) {
+      var k = ls.key(i);
+      if (isSystem(k)) continue;
+      var o = owners(k);
+      if (o.length && o.indexOf(SLUG) === -1) continue;
+      rawRemove.call(ls, k);
+    }
+    try { changed(); } catch (e) {}
+  };
 
   function startWatching() {
     ready = true;
+    claimChanges();
     lastSeen = stable(snapshot());
     if (!watching) {
       watching = true;
-      // catches writes the hooks can't see, like localStorage.score = 5
       setInterval(function () {
         if (!ready) return;
+        claimChanges();
         var s = stable(snapshot());
         if (s !== lastSeen) { lastSeen = s; changed(); }
       }, POLL);
@@ -195,6 +231,7 @@
     }
     if (uid !== myUid) return;
 
+    claimChanges();
     var local = snapshot(), localStr = stable(local), server = rowMap(row);
     var localEmpty = !count(local);
 
@@ -214,14 +251,21 @@
     // otherwise the account's save wins
     try { if (sessionStorage.getItem(GUARD) === serverHash) { paused = true; warn("this save was just restored; uploads paused for this page"); return; } } catch (e) {}
     var localUnchanged = !!mark && mark.h === hash(localStr);
-    if (!localEmpty && !localUnchanged) writeJson(BACKUP, { uid: uid, map: local, shown: 0 });
+    // keep this device's copy, including older local saves under the same key names that no game has written yet
+    var keep = {}, k;
+    for (k in local) keep[k] = local[k];
+    for (k in server) {
+      var cur = rawGet.call(ls, k);
+      if (!isSystem(k) && typeof cur === "string" && cur !== server[k] && !(k in keep)) keep[k] = cur;
+    }
+    if (count(keep) && !localUnchanged) writeJson(BACKUP, { uid: uid, map: keep, shown: 0 });
     try {
       apply(server);
       setMark(serverHash);
       try { sessionStorage.setItem(GUARD, serverHash); } catch (e) {}
       location.reload();                        // so the game boots from the restored save
     } catch (e) {
-      apply(local);                             // put this device's copy back
+      apply(keep);                              // put this device's copy back
       paused = true;
       warn("could not load your account's save into this browser", e);
       notice("Your account's progress could not be loaded in this browser, so saving is paused.");
@@ -235,7 +279,7 @@
     notice("Loaded your account's progress. This device had different progress.", "Use this device's instead", async function () {
       try {
         apply(b.map);
-        await upload(b.map, true);
+        await upload(snapshot(), true);
         rawRemove.call(ls, BACKUP);
       } catch (e) { warn("could not switch", e); }
       location.reload();
