@@ -16,7 +16,7 @@
   var LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
   // Leading URL segments to skip before the game folder. 0 for https://name.github.io/game/,
   // 1 for a project site like https://name.github.io/repo/game/
-  var SKIP = 0;
+  var SKIP = 1;
 
   var cfg = window.CLOUD_SAVE || {};
   var seg = location.pathname.split("/").filter(Boolean);
