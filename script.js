@@ -122,6 +122,7 @@ const GAME_MODULES = [
   { href: "games/blumgi-dragon",           img: "/images/blumgi-dragon.jpg",                                                   title: "Blumgi Dragon",            cat: "action"        },
   { href: "games/blumgi-soccer",           img: "/images/blumgi-soccer.jpg",                                                   title: "Blumgi Soccer",            cat: "sports"        },
   { href: "games/blumgi-merge",           img: "/images/blumgi-merge.jpg",                                                   title: "Blumgi Merge",            cat: "idle"        },
+  { href: "games/fancade",           img: "/images/fancade.jpg",                                                   title: "Fancade",            cat: "puzzle"        },
 
 ]
 
