@@ -26,16 +26,16 @@
 //   * Idempotent: a second run finds the live save and does nothing.
 //   * Fails closed and silent: no storage, a blocked profile, a missing database -> no-op, game untouched.
 //
-// ORDERING -- THE ONE THING THAT MUST NOT BREAK. This tag goes FIRST, before save-sync.js and before any game
+// ORDERING -- THE ONE THING THAT MUST NOT BREAK. This tag goes FIRST, before any game
 // script. For "idbfs" the guarantee does not depend on how a game starts Unity (createUnityInstance,
 // UnityLoader.instantiate, Poki's master-loader -> unity.js, or a custom boot): the "/idbfs" open request is
 // issued synchronously while this script executes, IndexedDB serves open requests in order, and ALL of the
 // work runs inside ONE readwrite transaction created in that open's success handler. IndexedDB does not start
 // any transaction created later on an overlapping scope until a readwrite one finishes, so Unity's
-// FS.syncfs(populate) read -- and save-sync's baseline snapshot -- cannot run before the copy commits.
+// FS.syncfs(populate) read cannot run before the copy commits.
 // (Wrapping createUnityInstance was considered and rejected: it is a global *function declaration* in most
 // builds, which replaces any accessor we define instead of calling it, and a third of these games never call
-// it at all.) The prototypes are captured here, before save-sync.js patches them, so our own writes are
+// it at all.) The prototypes are captured here so our own writes are
 // never mistaken for the game's.
 //
 // The page opts in per game with data-mode on the tag; tools/wire-save-migrate.js decides which games get
@@ -175,7 +175,7 @@
         var idb;
         try { idb = window.indexedDB; } catch (e) { idb = null; }
         if (!idb || !window.IDBKeyRange) return finish("no-indexeddb");
-        // capture BEFORE save-sync.js (next tag) wraps these: our copy is not a game write
+        // capture prototypes: our copy is not a game write
         var P = window.IDBObjectStore && IDBObjectStore.prototype, D = window.IDBDatabase && IDBDatabase.prototype;
         var open = IDBFactory.prototype.open, oCursor = P.openCursor, oGet = P.get, oPut = P.put, oCount = P.count, oTx = D.transaction;
         var dirOf = function (l) { return location.origin + "/" + FOLDER + "/" + l + (REST_DIR ? "/" + REST_DIR : ""); };

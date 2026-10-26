@@ -1,10 +1,10 @@
 // POKI sdk.js (V6.3.0)
-// V6.3.0: sdk.js now loads /scripts/save-sync.js itself (see the document.write block below), so a game's
+// V6.3.0: sdk.js now loads poki-sdk-core.js itself (see the document.write block below), so a game's
 // index.html only needs <script src="/scripts/sdk.js?v=23"></script>.
 (() => {
     "use strict";
 
-    // Load save-sync.js synchronously, before any game script. document.write is deliberate: a script
+    // Load poki-sdk-core.js synchronously, before any game script. document.write is deliberate: a script
     // injected with createElement loads async and would miss the game's first storage writes. This runs
     // while the parser is still in <head>, so the tag lands right after this script and executes before
     // the next tag in the HTML (the game's own scripts). Same-origin, parser-inserted, so Chrome's
