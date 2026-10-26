@@ -5,7 +5,7 @@
   "use strict";
 
   var SUPA_URL = "https://yerxoikcfeulgnrdjkyc.supabase.co";
-  var SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllcnhvaWtjZmV1bGducmRqa3ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzg4ODMsImV4cCI6MjA1NjgxNDg4M30.YOUR_ANON_KEY_HERE"; // Use your actual key
+  var SUPA_KEY = "sb_publishable_QX-XZw_wiRj_u0NXHGRkOA_Pq7rGK-p"; // Use your actual key
   var LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
 
   var pathSegments = location.pathname.split("/").filter(Boolean);
