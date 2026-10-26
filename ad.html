@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch Ad</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0a;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: min(90%, 400px);
+      padding: 32px;
+      text-align: center;
+      background: #171717;
+      border: 1px solid #303030;
+      border-radius: 16px;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    p {
+      color: #b3b3b3;
+      line-height: 1.5;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 9px;
+      background: #6366f1;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4f46e5;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    #status {
+      min-height: 24px;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+
+    #applixir-ad-container {
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <h1>Watch an Ad</h1>
+    <p>Watch the video to continue to your dashboard.</p>
+
+    <div id="applixir-ad-container"></div>
+
+    <button id="watch-ad-btn" type="button">
+      Watch Ad
+    </button>
+
+    <div id="status" role="status" aria-live="polite"></div>
+  </main>
+
+  <script src="https://cdn.applixir.com/applixir.app.v6.1.0.js"></script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const button = document.getElementById("watch-ad-btn");
+      const status = document.getElementById("status");
+
+      let adStarted = false;
+      let redirected = false;
+
+      const options = {
+        // Sandbox key: test ads only.
+        // Replace with your activated Applixir key for production.
+        apiKey: "5a4db0c5-0000-4000-8000-5a4db0c50001",
+
+        injectionElementId: "applixir-ad-container",
+
+        adStatusCallbackFn: function (adStatus) {
+          console.log("Applixir status:", adStatus);
+
+          if (
+            adStatus &&
+            adStatus.type === "complete" &&
+            !redirected
+          ) {
+            redirected = true;
+            status.textContent = "Ad completed! Redirecting...";
+            window.location.href = "dashboard.html";
+          }
+        },
+
+        adErrorCallbackFn: function (error) {
+          console.error("Applixir ad error:", error);
+
+          status.textContent = "The ad could not be loaded. Please try again.";
+          button.disabled = false;
+          button.textContent = "Try Again";
+          adStarted = false;
+        }
+      };
+
+      button.addEventListener("click", function () {
+        if (adStarted || redirected) return;
+
+        if (typeof window.initializeAndOpenPlayer !== "function") {
+          status.textContent = "The ad service is unavailable. Please refresh and try again.";
+          console.error("Applixir SDK did not load.");
+          return;
+        }
+
+        adStarted = true;
+        button.disabled = true;
+        button.textContent = "Loading Ad...";
+        status.textContent = "Please wait while the ad loads.";
+
+        try {
+          window.initializeAndOpenPlayer(options);
+        } catch (error) {
+          console.error("Failed to start Applixir:", error);
+
+          status.textContent = "Unable to start the ad. Please try again.";
+          button.disabled = false;
+          button.textContent = "Try Again";
+          adStarted = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
