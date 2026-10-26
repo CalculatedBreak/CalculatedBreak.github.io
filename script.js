@@ -4,7 +4,11 @@
  * This file:
  *  1. Reads game metadata from GAME_MODULES (populated from the games catalogue)
  *  2. Renders module cards on dashboard.html
- *  3. Launches games in a new tab via about:blank + fullscreen iframe
+ *  3. Launches games through the player wrapper (player.html) so the WGPlayer
+ *     ad tag loads on every game. Games with non-standard paths open directly.
+ *
+ * player.html also loads this file and builds its "More Games" catalog from
+ * GAME_MODULES, so this is the only list you need to maintain.
  */
 
 /* =============================================================================
@@ -133,7 +137,7 @@ const GAME_MODULES = [
 
 function renderModuleCards() {
   const grid = document.getElementById('module-grid');
-  if (!grid) return;
+  if (!grid) return; // not on the dashboard (e.g. player.html loads this file too)
 
   grid.innerHTML = '';
 
@@ -166,12 +170,12 @@ function renderModuleCards() {
 
     card.addEventListener('click', (event) => {
       if (event.target.closest('.btn-launch')) return;
-      launchSimulation(module.href);
+      launchSimulation(module.href, module.title);
     });
 
     card.querySelector('.btn-launch').addEventListener('click', (event) => {
       event.stopPropagation();
-      launchSimulation(module.href);
+      launchSimulation(module.href, module.title);
     });
 
     grid.appendChild(card);
@@ -188,13 +192,34 @@ function escapeHtml(text) {
    LAUNCHER
    ============================================================================= */
 
-function launchSimulation(href) {
+/**
+ * Returns the game folder id for standard paths like "games/drive-mad/",
+ * "/games/drive-mad" or "games/Idle Breakout/". Returns null for anything
+ * else (e.g. "/moto-x3m/", "/Level-Devil", "/car-machines/games/car-machines/").
+ */
+function getGameId(href) {
+  const match = String(href || '').match(/^\/?games\/([^/]+)\/?$/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Opens a game in a new tab. Standard games go through player.html so the
+ * WGPlayer ad tag is loaded; non-standard paths open directly as before.
+ */
+function launchSimulation(href, title) {
   if (!href) {
     console.error('Invalid game path.');
     return;
   }
 
-  window.open(href, '_blank');
+  const id = getGameId(href);
+
+  if (id) {
+    const params = new URLSearchParams({ game: id, title: title || id });
+    window.open('player.html?' + params.toString(), '_blank');
+  } else {
+    window.open(href, '_blank');
+  }
 }
 
 /* =============================================================================

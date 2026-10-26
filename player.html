@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Play browser games on EduSphere Game Hub.">
+  <title>Loading game... | EduSphere</title>
+
+  <!-- WGPlayer universal ad tag (exactly as provided) -->
+  <script type="text/javascript" async>
+    !function(e,t){
+      a=e.createElement("script"),
+      m=e.getElementsByTagName("script")[0],
+      a.async=1, a.src=t,
+      m.parentNode.insertBefore(a, m)
+    }(document, "https://wgplayer.com" + location.hostname + "&wp=" + location.pathname);
+  </script>
+
+  <!-- Google Analytics (same as the hub) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV0H0442XN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FV0H0442XN');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---- Theme tokens (identical to the Game Hub) ---- */
+    :root {
+      --bg: #170f35;
+      --bg-deep: #0f0925;
+      --panel: #241a4d;
+      --panel-hi: #2f2266;
+      --line: #4636a0;
+      --text: #f4f0ff;
+      --muted: #b3a8e6;
+      --pink: #ff4f9a;
+      --cyan: #3de0ff;
+      --sun: #ffd23f;
+      --radius: 18px;
+      --display: "Bungee", "Impact", sans-serif;
+      --body: "Space Grotesk", system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--body);
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 85% -10%, rgba(255,79,154,.25), transparent 60%),
+        radial-gradient(700px 500px at -5% 105%, rgba(61,224,255,.18), transparent 60%),
+        var(--bg-deep);
+      background-attachment: fixed;
+      line-height: 1.55;
+    }
+
+    a { color: var(--cyan); }
+    :focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+    [hidden] { display: none !important; }
+
+    .page {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px clamp(16px, 4vw, 32px) 48px;
+    }
+
+    /* ---- Top bar ---- */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      max-width: 960px;
+      margin: 0 auto 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      font-family: var(--display);
+      font-size: 1.1rem;
+      color: var(--bg-deep);
+      background: var(--sun);
+      border-radius: 12px;
+      box-shadow: 4px 4px 0 var(--pink);
+      transform: rotate(-6deg);
+    }
+    .brand-text {
+      font-family: var(--display);
+      font-size: 1.3rem;
+      letter-spacing: .02em;
+    }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+
+    /* ---- Signed-in user chip ---- */
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px 4px 4px;
+      background: var(--panel-hi);
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      max-width: 200px;
+    }
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      flex: none;
+      border-radius: 50%;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--bg-deep);
+      background: linear-gradient(135deg, var(--cyan), var(--pink));
+    }
+    .user-chip-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: .9rem;
+      font-weight: 600;
+    }
+
+    /* ---- Buttons (same look as the hub's yellow buttons) ---- */
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+      font: 700 .95rem var(--body);
+      text-align: center;
+      text-decoration: none;
+      color: var(--bg-deep);
+      background: var(--sun);
+      box-shadow: 0 4px 0 #c99a00;
+      transition: transform .1s, box-shadow .1s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #c99a00; }
+    .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #c99a00; }
+    .btn--alt { background: var(--cyan); box-shadow: 0 4px 0 #1f9fb8; }
+    .btn--alt:hover { box-shadow: 0 7px 0 #1f9fb8; }
+    .btn--alt:active { box-shadow: 0 1px 0 #1f9fb8; }
+    .btn--pink { background: var(--pink); box-shadow: 0 4px 0 #b3306a; }
+    .btn--pink:hover { box-shadow: 0 7px 0 #b3306a; }
+    .btn--pink:active { box-shadow: 0 1px 0 #b3306a; }
+    .btn--pink.is-cta { animation: ctaPulse 2.2s infinite; }
+    .btn:disabled { opacity: .6; cursor: wait; }
+    @keyframes ctaPulse {
+      0% { outline: 0 solid rgba(255,79,154,.6); }
+      70% { outline: 10px solid rgba(255,79,154,0); }
+      100% { outline: 0 solid rgba(255,79,154,0); }
+    }
+
+    /* ---- Sign-in reminder banner ---- */
+    .signin-banner {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 18px;
+      max-width: 960px;
+      margin: 0 auto 20px;
+      padding: 16px 48px 16px 22px;
+      border-radius: var(--radius);
+      background: linear-gradient(120deg, var(--panel-hi), var(--panel));
+      border: 2px solid var(--line);
+      border-left: 8px solid var(--pink);
+    }
+    .signin-banner p { flex: 1 1 260px; margin: 0; color: var(--muted); }
+    .signin-banner strong { display: block; color: var(--text); font-size: 1.1rem; }
+    .signin-banner-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .banner-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 50%;
+      background: none;
+      color: var(--muted);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .banner-close:hover { color: var(--text); }
+
+    /* ---- Game container: max 960px, 16:9 ---- */
+    .game-container {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border: 3px solid var(--sun);
+      border-radius: 24px;
+      box-shadow: 8px 8px 0 var(--pink), 0 30px 80px rgba(0,0,0,.5);
+      overflow: hidden;
+    }
+    .game-container iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* ---- Title ---- */
+    .title-block { max-width: 960px; margin: 34px auto 0; }
+    .eyebrow { margin: 0 0 4px; color: var(--muted); font-size: .9rem; }
+    .game-title {
+      margin: 0;
+      font-family: var(--display);
+      font-weight: 400;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1.05;
+      letter-spacing: .01em;
+      color: var(--sun);
+      text-shadow: 4px 4px 0 var(--pink), 8px 8px 0 rgba(61,224,255,.35);
+      overflow-wrap: anywhere;
+    }
+
+    /* ---- More Games ---- */
+    .more-games { max-width: 960px; margin: 48px auto 0; }
+    .more-games h2 {
+      margin: 0 0 4px;
+      font-family: var(--display);
+      font-weight: 400;
+      font-size: 1.8rem;
+    }
+    .section-lead { margin: 0 0 20px; color: var(--muted); }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 18px;
+    }
+    .game-card {
+      --accent: var(--cyan);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      color: var(--text);
+      text-decoration: none;
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 6px 6px 0 var(--accent);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .game-card:hover { transform: translate(-3px,-3px); box-shadow: 9px 9px 0 var(--accent); }
+    .game-card:active { transform: translate(3px,3px); box-shadow: 2px 2px 0 var(--accent); }
+    .game-card:nth-child(4n+1) { --accent: var(--cyan); }
+    .game-card:nth-child(4n+2) { --accent: var(--pink); }
+    .game-card:nth-child(4n+3) { --accent: var(--sun); }
+    .game-card:nth-child(4n+4) { --accent: #5dffa6; }
+
+    .game-card-thumb {
+      height: 120px;
+      overflow: hidden;
+      background: var(--panel-hi);
+      border-bottom: 2px solid var(--line);
+    }
+    .game-card-thumb img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .game-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 14px 14px;
+    }
+    .game-card-tag {
+      align-self: flex-start;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--bg-deep);
+      background: var(--accent);
+      text-transform: capitalize;
+    }
+    .game-card-name {
+      margin: 0;
+      font-family: var(--display);
+      font-weight: 400;
+      font-size: 1rem;
+      line-height: 1.2;
+    }
+
+    /* ---- Error state ---- */
+    .error-msg {
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      border: 2px dashed var(--line);
+      border-radius: var(--radius);
+    }
+
+    .footer {
+      max-width: 960px;
+      margin: 56px auto 0;
+      padding-top: 20px;
+      border-top: 2px dashed var(--line);
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    /* ---- Authentication popup (same look as the hub) ---- */
+    .auth-overlay {
+      position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px;
+      background: rgba(10,5,30,.8); backdrop-filter: blur(6px); animation: fade .25s ease-out;
+    }
+    .auth-modal {
+      position: relative; width: min(460px,100%); padding: 40px 32px 32px; text-align: left;
+      background: linear-gradient(160deg,var(--panel-hi),var(--panel)); border: 3px solid var(--sun);
+      border-radius: 24px; box-shadow: 8px 8px 0 var(--pink),0 30px 80px rgba(0,0,0,.6);
+      animation: pop .4s cubic-bezier(.2,1.4,.4,1);
+    }
+    .auth-burst {
+      position: absolute; top: -32px; left: 50%; transform: translateX(-50%); display: grid;
+      place-items: center; width: 64px; height: 64px; font-size: 2rem; background: var(--pink);
+      border: 3px solid var(--sun); border-radius: 50%;
+    }
+    .auth-modal h2 { margin: 0 0 14px; text-align: center; font-family: var(--display); font-weight: 400; font-size: 1.7rem; color: var(--sun); }
+    .auth-field { display: block; margin-bottom: 14px; }
+    .auth-field span { display: block; margin-bottom: 4px; color: var(--muted); font-size: .9rem; font-weight: 600; }
+    .auth-field input { width: 100%; padding: 12px 14px; font: 500 1rem var(--body); color: var(--text); background: var(--bg-deep); border: 2px solid var(--line); border-radius: 12px; }
+    .auth-status { min-height: 1.4em; margin: 0 0 14px; font-size: .92rem; color: var(--muted); }
+    .auth-status.is-error { color: #ff8fb8; }
+    .auth-status.is-ok { color: #5dffa6; }
+    .auth-submit { width: 100%; padding: 12px 22px; font-size: 1rem; }
+    .auth-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 14px; margin-top: 18px; }
+    .auth-link { padding: 0; border: 0; background: none; color: var(--cyan); font: 600 .9rem var(--body); cursor: pointer; text-decoration: underline; }
+    .auth-close { position: absolute; top: 12px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 1.4rem; line-height: 1; cursor: pointer; }
+    .auth-close:hover { color: var(--text); }
+    .auth-pass { position: relative; }
+    .auth-pass input { padding-right: 76px; }
+    .auth-eye {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 6px 10px;
+      border: 0; border-radius: 8px; cursor: pointer; background: var(--panel-hi);
+      color: var(--cyan); font: 700 .8rem var(--body);
+    }
+    .auth-eye:hover { color: var(--text); }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pop { from { opacity: 0; transform: scale(.8) translateY(20px); } to { opacity: 1; transform: none; } }
+
+    @media (max-width: 560px) {
+      .brand-text { display: none; }
+      .user-chip-name { display: none; }
+      .user-chip { padding: 4px; }
+      .game-container { border-radius: 16px; box-shadow: 5px 5px 0 var(--pink); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <a href="index.html" class="brand">
+        <span class="brand-mark" aria-hidden="true">ES</span>
+        <span class="brand-text">EduSphere</span>
+      </a>
+      <div class="topbar-actions">
+        <div class="user-chip" id="user-chip" hidden>
+          <span class="avatar" id="user-avatar" aria-hidden="true">?</span>
+          <span class="user-chip-name" id="user-name"></span>
+        </div>
+        <a href="menu.html" class="btn btn--alt">&larr; All games</a>
+        <a class="btn btn--alt" id="direct-play-btn" hidden>Direct Play</a>
+        <button type="button" class="btn" id="fs-btn">Fullscreen</button>
+        <button type="button" class="btn btn--pink is-cta" id="auth-toggle">Sign in</button>
+      </div>
+    </div>
+
+    <!-- Sign in / sign up reminder (only shown to signed-out players) -->
+    <div class="signin-banner" id="signin-banner" role="region" aria-label="Save your progress" hidden>
+      <p>
+        <strong>Don't lose your progress!</strong>
+        Sign in or create a free account to save this game and pick it up on any device.
+      </p>
+      <div class="signin-banner-actions">
+        <button type="button" class="btn btn--pink" id="banner-signin">Sign in</button>
+        <button type="button" class="btn btn--alt" id="banner-signup">Create account</button>
+      </div>
+      <button type="button" class="banner-close" id="banner-close" aria-label="Hide this reminder">&times;</button>
+    </div>
+
+    <!-- Active game -->
+    <div class="game-container" id="game-container">
+      <iframe
+        id="game-frame"
+        title="Game"
+        allow="autoplay; fullscreen; gamepad; clipboard-write"
+        allowfullscreen></iframe>
+    </div>
+
+    <!-- Title -->
+    <div class="title-block" id="title-block">
+      <p class="eyebrow">Now playing</p>
+      <h1 class="game-title" id="game-title">Loading...</h1>
+    </div>
+
+    <p class="error-msg" id="error-msg" hidden>
+      No game selected. <a href="menu.html">Pick one from the hub</a>.
+    </p>
+
+    <!-- Recommendations -->
+    <section class="more-games" id="more-games">
+      <h2>More Games</h2>
+      <p class="section-lead">Keep the fun going.</p>
+      <div class="game-grid" id="game-grid"></div>
+    </section>
+
+    <footer class="footer">
+      <p>Need help? Email <a href="mailto:labsupport@edusphere.edu">labsupport@edusphere.edu</a></p>
+    </footer>
+
+  </div>
+
+  <!-- Authentication popup -->
+  <div class="auth-overlay" id="auth-overlay" hidden>
+    <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div class="auth-burst" aria-hidden="true">🔐</div>
+      <button type="button" class="auth-close" id="auth-close" aria-label="Close">&times;</button>
+      <h2 id="auth-title">Sign in</h2>
+      <form id="auth-form" novalidate>
+        <label class="auth-field" id="auth-email-wrap">
+          <span>Email</span>
+          <input type="email" id="auth-email" autocomplete="email" required>
+        </label>
+        <label class="auth-field" id="auth-password-wrap">
+          <span id="auth-password-label">Password</span>
+          <div class="auth-pass">
+            <input type="password" id="auth-password" autocomplete="current-password" minlength="6" required>
+            <button type="button" class="auth-eye" id="auth-eye" aria-label="Show password" aria-pressed="false">Show</button>
+          </div>
+        </label>
+        <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+        <button type="submit" class="btn auth-submit" id="auth-submit">Sign in</button>
+      </form>
+      <div class="auth-links">
+        <button type="button" class="auth-link" id="auth-switch"></button>
+        <button type="button" class="auth-link" id="auth-forgot">Forgot password?</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Provides GAME_MODULES and getGameId(). Its card renderer does nothing on
+       this page because there is no #module-grid element. -->
+  <script src="script.js"></script>
+
+  <script>
+    /* ==========================================================================
+       GAME CATALOG
+       Built automatically from GAME_MODULES in script.js. Each entry has:
+         id    - folder name inside /games/
+         title - display name
+         thumb - thumbnail path
+         cat   - category label shown on the card
+       Only games stored at games/[id]/ are included, because those are the
+       ones this player can load as /games/[id]/index.html.
+       ========================================================================== */
+    const GAME_CATALOG = GAME_MODULES
+      .map((m) => {
+        const id = getGameId(m.href);
+        if (!id) return null;
+
+        // Make relative thumbnail paths root-relative; leave full URLs alone.
+        const thumb = /^(https?:)?\/\//.test(m.img) || m.img.startsWith("/")
+          ? m.img
+          : "/" + m.img;
+
+        return { id: id, title: m.title, thumb: thumb, cat: m.cat || "game" };
+      })
+      .filter(Boolean);
+
+    // How many suggestions to show (random pick each visit). Use 0 to show all.
+    const MAX_SUGGESTIONS = 24;
+
+    /* ==========================================================================
+       READ URL PARAMETERS
+       Expected: player.html?game=drive-mad&title=Drive+Mad
+       ========================================================================== */
+    const params = new URLSearchParams(window.location.search);
+    const gameId = (params.get("game") || "").trim();
+    let gameTitle = (params.get("title") || "").trim();
+
+    // Only allow safe folder names (letters, digits, space, _ . -) and no ".."
+    // so the parameter can't be used to load files outside /games/.
+    const isValidId = /^[\w. -]+$/.test(gameId) && !gameId.includes("..");
+
+    // If no title was passed, fall back to the catalog entry, then to the id.
+    if (!gameTitle && isValidId) {
+      const match = GAME_CATALOG.find((g) => g.id === gameId);
+      gameTitle = match ? match.title : gameId;
+    }
+
+    /* ==========================================================================
+       LOAD THE GAME + UPDATE TITLES
+       ========================================================================== */
+    function loadGame() {
+      const frame = document.getElementById("game-frame");
+      const directPlayButton = document.getElementById("direct-play-btn");
+      const heading = document.getElementById("game-title");
+      const container = document.getElementById("game-container");
+      const titleBlock = document.getElementById("title-block");
+      const errorMsg = document.getElementById("error-msg");
+
+      if (!isValidId) {
+        container.hidden = true;
+        titleBlock.hidden = true;
+        errorMsg.hidden = false;
+        document.title = "Game not found | EduSphere";
+        return;
+      }
+
+      // Point the iframe at /games/[game-id]/index.html
+      const gameUrl = "/games/" + encodeURIComponent(gameId) + "/index.html";
+      frame.src = gameUrl;
+      directPlayButton.href = gameUrl;
+      directPlayButton.hidden = false;
+      frame.title = gameTitle;
+
+      // textContent (not innerHTML) so the title param can't inject markup
+      heading.textContent = gameTitle;
+      document.title = gameTitle + " | EduSphere";
+    }
+
+    /* ==========================================================================
+       "MORE GAMES" GRID
+       Loops through the catalog, skips the game being played, and builds a
+       card linking back into player.html.
+       ========================================================================== */
+    function shuffle(list) {
+      const a = list.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function renderRecommendations() {
+      const grid = document.getElementById("game-grid");
+      const section = document.getElementById("more-games");
+      grid.innerHTML = "";
+
+      // Filter out the currently playing game
+      let others = GAME_CATALOG.filter((g) => g.id !== gameId);
+
+      if (!others.length) {
+        section.hidden = true;
+        return;
+      }
+
+      if (MAX_SUGGESTIONS > 0) {
+        others = shuffle(others).slice(0, MAX_SUGGESTIONS);
+      }
+
+      others.forEach((game) => {
+        const link = document.createElement("a");
+        link.className = "game-card";
+        // Result: player.html?game=target-id&title=Target+Title
+        link.href = "player.html?" + new URLSearchParams({ game: game.id, title: game.title }).toString();
+
+        const thumbWrap = document.createElement("div");
+        thumbWrap.className = "game-card-thumb";
+        const img = document.createElement("img");
+        img.src = game.thumb;
+        img.alt = game.title;
+        img.loading = "lazy";
+        img.onerror = function () {
+          thumbWrap.style.background = "linear-gradient(135deg, #2f2266, #241a4d)";
+          img.remove();
+        };
+        thumbWrap.appendChild(img);
+
+        const body = document.createElement("div");
+        body.className = "game-card-body";
+
+        const tag = document.createElement("span");
+        tag.className = "game-card-tag";
+        tag.textContent = game.cat;
+
+        const name = document.createElement("h3");
+        name.className = "game-card-name";
+        name.textContent = game.title;
+
+        body.appendChild(tag);
+        body.appendChild(name);
+        link.appendChild(thumbWrap);
+        link.appendChild(body);
+        grid.appendChild(link);
+      });
+    }
+
+    /* ==========================================================================
+       FULLSCREEN BUTTON
+       ========================================================================== */
+    function setupFullscreen() {
+      const btn = document.getElementById("fs-btn");
+      const container = document.getElementById("game-container");
+
+      btn.addEventListener("click", () => {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else if (container.requestFullscreen) {
+          container.requestFullscreen();
+        }
+      });
+    }
+
+    /* ==========================================================================
+       INIT
+       ========================================================================== */
+    loadGame();
+    renderRecommendations();
+    setupFullscreen();
+  </script>
+
+  <!-- Supabase email/password authentication (same project as the hub) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script>
+    const SUPA_URL = "https://yerxoikcfeulgnrdjkyc.supabase.co";
+    const SUPA_KEY = "sb_publishable_QX-XZw_wiRj_u0NXHGRkOA_Pq7rGK-p";
+
+    // Where the "reset password" email link sends people (the hub handles the
+    // new-password step). Add this URL to Supabase > Authentication > URL Configuration.
+    const RESET_REDIRECT = new URL("menu.html", location.href).href;
+
+    // Remembers that the player closed the reminder banner for this browser session.
+    const BANNER_KEY = "player-signin-banner-dismissed";
+
+    function setupAuth() {
+      const $ = (id) => document.getElementById(id);
+      const overlay = $("auth-overlay");
+      const form = $("auth-form");
+      const statusEl = $("auth-status");
+      const emailEl = $("auth-email");
+      const passEl = $("auth-password");
+      const submitBtn = $("auth-submit");
+      const switchBtn = $("auth-switch");
+      const forgotBtn = $("auth-forgot");
+      const toggleBtn = $("auth-toggle");
+      const eyeBtn = $("auth-eye");
+      const banner = $("signin-banner");
+      const chip = $("user-chip");
+
+      const lib = window.supabase && window.supabase.createClient;
+      const sb = lib ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
+
+      let mode = "signin";
+      let user = null;
+      let authKnown = false;   // true once we know whether someone is signed in
+      let lastFocus = null;
+
+      function bannerDismissed() {
+        try { return sessionStorage.getItem(BANNER_KEY) === "1"; } catch (e) { return false; }
+      }
+
+      function say(text, kind) {
+        statusEl.textContent = text || "";
+        statusEl.className = "auth-status" + (kind ? " is-" + kind : "");
+      }
+
+      function setMode(m) {
+        mode = m;
+        const titles = {
+          signin: "Sign in",
+          signup: "Create account",
+          reset: "Reset password",
+          newpass: "Choose a new password"
+        };
+        const buttons = {
+          signin: "Sign in",
+          signup: "Create account",
+          reset: "Send reset link",
+          newpass: "Save password"
+        };
+
+        $("auth-title").textContent = titles[m];
+        submitBtn.textContent = buttons[m];
+        $("auth-email-wrap").hidden = (m === "newpass");
+        $("auth-password-wrap").hidden = (m === "reset");
+        $("auth-password-label").textContent = (m === "newpass") ? "New password" : "Password";
+        passEl.autocomplete = (m === "signin") ? "current-password" : "new-password";
+        emailEl.required = (m !== "newpass");
+        passEl.required = (m !== "reset");
+        passEl.minLength = (m === "reset") ? 0 : 6;
+        switchBtn.textContent = (m === "signin") ? "Create an account" : "Back to sign in";
+        forgotBtn.hidden = (m !== "signin");
+        switchBtn.hidden = (m === "newpass");
+        say("");
+      }
+
+      function setPassVisible(show) {
+        passEl.type = show ? "text" : "password";
+        eyeBtn.textContent = show ? "Hide" : "Show";
+        eyeBtn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+        eyeBtn.setAttribute("aria-pressed", String(show));
+      }
+
+      eyeBtn.addEventListener("click", () => setPassVisible(passEl.type === "password"));
+
+      function open(m) {
+        lastFocus = document.activeElement;
+        setMode(m || "signin");
+        overlay.hidden = false;
+
+        if (!sb) say("Login could not load. Check your connection and reload.", "error");
+
+        (m === "newpass" ? passEl : emailEl).focus();
+      }
+
+      function close() {
+        overlay.hidden = true;
+        form.reset();
+        setPassVisible(false);
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      // Updates the button, avatar chip and reminder banner for the current user.
+      function renderUser(u) {
+        user = u || null;
+        const email = user && user.email;
+        const name = email ? email.split("@")[0] : "";
+
+        chip.hidden = !user;
+        $("user-avatar").textContent = email ? email.slice(0, 2).toUpperCase() : "?";
+        $("user-name").textContent = name;
+
+        toggleBtn.textContent = user ? "Sign out" : "Sign in";
+        toggleBtn.classList.toggle("is-cta", !user);
+
+        // Only remind signed-out players, and only once we know they're signed out
+        banner.hidden = !(authKnown && !user && !bannerDismissed());
+      }
+
+      // Reloads the game so its cloud save is restored for the account that just signed in.
+      function reloadGame() {
+        const frame = $("game-frame");
+        if (frame && frame.getAttribute("src")) frame.src = frame.getAttribute("src");
+      }
+
+      /* ---- Buttons ---- */
+      toggleBtn.addEventListener("click", async () => {
+        if (!user) return open("signin");
+        if (sb) {
+          const { error } = await sb.auth.signOut();
+          if (error) console.error("Sign out failed:", error);
+        }
+        renderUser(null);
+      });
+
+      $("banner-signin").addEventListener("click", () => open("signin"));
+      $("banner-signup").addEventListener("click", () => open("signup"));
+      $("banner-close").addEventListener("click", () => {
+        try { sessionStorage.setItem(BANNER_KEY, "1"); } catch (e) {}
+        banner.hidden = true;
+      });
+
+      switchBtn.addEventListener("click", () => setMode(mode === "signin" ? "signup" : "signin"));
+      forgotBtn.addEventListener("click", () => setMode("reset"));
+      $("auth-close").addEventListener("click", close);
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !overlay.hidden) close();
+      });
+
+      /* ---- Form submit ---- */
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!sb) return;
+
+        const email = emailEl.value.trim();
+        const password = passEl.value;
+
+        if (mode !== "newpass" && !email) return say("Enter your email address.", "error");
+        if (mode !== "reset" && password.length < 6) {
+          return say("Use a password with at least 6 characters.", "error");
+        }
+
+        submitBtn.disabled = true;
+        say("Working...");
+
+        try {
+          if (mode === "signin") {
+            const { error } = await sb.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            close();
+          } else if (mode === "signup") {
+            const { data, error } = await sb.auth.signUp({ email, password });
+            if (error) throw error;
+
+            if (data.session) {
+              close();
+            } else {
+              setMode("signin");
+              say("Account created. Check your email to confirm it, then sign in.", "ok");
+            }
+          } else if (mode === "reset") {
+            const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: RESET_REDIRECT });
+            if (error) throw error;
+            say("If that email has an account, a reset link is on its way.", "ok");
+          } else if (mode === "newpass") {
+            const { error } = await sb.auth.updateUser({ password });
+            if (error) throw error;
+            close();
+          }
+        } catch (err) {
+          say(err && err.message ? err.message : "Something went wrong. Try again.", "error");
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      /* ---- Session handling ---- */
+      renderUser(null);
+
+      if (!sb) {
+        // Login library didn't load: still show the reminder so the button explains why
+        authKnown = true;
+        renderUser(null);
+        return;
+      }
+
+      // Initial check: is someone already signed in (e.g. from the hub)?
+      sb.auth.getSession()
+        .then(({ data }) => {
+          authKnown = true;
+          renderUser(data && data.session && data.session.user);
+        })
+        .catch((error) => {
+          console.error("Could not check the session:", error);
+          authKnown = true;
+          renderUser(null);
+        });
+
+      // Later changes: sign in/out here, in another tab, or password recovery.
+      sb.auth.onAuthStateChange((event, session) => {
+        const wasSignedIn = !!user;
+        renderUser(session && session.user);
+        if (event === "PASSWORD_RECOVERY") open("newpass");
+        // Just signed in mid-visit: reload the game so it loads their cloud save
+        if (authKnown && !wasSignedIn && user) reloadGame();
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", setupAuth);
+  </script>
+</body>
+</html>
