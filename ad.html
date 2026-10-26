@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,6 +100,17 @@
       let adStarted = false;
       let redirected = false;
 
+      // Ad events that let the player move on. Skips count too.
+      const REWARD_EVENTS = ["complete", "skipped", "manuallyEnded", "allAdsCompleted"];
+
+      function grantRewardAndContinue(type) {
+        if (redirected) return;
+        redirected = true;
+        status.textContent = "Thanks! Redirecting...";
+        console.log("Reward granted on:", type);
+        window.location.href = "menu.html";
+      }
+
       const options = {
         // Sandbox key: test ads only.
         // Replace with your activated Applixir key for production.
@@ -111,20 +121,15 @@
         adStatusCallbackFn: function (adStatus) {
           console.log("Applixir status:", adStatus);
 
-          if (
-            adStatus &&
-            adStatus.type === "complete" &&
-            !redirected
-          ) {
-            redirected = true;
-            status.textContent = "Ad completed! Redirecting...";
-            window.location.href = "menu.html";
+          if (adStatus && REWARD_EVENTS.indexOf(adStatus.type) !== -1) {
+            grantRewardAndContinue(adStatus.type);
           }
         },
 
         adErrorCallbackFn: function (error) {
           console.error("Applixir ad error:", error);
 
+          if (redirected) return;
           status.textContent = "The ad could not be loaded. Please try again.";
           button.disabled = false;
           button.textContent = "Try Again";
