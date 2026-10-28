@@ -234,7 +234,7 @@
         }
     if (!k) {
         const e = ( () => {
-           return "poki-sdk-core.js";
+           return "/poki-sdk-core.js";
         }
         )()
           , t = document.createElement("script");

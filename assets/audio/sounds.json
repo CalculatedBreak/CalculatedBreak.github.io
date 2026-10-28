@@ -1,0 +1,639 @@
+{
+  "$comment": "Generated from tools/rl-audio-map.json by scripts/import-rl-audio.mjs (or the Sound Lab). Paths are relative to publicassets/audio/. Each slot has layers (played together; several files in a layer = random variants, minStrength/maxStrength gate layers by impact strength) and optional \"others\" files used for other cars (mono/3D versions).",
+  "boostStart": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Standard/SFX_Boost_Standard_0002.ogg"
+        ],
+        "volume": 0.55
+      }
+    ]
+  },
+  "boostLoop": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Standard/SFX_Boost_Standard_0003.ogg"
+        ],
+        "volume": 0.9
+      }
+    ]
+  },
+  "boostEnd": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Standard/SFX_Boost_Standard_0001.ogg"
+        ],
+        "volume": 0.9
+      }
+    ]
+  },
+  "boostEmpty": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_Boost/SFX_UI_Boost_0004.ogg"
+        ],
+        "volume": 0.6
+      }
+    ]
+  },
+  "boostOverchargeStart": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Lightning/SFX_Boost_Lightning_0005.ogg"
+        ],
+        "volume": 0.6
+      }
+    ]
+  },
+  "boostOverchargeLoop": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Lightning/SFX_Boost_Lightning_0006.ogg"
+        ],
+        "volume": 0.63
+      }
+    ]
+  },
+  "boostOverchargeEnd": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Lightning/SFX_Boost_Lightning_0002.ogg"
+        ],
+        "volume": 1.6
+      }
+    ]
+  },
+  "boostComicStart": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Toon/SFX_Boost_Toon_0002.ogg"
+        ],
+        "volume": 0.72
+      }
+    ]
+  },
+  "boostComicLoop": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Toon/SFX_Boost_Toon_0001.ogg"
+        ],
+        "volume": 0.8
+      }
+    ]
+  },
+  "boostComicEnd": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Toon/SFX_Boost_Toon_0003.ogg"
+        ],
+        "volume": 1.1
+      }
+    ]
+  },
+  "boostLightbraidStart": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Retrowave/SFX_Boost_Retrowave_0002.ogg"
+        ],
+        "volume": 0.75
+      }
+    ]
+  },
+  "boostLightbraidLoop": {
+    "layers": [
+      {
+        "files": [
+          "rl/Boosts/SFX_Boost_Retrowave/SFX_Boost_Retrowave_0001.ogg"
+        ],
+        "volume": 0.85
+      }
+    ]
+  },
+  "engineIdle": {
+    "layers": [
+      {
+        "files": [
+          "rl/Motors/SFX_Motor_Car01/SFX_Motor_Car01_0005.ogg",
+          "rl/Motors/SFX_Motor_Car01/SFX_Motor_Car01_0006.ogg"
+        ],
+        "volume": 1.85
+      }
+    ]
+  },
+  "engineAccelLow": {
+    "layers": [
+      {
+        "files": [
+          "rl/Motors/SFX_Motor_Car01/SFX_Motor_Car01_0003.ogg"
+        ],
+        "volume": 0.55
+      }
+    ]
+  },
+  "engineAccelHigh": {
+    "layers": [
+      {
+        "files": [
+          "rl/Motors/SFX_Motor_Car01/SFX_Motor_Car01_0004.ogg"
+        ],
+        "volume": 0.75
+      }
+    ]
+  },
+  "engineDriveLow": {
+    "layers": [
+      {
+        "files": [
+          "rl/Motors/SFX_Motor_Car01/SFX_Motor_Car01_0002.ogg"
+        ],
+        "volume": 0.95
+      }
+    ]
+  },
+  "engineDriveHigh": {
+    "layers": [
+      {
+        "files": [
+          "rl/Motors/SFX_Motor_Car01/SFX_Motor_Car01_0007.ogg"
+        ],
+        "volume": 1.35
+      }
+    ]
+  },
+  "engineAir": {
+    "layers": [
+      {
+        "files": [
+          "rl/Motors/SFX_Motor_Car01/SFX_Motor_Car01_0001.ogg",
+          "rl/Motors/SFX_Motor_Car01/SFX_Motor_Car01_0008.ogg"
+        ],
+        "volume": 0.8
+      }
+    ]
+  },
+  "jump": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0003.ogg",
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0007.ogg",
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0022.ogg",
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0025.ogg"
+        ],
+        "volume": 0.8
+      }
+    ],
+    "others": {
+      "files": [
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0006.ogg",
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0012.ogg",
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0013.ogg",
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0019.ogg"
+      ],
+      "volume": 0.8
+    }
+  },
+  "doubleJump": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0005.ogg",
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0008.ogg",
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0009.ogg",
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0023.ogg"
+        ],
+        "volume": 0.8
+      }
+    ],
+    "others": {
+      "files": [
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0001.ogg",
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0015.ogg",
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0017.ogg",
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0024.ogg"
+      ],
+      "volume": 0.8
+    }
+  },
+  "dodge": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0010.ogg",
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0014.ogg",
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0018.ogg",
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0020.ogg"
+        ],
+        "volume": 0.8
+      }
+    ],
+    "others": {
+      "files": [
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0004.ogg",
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0011.ogg",
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0016.ogg",
+        "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0021.ogg"
+      ],
+      "volume": 0.8
+    }
+  },
+  "land": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Car_Movements/SFX_Car_Movements_0002.ogg"
+        ],
+        "volume": 0.6
+      }
+    ]
+  },
+  "ballHit": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0015.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0094.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0197.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0247.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0341.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0434.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0537.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0569.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0673.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0691.ogg"
+        ],
+        "volume": 0.8
+      },
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0056.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0078.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0130.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0149.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0182.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0280.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0325.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0326.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0352.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0501.ogg"
+        ],
+        "volume": 0.7,
+        "minStrength": 0.3
+      },
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0111.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0162.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0369.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0527.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0559.ogg"
+        ],
+        "volume": 0.6,
+        "minStrength": 0.65
+      }
+    ]
+  },
+  "ballBounce": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0069.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0271.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0335.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0408.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0419.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0448.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0756.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0758.ogg"
+        ],
+        "volume": 0.6
+      }
+    ]
+  },
+  "bump": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0134.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0141.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0158.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0161.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0173.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0219.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0355.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0433.ogg"
+        ],
+        "volume": 0.8
+      },
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0056.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0078.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0130.ogg"
+        ],
+        "volume": 0.5,
+        "minStrength": 0.4
+      }
+    ]
+  },
+  "demo": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_VehicleElements/SFX_VehicleElements_0001.ogg",
+          "rl/Uncategorized/SFX_VehicleElements/SFX_VehicleElements_0003.ogg",
+          "rl/Uncategorized/SFX_VehicleElements/SFX_VehicleElements_0006.ogg"
+        ],
+        "volume": 0.8
+      },
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0118.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0489.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0637.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0640.ogg",
+          "rl/Uncategorized/SFX_Impacts/SFX_Impacts_0714.ogg"
+        ],
+        "volume": 0.7
+      }
+    ]
+  },
+  "padSmall": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_Boost/SFX_UI_Boost_0006.ogg"
+        ],
+        "volume": 0.7
+      }
+    ]
+  },
+  "padBig": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_Boost/SFX_UI_Boost_0006.ogg"
+        ],
+        "volume": 0.7
+      }
+    ]
+  },
+  "powerslideLoop": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_Car_Tires/SFX_Car_Tires_0001.ogg"
+        ],
+        "volume": 0.35
+      }
+    ]
+  },
+  "countdown": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_Countdown/SFX_UI_Countdown_0003.ogg"
+        ],
+        "volume": 0.8
+      }
+    ]
+  },
+  "go": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_Countdown/SFX_UI_Countdown_0007.ogg"
+        ],
+        "volume": 0.9
+      }
+    ]
+  },
+  "finalCountdown": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_Countdown/SFX_UI_Countdown_0002.ogg"
+        ],
+        "volume": 0.75
+      }
+    ]
+  },
+  "victory": {
+    "layers": [
+      {
+        "files": [
+          "rl/Stingers/MX_Arena_Stingers/MX_Arena_Stingers_0016.ogg"
+        ],
+        "volume": 0.6
+      }
+    ]
+  },
+  "defeat": {
+    "layers": [
+      {
+        "files": [
+          "rl/Stingers/MX_Arena_Stingers/MX_Arena_Stingers_0005.ogg"
+        ],
+        "volume": 0.6
+      }
+    ]
+  },
+  "goalExplosion": {
+    "layers": [
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_NewDefault/SFX_GoalExplosion_NewDefault_0001.ogg"
+        ],
+        "volume": 0.9
+      },
+      {
+        "files": [
+          "rl/Balls/SFX_Ball/SFX_Ball_0001.ogg"
+        ],
+        "volume": 0.6
+      }
+    ]
+  },
+  "goalToon": {
+    "layers": [
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_Toon/SFX_GoalExplosion_Toon_0001.ogg"
+        ],
+        "volume": 1
+      }
+    ]
+  },
+  "goalVoid": {
+    "layers": [
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_DarkEnergy_T01/SFX_GoalExplosion_DarkEnergy_T01_0002.ogg"
+        ],
+        "volume": 0.75
+      },
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_DarkEnergy_T01/SFX_GoalExplosion_DarkEnergy_T01_0004.ogg"
+        ],
+        "volume": 0.7
+      }
+    ]
+  },
+  "goalVoidRelease": {
+    "layers": [
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_DarkEnergy_T03/SFX_GoalExplosion_DarkEnergy_T03_0004.ogg"
+        ],
+        "volume": 0.95
+      }
+    ]
+  },
+  "goalIon": {
+    "layers": [
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_IonCannon/SFX_GoalExplosion_IonCannon_0001.ogg"
+        ],
+        "volume": 0.35
+      },
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_IonCannon/SFX_GoalExplosion_IonCannon_0002.ogg"
+        ],
+        "volume": 0.38
+      }
+    ]
+  },
+  "goalDragon": {
+    "layers": [
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_Dragon/SFX_GoalExplosion_Dragon_0003.ogg"
+        ],
+        "volume": 0.95
+      },
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_Dragon/SFX_GoalExplosion_Dragon_0001.ogg"
+        ],
+        "volume": 0.3
+      }
+    ]
+  },
+  "goalDragonRoar": {
+    "layers": [
+      {
+        "files": [
+          "rl/GoalExplosions/SFX_GoalExplosion_Dragon/SFX_GoalExplosion_Dragon_0002.ogg"
+        ],
+        "volume": 0.38
+      }
+    ]
+  },
+  "goalHorn": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_GoalEvent/SFX_GoalEvent_0004.ogg"
+        ],
+        "volume": 0.7
+      }
+    ]
+  },
+  "crowdCheer": {
+    "layers": [
+      {
+        "files": [
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0008.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0064.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0109.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0128.ogg"
+        ],
+        "volume": 0.7
+      }
+    ]
+  },
+  "matchEnd": {
+    "layers": [
+      {
+        "files": [
+          "rl/Uncategorized/SFX_GoalEvent/SFX_GoalEvent_0001.ogg"
+        ],
+        "volume": 0.7
+      }
+    ]
+  },
+  "crowdLoop": {
+    "layers": [
+      {
+        "files": [
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0031.ogg"
+        ],
+        "volume": 0.45
+      }
+    ]
+  },
+  "menuHover": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_MainMenu/SFX_UI_MainMenu_0010.ogg"
+        ],
+        "volume": 0.6
+      }
+    ]
+  },
+  "menuClick": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_MainMenu/SFX_UI_MainMenu_0023.ogg"
+        ],
+        "volume": 0.45
+      }
+    ]
+  },
+  "ballCamToggle": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_InGame/SFX_UI_InGame_0018.ogg"
+        ],
+        "volume": 0.4
+      }
+    ]
+  },
+  "chat": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_InGame/SFX_UI_InGame_0016.ogg"
+        ],
+        "volume": 0.3
+      }
+    ]
+  },
+  "statPopup": {
+    "layers": [
+      {
+        "files": [
+          "rl/UserInterface/SFX_UI_StatEvents/SFX_UI_StatEvents_0004.ogg"
+        ],
+        "volume": 0.45
+      }
+    ]
+  }
+}

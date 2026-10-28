@@ -234,7 +234,7 @@
         }
     if (!k) {
         const e = document.createElement("script");
-        e.src = "poki-sdk-core.js";
+        e.src = "/poki-sdk-core.js";
         e.type = "text/javascript";
         e.crossOrigin = "anonymous";
         e.onload = () => v.dequeue();

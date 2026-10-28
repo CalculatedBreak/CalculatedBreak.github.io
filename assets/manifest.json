@@ -1,0 +1,61 @@
+{
+  "$comment": "Visual models only; gameplay never depends on meshes. Files are relative to publicassets/. Set an assignment to null (or remove it) to restore the built-in placeholder. rotationOffset = Euler XYZ degrees that turns the model to face +X with +Y up (glTF convention). Cars are auto-fitted to the hitbox length unless 'scale' is given.",
+  "version": 1,
+  "models": [
+    {
+      "id": "red_rocket_car",
+      "file": "models/red_rocket_car.glb",
+      "kind": "car",
+      "hitboxPreset": "octane",
+      "rotationOffset": [0, 0, 0],
+      "wheelNodes": ["Wheel_FL", "Wheel_FR", "Wheel_RL", "Wheel_RR"],
+      "teamMaterial": "Paint_Red",
+      "boostNodes": ["BoostFlame_L", "BoostFlame_R"]
+    },
+    {
+      "$comment": "Shop car body (src/game/cosmetics/cars.ts). Every car model is loaded at startup: cars wear the body in their loadout. No flame nodes: the boost comes out of the two round rear dots (Lamp discs, model space), with the standard flame.",
+      "id": "low_poly_car",
+      "file": "models/low_poly_car_game_ready.glb",
+      "kind": "car",
+      "hitboxPreset": "octane",
+      "rotationOffset": [0, 0, 0],
+      "wheelNodes": ["Wheel_FL", "Wheel_FR", "Wheel_RL", "Wheel_RR"],
+      "teamMaterial": "Body_Paint",
+      "wheelWells": true,
+      "exhaust": [
+        [-2.06, 0.906, 0.659],
+        [-2.06, 0.906, -0.659]
+      ]
+    },
+    {
+      "id": "stadium_light_tower",
+      "file": "models/stadium/light_tower.glb",
+      "kind": "prop"
+    },
+    {
+      "id": "stadium_jumbotron",
+      "file": "models/stadium/jumbotron.glb",
+      "kind": "prop"
+    }
+  ],
+  "assignments": {
+    "cars": {
+      "octane": "red_rocket_car",
+      "dominus": null,
+      "plank": null,
+      "breakout": null,
+      "hybrid": null,
+      "merc": null
+    },
+    "ball": null,
+    "arena": null,
+    "stadium": {
+      "$comment": "Stadium pieces (kind 'prop', +X facing the field, +Y up). null = the built-in piece. Generators for the shipped ones: tools/blender/*.py.",
+      "lightTower": "stadium_light_tower",
+      "screen": "stadium_jumbotron",
+      "standSection": null,
+      "trees": []
+    }
+  },
+  "props": []
+}

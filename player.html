@@ -6,19 +6,6 @@
   <meta name="description" content="Play browser games on EduSphere Game Hub.">
   <title>Loading game... | EduSphere</title>
   <!-- Ad script 1 (unfoldedtrade) -->
-  <script>
-(function(mreh){
-var d = document,
-    s = d.createElement('script'),
-    l = d.currentScript || d.scripts[d.scripts.length - 1];
-s.settings = mreh || {};
-s.src = "\/\/unfoldedtrade.com\/beXAVms.dRGhlZ0ZYbWbcy\/Ne_m\/9\/uBZcUwlPkiPqTwc\/1\/NMTEklwmNFjjkdtFNUzDUq1hOZTxA_3PMYwD";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-</script>
-
   <!-- Ad script 2 (periodic-teacher pop script)
        >>> PASTE YOUR LONG <script>(function(options){ ... })({...})</script> BLOCK HERE <<<
        Copy it exactly as it is in your current player.html. -->
@@ -237,6 +224,7 @@ l.parentNode.insertBefore(s, l);
 
     /* ---- Game container: max 960px, 16:9 ---- */
     .game-container {
+      position: relative;             /* anchors the video pre-roll overlay */
       width: 100%;
       max-width: 960px;
       margin: 0 auto;
@@ -253,6 +241,127 @@ l.parentNode.insertBefore(s, l);
       height: 100%;
       border: 0;
     }
+
+    /* ---- Video pre-roll overlay (sits on top of the game player) ---- */
+    .preroll-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      color: var(--text);
+      font-family: var(--body);
+      background:
+        radial-gradient(600px 300px at 85% -10%, rgba(255,79,154,.25), transparent 60%),
+        var(--bg-deep);
+    }
+    .preroll-overlay:focus { outline: none; }
+    .preroll-stage {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+    .preroll-video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+    .preroll-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: linear-gradient(rgba(15,9,37,.92), rgba(15,9,37,0));
+      pointer-events: none;
+    }
+    .preroll-bar > * { pointer-events: auto; }
+    .preroll-label {
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--bg-deep);
+      background: var(--sun);
+    }
+    .preroll-timer { margin-right: auto; font-size: .85rem; color: var(--muted); }
+    .preroll-actions {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px;
+      background: linear-gradient(rgba(15,9,37,0), rgba(15,9,37,.92));
+      pointer-events: none;
+    }
+    .preroll-actions > * { pointer-events: auto; }
+    .preroll-btn { padding: 6px 12px; font-size: .82rem; box-shadow: 0 3px 0 #c99a00; }
+    .preroll-btn.btn--alt { box-shadow: 0 3px 0 #1f9fb8; }
+    .preroll-btn:hover { transform: translateY(-1px); }
+    .preroll-btn:disabled { cursor: not-allowed; }
+    .preroll-msg {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .95rem;
+      pointer-events: none;
+    }
+    .preroll-msg .btn { pointer-events: auto; }
+    .preroll-spinner {
+      width: 34px;
+      height: 34px;
+      border: 4px solid var(--line);
+      border-top-color: var(--sun);
+      border-radius: 50%;
+      animation: prerollSpin .9s linear infinite;
+    }
+    @keyframes prerollSpin { to { transform: rotate(360deg); } }
+
+    /* ---- Banner ad section ---- */
+    .ad-section {
+      max-width: 960px;
+      margin: 24px auto 0;
+      text-align: center;
+    }
+    .ad-label {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .ad-slot {
+      min-height: 90px;               /* reserves space so the page doesn't jump */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .ad-slot > * { max-width: 100%; }
 
     /* ---- Title ---- */
     .title-block { max-width: 960px; margin: 34px auto 0; }
@@ -404,12 +513,26 @@ l.parentNode.insertBefore(s, l);
       .user-chip-name { display: none; }
       .user-chip { padding: 4px; }
       .game-container { border-radius: 16px; box-shadow: 5px 5px 0 var(--pink); }
+      .preroll-bar { padding: 6px 8px; }
+      .preroll-actions { padding: 8px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
     }
   </style>
 </head>
+<script>
+(function(jehe){
+var d = document,
+    s = d.createElement('script'),
+    l = d.currentScript || d.scripts[d.scripts.length - 1];
+s.settings = jehe || {};
+s.src = "\/\/unfoldedtrade.com\/bNXDV.sxdiGclu0\/YbWkcz\/SeqmS9\/u\/Z\/UTlGksP\/T-cK1vNpT-kvyJNyj\/UwtFNtzaUz1wO\/TzIs2jO\/QQ";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({})
+</script>
 
 <body>
   <div class="page">
@@ -448,7 +571,8 @@ l.parentNode.insertBefore(s, l);
     <!-- Active game
          The sandbox attribute is what stops a game's own "frame-buster" script
          (top.location = self.location) from redirecting the whole tab.
-         "allow-top-navigation" is deliberately NOT included. -->
+         "allow-top-navigation" is deliberately NOT included.
+         The video pre-roll overlay is created by JavaScript and placed inside this container. -->
     <div class="game-container" id="game-container">
       <iframe
         id="game-frame"
@@ -457,6 +581,25 @@ l.parentNode.insertBefore(s, l);
         allow="autoplay; fullscreen; gamepad; clipboard-write"
         allowfullscreen></iframe>
     </div>
+
+    <!-- Banner ad section (HilltopAds banner only) -->
+    <section class="ad-section" id="banner-ad" aria-label="Advertisement">
+      <p class="ad-label">Advertisement</p>
+      <div class="ad-slot" id="hilltop-banner">
+        <script>
+(function(cw){
+var d = document,
+    s = d.createElement('script'),
+    l = d.currentScript || d.scripts[d.scripts.length - 1];
+s.settings = cw || {};
+s.src = "\/\/unfoldedtrade.com\/b.XrV-sUdcGhla0lYJWPcz\/qeSmL9ju\/ZlUrlmkJPwTyc\/1\/NaTqk_wmNwjDkEtmNBzhU_1\/OnTLAt3lMOwB";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({})
+</script>
+      </div>
+    </section>
 
     <!-- Title -->
     <div class="title-block" id="title-block">
@@ -560,11 +703,524 @@ l.parentNode.insertBefore(s, l);
     }
 
     /* ==========================================================================
-       LOAD THE GAME + UPDATE TITLES
+       VIDEO PRE-ROLL (HilltopAds VAST)
+       Plays a VAST video ad in an overlay on top of the game player. The game's
+       iframe is NOT given a src until the ad has completed, been skipped, or
+       failed/timed out (so the player is never stuck).
+
+       IMPORTANT: the browser must be allowed to read the VAST XML from
+       PREROLL_VAST_URL (CORS). If HilltopAds does not send
+       "Access-Control-Allow-Origin" for your domain, the request fails and the
+       game simply loads without an ad (a warning is logged to the console).
        ========================================================================== */
-    function loadGame() {
+    const PREROLL_VAST_URL = "https://unfolded-uncle.com/d/mlF/z.dgGPN/v-ZtGhUe/Ce/my9vutZUUKl/kfPyTMcC1zNKTEkxz/MWDuUPtENGz/UC1jOITIM/wVOjQn";
+
+    const PREROLL = {
+      requestTimeoutMs: 6000,        // each single VAST request
+      resolveTimeoutMs: 10000,       // whole wrapper chain
+      startTimeoutMs: 12000,         // video must actually start playing within this
+      stallTimeoutMs: 10000,         // give up if playback stalls this long
+      maxWrapperDepth: 5,            // VAST wrapper redirects allowed
+      continueButtonAfterMs: 45000   // "Continue to game" button appears after this
+    };
+
+    let loadToken = 0;               // newest loadGame() call wins
+    let startedToken = 0;            // the token whose game has been put in the iframe
+    let activePreroll = null;        // handle of the pre-roll currently showing
+
+    function vastError(code, message) {
+      const e = new Error(message);
+      e.vastCode = code;
+      return e;
+    }
+    function kids(el, name) {
+      return el ? Array.prototype.filter.call(el.children, (c) => c.localName === name) : [];
+    }
+    function kid(el, name) { return kids(el, name)[0] || null; }
+    function txt(el) { return el ? (el.textContent || "").trim() : ""; }
+    function isHttpUrl(u) { return /^https?:\/\//i.test(u || ""); }
+
+    // Fires a tracking pixel (impression, quartile, error, click...). Never throws.
+    function firePixel(url, ctx) {
+      if (!url) return;
+      let u = String(url).trim();
+      if (u.indexOf("//") === 0) u = location.protocol + u;
+      if (!isHttpUrl(u)) return;
+      ctx = ctx || {};
+      u = u
+        .replace(/\[ERRORCODE\]|%5BERRORCODE%5D/gi, String(ctx.code != null ? ctx.code : 900))
+        .replace(/\[TIMESTAMP\]|%5BTIMESTAMP%5D/gi, encodeURIComponent(new Date().toISOString()))
+        .replace(/\[CACHEBUSTING\]|%5BCACHEBUSTING%5D/gi, String(Math.floor(Math.random() * 90000000) + 10000000))
+        .replace(/\[ASSETURI\]|%5BASSETURI%5D/gi, encodeURIComponent(ctx.assetUri || ""));
+      try {
+        const img = new Image();
+        img.referrerPolicy = "no-referrer-when-downgrade";
+        img.src = u;
+      } catch (e) { /* ignore */ }
+    }
+
+    async function fetchVastXml(url, deadline) {
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) throw vastError(301, "VAST request timed out");
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), Math.min(PREROLL.requestTimeoutMs, remaining));
+      try {
+        const res = await fetch(url, { method: "GET", credentials: "omit", cache: "no-store", signal: ctrl.signal });
+        if (!res.ok) throw vastError(301, "VAST request failed with HTTP " + res.status);
+        return await res.text();
+      } catch (e) {
+        if (e && e.vastCode) throw e;
+        throw vastError(301, "VAST request failed (network error, timeout or CORS block): " + (e && e.message ? e.message : e));
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function parseVast(text) {
+      const trimmed = (text || "").trim();
+      if (!trimmed) throw vastError(303, "Empty VAST response");
+      const doc = new DOMParser().parseFromString(trimmed, "application/xml");
+      if (doc.getElementsByTagName("parsererror").length) throw vastError(100, "VAST XML could not be parsed");
+      const root = doc.documentElement;
+      if (!root || root.localName !== "VAST") throw vastError(101, "Response is not a VAST document");
+      return root;
+    }
+
+    function newAcc() {
+      return { impressions: [], errors: [], tracking: {}, clickTracking: [], clickThrough: "", skipoffset: "", media: null };
+    }
+    function cloneAcc(a) {
+      const t = {};
+      Object.keys(a.tracking).forEach((k) => { t[k] = a.tracking[k].slice(); });
+      return {
+        impressions: a.impressions.slice(),
+        errors: a.errors.slice(),
+        tracking: t,
+        clickTracking: a.clickTracking.slice(),
+        clickThrough: a.clickThrough,
+        skipoffset: a.skipoffset,
+        media: null
+      };
+    }
+    function addTracking(acc, ev, url) {
+      (acc.tracking[ev] = acc.tracking[ev] || []).push(url);
+    }
+
+    function findLinear(node, needMedia) {
+      const creatives = kid(node, "Creatives");
+      if (!creatives) return null;
+      const list = kids(creatives, "Creative");
+      for (let i = 0; i < list.length; i++) {
+        const linear = kid(list[i], "Linear");
+        if (linear && (!needMedia || kid(linear, "MediaFiles"))) return linear;
+      }
+      return null;
+    }
+
+    function mergeLinear(linear, acc) {
+      const so = linear.getAttribute("skipoffset");
+      if (so) acc.skipoffset = so;
+      kids(kid(linear, "TrackingEvents"), "Tracking").forEach((t) => {
+        const ev = t.getAttribute("event");
+        const u = txt(t);
+        if (ev && u) addTracking(acc, ev, u);
+      });
+      const clicks = kid(linear, "VideoClicks");
+      if (clicks) {
+        const ct = txt(kid(clicks, "ClickThrough"));
+        if (ct) acc.clickThrough = ct;
+        kids(clicks, "ClickTracking").forEach((e) => {
+          const u = txt(e);
+          if (u) acc.clickTracking.push(u);
+        });
+      }
+    }
+
+    // Chooses a MediaFile this browser can play (skips VPAID/JavaScript creatives).
+    function pickMedia(linear) {
+      const files = kids(kid(linear, "MediaFiles"), "MediaFile").map((e) => ({
+        url: txt(e),
+        type: (e.getAttribute("type") || "").toLowerCase(),
+        width: parseInt(e.getAttribute("width"), 10) || 0,
+        bitrate: parseInt(e.getAttribute("bitrate"), 10) || 0,
+        api: e.getAttribute("apiFramework") || ""
+      }));
+      const probe = document.createElement("video");
+      const usable = files.filter((f) =>
+        isHttpUrl(f.url) &&
+        !f.api &&
+        (f.type.indexOf("video/") === 0 || f.type === "application/x-mpegurl" || f.type === "application/vnd.apple.mpegurl") &&
+        probe.canPlayType(f.type)
+      );
+      if (!usable.length) throw vastError(403, "No supported video MediaFile in the VAST response");
+      const container = document.getElementById("game-container");
+      const target = Math.min((container ? container.clientWidth : 640) * (window.devicePixelRatio || 1), 1920);
+      usable.sort((a, b) =>
+        (Math.abs((a.width || 640) - target) - Math.abs((b.width || 640) - target)) || (a.bitrate - b.bitrate)
+      );
+      return usable[0];
+    }
+
+    // Follows wrappers (up to maxWrapperDepth) until it finds an InLine ad with a playable video.
+    async function resolveVast(url, depth, acc, deadline) {
+      if (depth > PREROLL.maxWrapperDepth) throw vastError(302, "Too many VAST wrapper redirects");
+      const root = parseVast(await fetchVastXml(url, deadline));
+      const ads = kids(root, "Ad");
+      if (!ads.length) {
+        const e = vastError(303, "VAST response contains no ads");
+        e.errorUrls = acc.errors.concat(kids(root, "Error").map(txt).filter(Boolean));
+        throw e;
+      }
+      let lastErr = null;
+      for (let i = 0; i < ads.length; i++) {
+        const branch = cloneAcc(acc);
+        try {
+          const inline = kid(ads[i], "InLine");
+          const wrapper = kid(ads[i], "Wrapper");
+          const node = inline || wrapper;
+          if (!node) throw vastError(101, "Ad has neither InLine nor Wrapper");
+
+          kids(node, "Impression").forEach((e) => { const u = txt(e); if (u) branch.impressions.push(u); });
+          kids(node, "Error").forEach((e) => { const u = txt(e); if (u) branch.errors.push(u); });
+
+          const linear = findLinear(node, !!inline);
+          if (linear) mergeLinear(linear, branch);
+
+          if (wrapper) {
+            const next = txt(kid(wrapper, "VASTAdTagURI"));
+            if (!next) throw vastError(303, "Wrapper has no VASTAdTagURI");
+            return await resolveVast(new URL(next, url).href, depth + 1, branch, deadline);
+          }
+
+          if (!linear) throw vastError(400, "InLine ad has no linear video creative");
+          branch.media = pickMedia(linear);
+          return branch;
+        } catch (e) {
+          if (!e.errorUrls) e.errorUrls = branch.errors.slice();
+          lastErr = e;
+        }
+      }
+      throw lastErr || vastError(303, "No usable ad");
+    }
+
+    function parseClock(s) {
+      const m = /^(\d+):(\d+):(\d+(?:\.\d+)?)$/.exec(s || "");
+      return m ? (+m[1]) * 3600 + (+m[2]) * 60 + parseFloat(m[3]) : null;
+    }
+    function skipSeconds(offset, duration) {
+      if (!offset) return null;
+      if (offset.slice(-1) === "%") {
+        const p = parseFloat(offset);
+        return isFinite(p) && isFinite(duration) && duration > 0 ? duration * p / 100 : null;
+      }
+      return parseClock(offset);
+    }
+    function mmss(sec) {
+      sec = Math.max(0, Math.ceil(sec));
+      return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
+    }
+
+    function cancelPreroll() {
+      if (activePreroll) activePreroll.cancel();
+    }
+
+    // Shows the overlay and plays the ad. Resolves (never rejects) when the game may load.
+    function runPreroll(container) {
+      cancelPreroll();
+      if (!PREROLL_VAST_URL) return Promise.resolve("disabled");
+
+      return new Promise((resolve) => {
+        let settled = false;
+        let started = false;
+        let ad = null;
+        let video = null;
+        let assetUri = "";
+        let lastMuted = false;
+        let stallTimer = null;
+        let startTimer = null;
+        const fired = {};
+        const timers = [];
+        const listeners = [];
+
+        // Never allow two overlays at once
+        const stale = document.getElementById("preroll-overlay");
+        if (stale) stale.remove();
+
+        function later(fn, ms) { const id = setTimeout(fn, ms); timers.push(id); return id; }
+        function on(target, ev, fn) { target.addEventListener(ev, fn); listeners.push([target, ev, fn]); }
+        function make(tag, cls, text) {
+          const n = document.createElement(tag);
+          if (cls) n.className = cls;
+          if (text) n.textContent = text;
+          return n;
+        }
+
+        /* ---- Overlay DOM (built with createElement; no innerHTML) ---- */
+        const overlay = make("div", "preroll-overlay");
+        overlay.id = "preroll-overlay";
+        overlay.setAttribute("role", "region");
+        overlay.setAttribute("aria-label", "Advertisement");
+        overlay.tabIndex = -1;
+
+        const stage = make("div", "preroll-stage");
+        const bar = make("div", "preroll-bar");
+        const label = make("span", "preroll-label", "Advertisement");
+        const timerEl = make("span", "preroll-timer");
+        const skipBtn = make("button", "btn preroll-btn", "Skip ad");
+        skipBtn.type = "button";
+        skipBtn.hidden = true;
+        bar.append(label, timerEl, skipBtn);
+
+        const msg = make("div", "preroll-msg");
+        msg.setAttribute("role", "status");
+        msg.setAttribute("aria-live", "polite");
+        const spinner = make("div", "preroll-spinner");
+        const msgText = make("p", "", "Loading advertisement… your game starts right after.");
+        msgText.style.margin = "0";
+        const playBtn = make("button", "btn btn--pink", "Play ad");
+        playBtn.type = "button";
+        playBtn.hidden = true;
+        msg.append(spinner, msgText, playBtn);
+
+        const actions = make("div", "preroll-actions");
+        const learnLink = make("a", "btn btn--alt preroll-btn", "Learn more");
+        learnLink.target = "_blank";
+        learnLink.rel = "noopener noreferrer";
+        learnLink.hidden = true;
+        const unmuteBtn = make("button", "btn preroll-btn", "Unmute");
+        unmuteBtn.type = "button";
+        unmuteBtn.hidden = true;
+        const continueBtn = make("button", "btn btn--pink preroll-btn", "Continue to game");
+        continueBtn.type = "button";
+        continueBtn.hidden = true;
+        actions.append(learnLink, unmuteBtn, continueBtn);
+
+        stage.append(msg, bar, actions);
+        overlay.appendChild(stage);
+        container.appendChild(overlay);
+        try { overlay.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+
+        /* ---- Finish / fail (both idempotent) ---- */
+        const handle = { cancel: () => finish("cancelled") };
+        activePreroll = handle;
+
+        function finish(reason) {
+          if (settled) return;
+          settled = true;
+          timers.forEach(clearTimeout);
+          if (stallTimer) clearTimeout(stallTimer);
+          if (startTimer) clearTimeout(startTimer);
+          listeners.forEach((l) => l[0].removeEventListener(l[1], l[2]));
+          listeners.length = 0;
+          if (video) {
+            try { video.pause(); } catch (e) { /* ignore */ }
+            video.removeAttribute("src");
+            try { video.load(); } catch (e) { /* ignore */ }
+          }
+          overlay.remove();
+          if (activePreroll === handle) activePreroll = null;
+          resolve(reason);
+        }
+
+        function fail(err) {
+          if (settled) return;
+          const code = err && err.vastCode ? err.vastCode : 900;
+          console.warn("[pre-roll] No ad played: " + (err && err.message ? err.message : err));
+          const urls = (err && err.errorUrls) || (ad ? ad.errors : []);
+          urls.forEach((u) => firePixel(u, { code: code }));
+          finish("failed");
+        }
+
+        /* ---- Tracking ---- */
+        const REPEATABLE = { mute: 1, unmute: 1 };
+        function track(ev) {
+          if (!ad) return;
+          if (!REPEATABLE[ev]) {
+            if (fired[ev]) return;
+            fired[ev] = true;
+          }
+          (ad.tracking[ev] || []).forEach((u) => firePixel(u, { assetUri: assetUri }));
+        }
+        function fireImpression() {
+          if (fired.impression) return;
+          fired.impression = true;
+          ad.impressions.forEach((u) => firePixel(u, { assetUri: assetUri }));
+        }
+
+        /* ---- UI helpers ---- */
+        function updateTimer() {
+          const d = video.duration, t = video.currentTime;
+          timerEl.textContent = isFinite(d) && d > 0 ? "Ad · " + mmss(d - t) + " left" : "";
+        }
+        function updateSkip() {
+          const so = skipSeconds(ad.skipoffset, video.duration);
+          if (so == null) return;
+          skipBtn.hidden = false;
+          const left = Math.ceil(so - video.currentTime);
+          if (left > 0) {
+            skipBtn.disabled = true;
+            skipBtn.textContent = "Skip in " + left + "s";
+          } else {
+            skipBtn.disabled = false;
+            skipBtn.textContent = "Skip ad";
+          }
+        }
+        function syncUnmute() { unmuteBtn.hidden = !video.muted; }
+        function showPlayPrompt() {
+          spinner.hidden = true;
+          msgText.textContent = "Your browser blocked autoplay. Press play to watch the ad.";
+          playBtn.hidden = false;
+        }
+        function tryPlay(muted) {
+          video.muted = muted;
+          const p = video.play();
+          return p && typeof p.then === "function" ? p : Promise.resolve();
+        }
+
+        /* ---- Buttons ---- */
+        on(skipBtn, "click", () => {
+          if (skipBtn.disabled) return;
+          track("skip");
+          finish("skipped");
+        });
+        on(continueBtn, "click", () => finish("continued"));
+        on(unmuteBtn, "click", () => {
+          if (!video) return;
+          video.muted = false;
+          if (video.volume === 0) video.volume = 1;
+        });
+        on(learnLink, "click", () => {
+          if (ad) ad.clickTracking.forEach((u) => firePixel(u, { assetUri: assetUri }));
+        });
+        on(playBtn, "click", () => {
+          playBtn.hidden = true;
+          spinner.hidden = false;
+          msgText.textContent = "Starting advertisement…";
+          tryPlay(false)
+            .catch(() => (settled ? null : tryPlay(true)))
+            .catch((e) => fail(vastError(405, "Playback was not allowed: " + (e && e.message ? e.message : e))));
+        });
+
+        // Safety valve so nobody is ever locked behind an ad
+        later(() => { continueBtn.hidden = false; }, PREROLL.continueButtonAfterMs);
+
+        /* ---- Start playback once the VAST ad is resolved ---- */
+        function begin(resolved) {
+          ad = resolved;
+          assetUri = ad.media.url;
+
+          video = document.createElement("video");
+          video.className = "preroll-video";
+          video.playsInline = true;
+          video.setAttribute("playsinline", "");
+          video.preload = "auto";
+          video.controls = false;
+          video.disablePictureInPicture = true;
+          video.setAttribute("controlslist", "nodownload noremoteplayback");
+          video.src = ad.media.url;
+          stage.insertBefore(video, msg);
+
+          if (isHttpUrl(ad.clickThrough)) learnLink.href = ad.clickThrough;
+
+          on(video, "playing", () => {
+            if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; }
+            if (started) return;
+            started = true;                       // real playback has begun
+            if (startTimer) { clearTimeout(startTimer); startTimer = null; }
+            msg.hidden = true;
+            lastMuted = video.muted;
+            syncUnmute();
+            if (isHttpUrl(ad.clickThrough)) learnLink.hidden = false;
+            fireImpression();
+            track("creativeView");
+            track("start");
+            updateTimer();
+          });
+
+          on(video, "timeupdate", () => {
+            if (!started) return;
+            if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; }
+            const d = video.duration, t = video.currentTime;
+            updateTimer();
+            if (isFinite(d) && d > 0) {
+              const p = t / d;
+              if (p >= 0.25) track("firstQuartile");
+              if (p >= 0.5) track("midpoint");
+              if (p >= 0.75) track("thirdQuartile");
+            }
+            updateSkip();
+          });
+
+          on(video, "volumechange", () => {
+            if (!started) return;
+            syncUnmute();
+            if (video.muted !== lastMuted) {
+              lastMuted = video.muted;
+              track(video.muted ? "mute" : "unmute");
+            }
+          });
+
+          const onStall = () => {
+            if (settled || !started || stallTimer) return;
+            stallTimer = setTimeout(() => fail(vastError(405, "Ad playback stalled")), PREROLL.stallTimeoutMs);
+          };
+          on(video, "waiting", onStall);
+          on(video, "stalled", onStall);
+
+          on(video, "ended", () => {
+            if (!started) return;
+            track("complete");
+            finish("completed");
+          });
+
+          on(video, "error", () => {
+            fail(vastError(started ? 405 : 401, "The ad video could not be loaded or played"));
+          });
+
+          // The video must actually start within startTimeoutMs, otherwise the game loads
+          startTimer = setTimeout(() => {
+            if (!started) fail(vastError(402, "Timed out waiting for the ad video to start"));
+          }, PREROLL.startTimeoutMs);
+
+          // 1) try with sound, 2) retry muted (unmute button appears), 3) ask the user to press play
+          tryPlay(false).catch((e) => {
+            if (settled) return;
+            if (e && e.name === "NotAllowedError") {
+              return tryPlay(true).catch((e2) => {
+                if (settled) return;
+                if (e2 && e2.name === "NotAllowedError") showPlayPrompt();
+                else fail(vastError(405, "Playback error: " + (e2 && e2.message ? e2.message : e2)));
+              });
+            }
+            fail(vastError(405, "Playback error: " + (e && e.message ? e.message : e)));
+          });
+        }
+
+        /* ---- Request the VAST ad ---- */
+        resolveVast(PREROLL_VAST_URL, 0, newAcc(), Date.now() + PREROLL.resolveTimeoutMs)
+          .then((resolved) => { if (!settled) begin(resolved); })
+          .catch((err) => fail(err));
+      });
+    }
+
+    /* ==========================================================================
+       LOAD THE GAME + UPDATE TITLES
+       loadGame() now: validates the id, sets the titles, plays the pre-roll,
+       and only THEN calls startGameFrame(), the only place the iframe src is set.
+       loadGame() never calls itself.
+       ========================================================================== */
+    function startGameFrame(gameUrl) {
       const frame = document.getElementById("game-frame");
       const directPlayButton = document.getElementById("direct-play-btn");
+
+      // Point the iframe at /games/[game-id]/index.html
+      frame.src = gameUrl;
+      directPlayButton.href = gameUrl;
+      directPlayButton.hidden = false;
+      frame.title = gameTitle;
+    }
+
+    async function loadGame() {
       const heading = document.getElementById("game-title");
       const container = document.getElementById("game-container");
       const titleBlock = document.getElementById("title-block");
@@ -578,16 +1234,25 @@ l.parentNode.insertBefore(s, l);
         return;
       }
 
-      // Point the iframe at /games/[game-id]/index.html
       const gameUrl = "/games/" + encodeURIComponent(gameId) + "/index.html";
-      frame.src = gameUrl;
-      directPlayButton.href = gameUrl;
-      directPlayButton.hidden = false;
-      frame.title = gameTitle;
 
       // textContent (not innerHTML) so the title param can't inject markup
       heading.textContent = gameTitle;
       document.title = gameTitle + " | EduSphere";
+
+      // The newest call wins; an older, still-running pre-roll is cancelled by runPreroll()
+      const token = ++loadToken;
+
+      try {
+        await runPreroll(container);
+      } catch (e) {
+        console.warn("[pre-roll] Unexpected error, loading the game anyway:", e);
+      }
+
+      // A newer loadGame() call replaced this one, or this game was already started
+      if (token !== loadToken || startedToken === token) return;
+      startedToken = token;
+      startGameFrame(gameUrl);
     }
 
     /* ==========================================================================
@@ -675,11 +1340,24 @@ l.parentNode.insertBefore(s, l);
     }
 
     /* ==========================================================================
+       BANNER AD (HilltopAds)
+       The section stays hidden until banner code has been pasted into
+       #hilltop-banner, so visitors never see an empty box.
+       ========================================================================== */
+    function setupBannerAd() {
+      const section = document.getElementById("banner-ad");
+      const slot = document.getElementById("hilltop-banner");
+      if (!section || !slot) return;
+      section.hidden = slot.children.length === 0;
+    }
+
+    /* ==========================================================================
        INIT
        ========================================================================== */
     loadGame();
     renderRecommendations();
     setupFullscreen();
+    setupBannerAd();
   </script>
 
   <!-- Supabase email/password authentication (same project as the hub) -->
@@ -801,6 +1479,8 @@ l.parentNode.insertBefore(s, l);
       }
 
       // Reloads the game so its cloud save is restored for the account that just signed in.
+      // (If the pre-roll is still playing the iframe has no src yet, so this does nothing
+      // and the game simply loads signed in once the ad ends.)
       function reloadGame() {
         const frame = $("game-frame");
         if (frame && frame.getAttribute("src")) frame.src = frame.getAttribute("src");

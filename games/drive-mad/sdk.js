@@ -1,41 +1,23 @@
-// POKI sdk.js (V6.2.1)
+// POKI sdk.js (V6.3.0) -- rewarded ads via HilltopAds VAST, house video fallback
 (() => {
     "use strict";
 
     const CONFIG = {
-        adUnits: {
-            rewarded: '/11,11/Ad.Plus-Rewarded'
-        },
         fallbackVideosUrl: '/scripts/videos/videos.json',
         loadingGifUrl: '/scripts/videos/thumb_anim.gif',
-        adTimeout: 4000, // was 1200ms -- too short for a real GPT auction to ever answer (owner-flagged root cause of 0% real fills), raised 2026-09-13
         minLoadingTime: 100,
-        applixirBridge: {
-            // games.pizzaedition.com is NOT (yet) a separately AppLixir-approved
-            // domain -- only pizzaedition.com is. AppLixir reads the domain it
-            // reports off its OWN frame's window.location, so it has to run in
-            // the parent /embed/<slug>/ page (which IS on pizzaedition.com), not
-            // here. This game-side file is only a postMessage bridge to that
-            // parent -- the other half is
-            // pizzaedition.com/html/jsload/applixir-parent-bridge.js.
-            //
-            // parentOrigins is BOTH the postMessage target and the allowlist for
-            // replies. www.pizzaedition.com 301s to the apex so in practice only
-            // the first entry is ever used; it is listed so a reply from either
-            // is accepted and neither is ever answered with '*'.
-            parentOrigins: ['https://pizzaedition.com', 'https://www.pizzaedition.com'],
-            ackTimeoutMs: 2500,     // parent must ack fast if its listener exists
-            resultTimeoutMs: 90000  // once acked, give a real ad plenty of room to play out
+        vast: {
+            // HilltopAds VAST tag. The server runs an auction per request, so it is
+            // fetched fresh every time an ad is requested (never cached).
+            tagUrl: 'https://unfolded-uncle.com/d/mlF/z.dgGPN/v-ZtGhUe/Ce/my9vutZUUKl/kfPyTMcC1zNKTEkxz/MWDuUPtENGz/UC1jOITIM/wVOjQn',
+            fetchTimeoutMs: 5000,     // time allowed to download the VAST XML
+            startTimeoutMs: 8000,     // time allowed for the video to actually begin playing
+            maxWrapperDepth: 3,
+            // Owner policy carried over from the previous SDK: a genuine skip still
+            // grants the reward. Set to false to require the ad to finish.
+            rewardOnSkip: true
         }
     };
-
-    // AppLixir is a rewarded-video network purpose-built for HTML5 games (approved
-    // 2026-09-13) and is now the PRIMARY rewarded-ad strategy -- see showRewardedAd().
-    // GPT/AdSense (which at the old 1200ms adTimeout effectively never took a
-    // real fill -- see proposals/backlog.md; now 4000ms, see CONFIG.adTimeout)
-    // and the house fallback video are kept as-is, demoted to secondary/tertiary
-    // fallbacks so an AppLixir outage (or a parent frame too old to have the
-    // bridge listener) never regresses to "no ad".
 
     const GA_ID = 'G-ZL2MS6ZDBK';
 
@@ -62,7 +44,6 @@
     let lastIndex = -1;
     let freezeTimer = null;
     let currentVideoElement = null;
-    let gptSlot = null;
     let loadingOverlay = null;
     let loadingStartTime = 0;
 
@@ -86,6 +67,14 @@
                 cursor: pointer;
             }
             .sdk-cta-button:hover { transform: scale(1.04); }
+            .sdk-skip-button {
+                position: absolute; bottom: 28px; right: 16px;
+                padding: 12px 18px; background: rgba(0,0,0,0.7); color: #fff;
+                font-family: sans-serif; font-size: 16px; font-weight: bold;
+                border: 1px solid #fff; border-radius: 6px;
+                z-index: 1000000002; cursor: default;
+            }
+            .sdk-skip-button.ready { cursor: pointer; background: #fff; color: #000; }
             .sdk-pause-container {
                 display: none;
                 position: absolute;
@@ -139,24 +128,6 @@
         style.id = 'sdk-v6-styles';
         style.textContent = css;
         document.head.appendChild(style);
-    }
-
-    function initGPT() {
-        window.googletag = window.googletag || { cmd: [] };
-
-        if (!document.querySelector('script[src*="gpt.js"]')) {
-            const script = document.createElement('script');
-            script.src = 'https://securepubads.g.doubleclick.net/tag/js/gpt.js';
-            script.async = true;
-            script.crossOrigin = 'anonymous';
-            document.head.appendChild(script);
-        }
-
-        window.googletag.cmd.push(() => {
-            window.googletag.pubads().enableSingleRequest();
-            window.googletag.enableServices();
-            console.log('[PokiSDK] GPT Core Initialized');
-        });
     }
 
     function showLoadingIndicator() {
@@ -304,241 +275,326 @@
         });
     }
 
-    // --- AppLixir (primary rewarded-ad strategy, 2026-09-13) -------------------
-    // This game runs on games.pizzaedition.com, which is NOT itself an
-    // AppLixir-approved domain (only pizzaedition.com is, and getting a second
-    // domain approved is a manual 1-2 business day review). So instead of loading
-    // the AppLixir SDK and calling initializeAndOpenPlayer() here, this posts a
-    // request up to the parent /embed/<slug>/ page -- same-origin as
-    // pizzaedition.com, already approved -- which does the actual AppLixir call
-    // and posts the outcome back. Same cross-frame shape the stub already uses
-    // for pokiMessageShowLeaderboard / pokiMessageOpenExternalLink below.
-    let applixirBridgeListenerInstalled = false;
-    let applixirRequestSeq = 0;
-    const applixirPendingRequests = new Map();
+    // --- VAST (HilltopAds) -----------------------------------------------------
 
-    // The parent frame is always the /embed/<slug>/ wrapper, so document.referrer
-    // is that page. It is used ONLY to choose between the two known-good entries
-    // in parentOrigins, never to widen them: an unknown referrer falls back to
-    // the apex rather than being trusted.
-    function applixirParentOrigin() {
+    function firePixel(url, errorCode) {
+        if (!url) return;
         try {
-            const ref = document.referrer;
-            if (ref) {
-                const origin = new URL(ref).origin;
-                if (CONFIG.applixirBridge.parentOrigins.indexOf(origin) !== -1) return origin;
-            }
+            const u = String(url)
+                .replace(/\[ERRORCODE\]/g, String(errorCode == null ? 900 : errorCode))
+                .replace(/\[TIMESTAMP\]/g, encodeURIComponent(new Date().toISOString()))
+                .replace(/\[CACHEBUSTING\]/g, String(Math.floor(Math.random() * 1e8)));
+            new Image().src = u;
         } catch (e) {}
-        return CONFIG.applixirBridge.parentOrigins[0];
     }
 
-    function installApplixirBridgeListener() {
-        if (applixirBridgeListenerInstalled) return;
-        applixirBridgeListenerInstalled = true;
-        window.addEventListener('message', (event) => {
-            // A forged "success" here is a free reward with no ad ever shown, so
-            // the sender is verified before anything else: it must be the exact
-            // parent frame AND an approved pizzaedition.com origin. Any other
-            // frame that can reach this window (an ad iframe, an injected frame,
-            // another tab's opener) is ignored outright.
-            if (event.source !== window.parent) return;
-            if (CONFIG.applixirBridge.parentOrigins.indexOf(event.origin) === -1) return;
-            const data = event.data;
-            if (!data || typeof data !== 'object') return;
-            if (typeof data.requestId !== 'string') return;
-            const req = applixirPendingRequests.get(data.requestId);
-            if (!req) return;
-            if (data.type === 'pokiMessageRewardedAdAck') {
-                req.onAck();
-            } else if (data.type === 'pokiMessageRewardedAdResult') {
-                if (data.success === true) req.resolve();
-                else req.reject(new Error('applixir_bridge_' + (typeof data.reason === 'string' ? data.reason.slice(0, 40) : 'failed')));
+    function fireAll(list, errorCode) {
+        (list || []).forEach((u) => firePixel(u, errorCode));
+    }
+
+    async function fetchText(url) {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), CONFIG.vast.fetchTimeoutMs);
+        try {
+            const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal, credentials: 'omit' });
+            if (!res.ok) throw new Error('vast_http_' + res.status);
+            return await res.text();
+        } catch (e) {
+            if (e && e.name === 'AbortError') throw new Error('vast_fetch_timeout');
+            throw e;
+        } finally {
+            clearTimeout(t);
+        }
+    }
+
+    function nodeText(node) {
+        return node && node.textContent ? node.textContent.trim() : '';
+    }
+
+    function texts(root, tag) {
+        return Array.prototype.map.call(root.getElementsByTagName(tag), nodeText).filter(Boolean);
+    }
+
+    function parseOffset(str, durationSec) {
+        if (!str) return null;
+        const pct = /^(\d+(?:\.\d+)?)%$/.exec(str);
+        if (pct) return durationSec ? (parseFloat(pct[1]) / 100) * durationSec : null;
+        const m = /^(\d+):(\d+):(\d+(?:\.\d+)?)$/.exec(str);
+        if (m) return (+m[1]) * 3600 + (+m[2]) * 60 + parseFloat(m[3]);
+        return null;
+    }
+
+    // Walks the VAST (following Wrapper redirects) and returns the first playable inline ad.
+    async function resolveVast(xmlText, depth, acc) {
+        const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+        if (doc.getElementsByTagName('parsererror').length) throw new Error('vast_parse_error');
+
+        const topErrors = Array.prototype.filter.call(doc.documentElement.children, (n) => n.tagName === 'Error').map(nodeText);
+        acc.errors = acc.errors.concat(topErrors);
+
+        const ads = doc.getElementsByTagName('Ad');
+        if (!ads.length) throw new Error('vast_no_ads');
+
+        for (let i = 0; i < ads.length; i++) {
+            const ad = ads[i];
+            const wrapper = ad.getElementsByTagName('Wrapper')[0];
+            const inline = ad.getElementsByTagName('InLine')[0];
+            const body = inline || wrapper;
+            if (!body) continue;
+
+            const local = {
+                impressions: texts(body, 'Impression'),
+                errors: texts(body, 'Error'),
+                tracking: {},
+                clickTracking: texts(body, 'ClickTracking')
+            };
+            Array.prototype.forEach.call(body.getElementsByTagName('Tracking'), (t) => {
+                const ev = t.getAttribute('event');
+                const u = nodeText(t);
+                if (ev && u) (local.tracking[ev] = local.tracking[ev] || []).push(u);
+            });
+
+            acc.impressions = acc.impressions.concat(local.impressions);
+            acc.errors = acc.errors.concat(local.errors);
+            acc.clickTracking = acc.clickTracking.concat(local.clickTracking);
+            Object.keys(local.tracking).forEach((ev) => {
+                acc.tracking[ev] = (acc.tracking[ev] || []).concat(local.tracking[ev]);
+            });
+
+            if (inline) {
+                const linear = inline.getElementsByTagName('Linear')[0];
+                if (!linear) continue;
+                const media = Array.prototype.map.call(linear.getElementsByTagName('MediaFile'), (m) => ({
+                    url: nodeText(m),
+                    type: (m.getAttribute('type') || '').toLowerCase(),
+                    width: parseInt(m.getAttribute('width'), 10) || 0
+                })).filter((m) => m.url);
+
+                const probe = document.createElement('video');
+                const playable = media.filter((m) => !m.type || probe.canPlayType(m.type));
+                const pool = playable.length ? playable : media;
+                if (!pool.length) continue;
+
+                // prefer mp4 (h264 plays everywhere), then the largest size that fits the screen
+                const maxW = Math.max(640, Math.min(window.innerWidth || 854, 1280));
+                pool.sort((a, b) => {
+                    const am = a.type.indexOf('mp4') !== -1 ? 0 : 1;
+                    const bm = b.type.indexOf('mp4') !== -1 ? 0 : 1;
+                    if (am !== bm) return am - bm;
+                    const af = a.width <= maxW ? 0 : 1;
+                    const bf = b.width <= maxW ? 0 : 1;
+                    if (af !== bf) return af - bf;
+                    return af === 0 ? b.width - a.width : a.width - b.width;
+                });
+
+                const durationSec = parseOffset(nodeText(linear.getElementsByTagName('Duration')[0]), 0);
+                const clickNode = linear.getElementsByTagName('ClickThrough')[0];
+                return {
+                    mediaUrl: pool[0].url,
+                    clickThrough: nodeText(clickNode),
+                    skipOffsetSec: parseOffset(linear.getAttribute('skipoffset'), durationSec),
+                    impressions: acc.impressions,
+                    errors: acc.errors,
+                    tracking: acc.tracking,
+                    clickTracking: acc.clickTracking
+                };
             }
-        });
+
+            if (wrapper) {
+                const next = nodeText(wrapper.getElementsByTagName('VASTAdTagURI')[0]);
+                if (next && depth < CONFIG.vast.maxWrapperDepth) {
+                    return resolveVast(await fetchText(next), depth + 1, acc);
+                }
+            }
+        }
+        throw new Error('vast_no_playable_media');
     }
 
-    function showApplixirRewardedAd() {
+    async function loadVastAd() {
+        const xml = await fetchText(CONFIG.vast.tagUrl);
+        const acc = { impressions: [], errors: [], tracking: {}, clickTracking: [] };
+        try {
+            return await resolveVast(xml, 0, acc);
+        } catch (e) {
+            fireAll(acc.errors, e && e.message === 'vast_no_ads' ? 303 : 900);
+            throw e;
+        }
+    }
+
+    // Resolves { skipped: boolean } when the ad finishes or is skipped; rejects if it never plays.
+    function playVastAd(ad) {
         return new Promise((resolve, reject) => {
-            if (window.parent === window) {
-                // not embedded inside the pizzaedition.com /embed/ wrapper -- no
-                // bridge target exists (e.g. a direct/dev load of the game itself)
-                return reject(new Error('applixir_no_parent_frame'));
-            }
-            installApplixirBridgeListener();
+            if (freezeTimer) { clearTimeout(freezeTimer); freezeTimer = null; }
 
-            const requestId = 'ax_' + Date.now() + '_' + (++applixirRequestSeq);
-            let settled = false;
-            let ackTimer = null;
-            let resultTimer = null;
+            const overlay = document.createElement('div');
+            overlay.className = 'sdk-video-overlay';
 
-            const finish = (ok, err) => {
-                if (settled) return;
-                settled = true;
-                clearTimeout(ackTimer);
-                clearTimeout(resultTimer);
-                applixirPendingRequests.delete(requestId);
-                if (ok) {
-                    console.log('[PokiSDK] AppLixir (bridge): complete');
-                    trackAdEvent('ad_watched', { ad_source: 'applixir', ad_type: 'rewarded' });
-                    resolve();
-                } else {
-                    const reason = (err && err.message) || 'applixir_bridge_failed';
-                    console.warn('[PokiSDK] AppLixir (bridge) failed:', reason);
-                    // Counterpart to the ad_watched above: without this the only
-                    // measurable AppLixir outcome is success, and a 0% fill rate
-                    // would look identical to nobody ever asking for an ad.
-                    trackAdEvent('ad_failed', { ad_source: 'applixir', ad_type: 'rewarded', reason: String(reason).slice(0, 60) });
-                    reject(err || new Error('applixir_bridge_failed'));
+            const video = document.createElement('video');
+            video.src = ad.mediaUrl;
+            video.autoplay = true;
+            video.playsInline = true;
+            video.setAttribute('playsinline', '');
+            video.preload = 'auto';
+            video.style.cssText = 'width:100%; height:100%; object-fit:contain; cursor:pointer;';
+            currentVideoElement = video;
+
+            const pauseLayer = document.createElement('div');
+            pauseLayer.className = 'sdk-pause-container';
+            pauseLayer.innerHTML = '<div class="sdk-play-icon"></div><div class="sdk-play-icon sdk-pulse"></div>';
+
+            const pb = document.createElement('div');
+            pb.className = 'sdk-progress-bar';
+            const pbi = document.createElement('div');
+            pbi.className = 'sdk-progress-inner';
+            pb.appendChild(pbi);
+
+            overlay.appendChild(video);
+            overlay.appendChild(pauseLayer);
+
+            const hasClick = !!ad.clickThrough;
+            const openClick = (e) => {
+                if (e) e.stopPropagation();
+                if (!hasClick) return;
+                fireAll(ad.clickTracking);
+                try { window.open(ad.clickThrough, '_blank', 'noopener'); } catch (err) {}
+                if (!video.paused) {
+                    video.pause();
+                    pauseLayer.style.display = 'block';
                 }
             };
 
-            applixirPendingRequests.set(requestId, {
-                resolve: () => finish(true),
-                reject: (e) => finish(false, e),
-                onAck: () => {
-                    // parent has the listener and is loading/showing the real ad now --
-                    // stop racing the short ack window, wait out the real ad instead.
-                    if (settled || resultTimer) return; // a duplicate ack must not leak a timer
-                    clearTimeout(ackTimer);
-                    resultTimer = setTimeout(
-                        () => finish(false, new Error('applixir_bridge_result_timeout')),
-                        CONFIG.applixirBridge.resultTimeoutMs
-                    );
+            if (hasClick) {
+                const cta = document.createElement('div');
+                cta.className = 'sdk-cta-button';
+                cta.textContent = 'Learn More';
+                cta.onclick = openClick;
+                overlay.appendChild(cta);
+            }
+
+            let skipBtn = null;
+            if (ad.skipOffsetSec != null) {
+                skipBtn = document.createElement('div');
+                skipBtn.className = 'sdk-skip-button';
+                overlay.appendChild(skipBtn);
+            }
+
+            document.body.appendChild(overlay);
+            document.body.appendChild(pb);
+
+            video.onclick = (e) => {
+                if (hasClick) return openClick(e);
+                e.stopPropagation();
+                video.pause();
+                pauseLayer.style.display = 'block';
+            };
+            pauseLayer.onclick = (e) => {
+                e.stopPropagation();
+                video.play().catch(() => {});
+                pauseLayer.style.display = 'none';
+            };
+
+            let settled = false;
+            let started = false;
+            const fired = {};
+            let startTimer = null;
+            let guardTimer = null;
+
+            const fireOnce = (ev) => {
+                if (fired[ev]) return;
+                fired[ev] = true;
+                fireAll(ad.tracking[ev]);
+            };
+
+            const finish = (err, skipped) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(startTimer);
+                clearTimeout(guardTimer);
+                try { video.pause(); } catch (e) {}
+                if (overlay.parentNode) overlay.remove();
+                if (pb.parentNode) pb.remove();
+                currentVideoElement = null;
+                if (err) reject(err);
+                else resolve({ skipped: !!skipped });
+            };
+
+            const fail = (msg, code) => {
+                if (settled) return;
+                fireAll(ad.errors, code || 405);
+                finish(new Error(msg));
+            };
+
+            // the ad never started: let the caller fall through to the house video
+            startTimer = setTimeout(() => {
+                if (!started) fail('vast_start_timeout', 402);
+            }, CONFIG.vast.startTimeoutMs);
+
+            video.addEventListener('playing', () => {
+                if (started) return;
+                started = true;
+                clearTimeout(startTimer);
+                hideLoadingIndicator();
+                fireAll(ad.impressions);
+                fireOnce('creativeView');
+                fireOnce('start');
+                const d = video.duration;
+                guardTimer = setTimeout(() => finish(null, false), ((isFinite(d) && d > 0 ? d : 60) + 20) * 1000);
+            });
+
+            video.addEventListener('timeupdate', () => {
+                const d = video.duration, t = video.currentTime;
+                if (!d || !isFinite(d)) return;
+                pbi.style.width = (t / d) * 100 + '%';
+                if (t >= d * 0.25) fireOnce('firstQuartile');
+                if (t >= d * 0.5) fireOnce('midpoint');
+                if (t >= d * 0.75) fireOnce('thirdQuartile');
+                if (skipBtn) {
+                    const remain = Math.ceil(ad.skipOffsetSec - t);
+                    if (remain > 0) {
+                        skipBtn.textContent = 'Skip in ' + remain;
+                    } else if (!skipBtn.classList.contains('ready')) {
+                        skipBtn.classList.add('ready');
+                        skipBtn.textContent = 'Skip \u25B6';
+                        skipBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            fireOnce('skip');
+                            finish(null, true);
+                        };
+                    }
                 }
             });
 
-            // If the parent page is an old cached copy without this listener yet
-            // (see the experiment.js ?v= cache-busting notes for why that happens
-            // on this site), no ack ever arrives -- fail fast into the GPT/house
-            // fallback chain instead of hanging the visitor.
-            ackTimer = setTimeout(
-                () => finish(false, new Error('applixir_bridge_no_ack')),
-                CONFIG.applixirBridge.ackTimeoutMs
-            );
+            video.addEventListener('pause', () => { if (started && !video.ended) fireOnce('pause'); });
+            video.addEventListener('ended', () => {
+                fireOnce('complete');
+                finish(null, false);
+            });
+            video.addEventListener('error', () => fail('vast_media_error', 405));
 
-            try {
-                window.parent.postMessage(
-                    { type: 'pokiMessageShowRewardedAd', requestId },
-                    applixirParentOrigin()
-                );
-            } catch (e) {
-                finish(false, e);
-            }
+            // try with sound first (we are normally inside a user gesture); fall back to muted autoplay
+            const tryPlay = () => {
+                let p;
+                try { p = video.play(); } catch (e) { p = Promise.reject(e); }
+                if (p && typeof p.catch === 'function') {
+                    p.catch(() => {
+                        if (video.muted) return fail('vast_play_blocked', 400);
+                        video.muted = true;
+                        let p2;
+                        try { p2 = video.play(); } catch (e) { p2 = Promise.reject(e); }
+                        if (p2 && typeof p2.catch === 'function') p2.catch(() => fail('vast_play_blocked', 400));
+                    });
+                }
+            };
+            // tap anywhere to unmute if we had to start muted
+            overlay.addEventListener('click', () => { try { if (video.muted) video.muted = false; } catch (e) {} });
+            tryPlay();
         });
     }
 
-    function showGPTRewardedAd() {
-        return new Promise((resolve, reject) => {
-            let adStarted = false;
-            let settled = false;
-            let timeoutId = null;
-            let listeners = [];
-
-            const cleanup = () => {
-                clearTimeout(timeoutId);
-                timeoutId = null;
-                try {
-                    listeners.forEach(l => window.googletag.pubads().removeEventListener(l.name, l.fn));
-                } catch (e) {}
-                listeners = [];
-                try {
-                    if (gptSlot) {
-                        window.googletag.destroySlots([gptSlot]);
-                        gptSlot = null;
-                    }
-                } catch (e) { gptSlot = null; }
-            };
-            const fail = (msg) => {
-                if (settled) return;
-                settled = true;
-                cleanup();
-                reject(new Error(msg));
-            };
-            const done = () => {
-                if (settled) return;
-                settled = true;
-                cleanup();
-                resolve();
-            };
-
-            // ARMED BEFORE cmd.push, deliberately. googletag.cmd is a plain array
-            // until gpt.js actually loads and replaces it, so if gpt.js never
-            // arrives -- a school content filter or ad blocker eating
-            // securepubads.g.doubleclick.net, which is the common case on this
-            // site's core audience -- the callback below NEVER RUNS. With the
-            // timer armed inside it (as it was until 2026-09-13) nothing ever
-            // settled this promise, the await in showRewardedAd() hung forever,
-            // and the visitor was left on a frozen game with a spinner and no
-            // house video. Same story if anything inside the callback throws:
-            // GPT's own cmd runner swallows it. This timer is the only thing
-            // guaranteeing the chain can always reach playFallbackVideo().
-            timeoutId = setTimeout(() => {
-                if (adStarted) return; // a real ad is on screen; let it play out
-                console.warn('[PokiSDK] GPT: Timeout');
-                fail('timeout');
-            }, CONFIG.adTimeout);
-
-            const run = () => {
-                try {
-                    gptSlot = window.googletag.defineOutOfPageSlot(
-                        CONFIG.adUnits.rewarded,
-                        window.googletag.enums.OutOfPageFormat.REWARDED
-                    );
-
-                    if (!gptSlot) return fail('no_slot');
-                    gptSlot.addService(window.googletag.pubads());
-
-                    const addL = (name, fn) => {
-                        window.googletag.pubads().addEventListener(name, fn);
-                        listeners.push({ name, fn });
-                    };
-
-                    addL('slotRenderEnded', (event) => {
-                        if (event.slot === gptSlot && event.isEmpty) {
-                            console.log('[PokiSDK] GPT: No fill');
-                            fail('no_fill');
-                        }
-                    });
-
-                    addL('rewardedSlotReady', (event) => {
-                        if (event.slot === gptSlot) {
-                            console.log('[PokiSDK] GPT: Ad ready');
-                            adStarted = true;
-                            clearTimeout(timeoutId);
-                            timeoutId = null;
-                            hideLoadingIndicator().then(() => {
-                                try { event.makeRewardedVisible(); } catch (e) { fail('make_visible_failed'); }
-                            });
-                        }
-                    });
-
-                    addL('rewardedSlotClosed', (event) => {
-                        if (event.slot === gptSlot) {
-                            console.log('[PokiSDK] GPT: Ad closed');
-                            done();
-                        }
-                    });
-
-                    addL('rewardedSlotGranted', (event) => {
-                        if (event.slot === gptSlot) {
-                            console.log('[PokiSDK] GPT: Reward granted 🎁');
-                            trackAdEvent('ad_watched', { ad_source: 'gpt' });
-                        }
-                    });
-
-                    window.googletag.display(gptSlot);
-                } catch (e) {
-                    console.warn('[PokiSDK] GPT: threw', e && e.message);
-                    fail('gpt_threw');
-                }
-            };
-
-            try {
-                window.googletag.cmd.push(run);
-            } catch (e) {
-                fail('gpt_unavailable');
-            }
-        });
+    async function showVastRewardedAd() {
+        const ad = await loadVastAd();
+        const result = await playVastAd(ad);
+        return result;
     }
 
     // --- restore keyboard/game focus after an ad (overlay steals activeElement) ---
@@ -658,80 +714,38 @@
         freezeGame();
         showLoadingIndicator();
 
-        // Fallback chain: AppLixir (primary) -> GPT/AdSense (secondary) -> house
-        // fallback video (last resort, always "completes" -- see playFallbackVideo).
-        // Reward is granted only for a genuine completion of one of these three,
-        // never unconditionally -- a TECHNICALLY-failed AppLixir attempt (no
-        // fill, SDK blocked, init error, timeout -- none of it the visitor's
-        // doing) falls through to GPT instead of leaving them with nothing.
-        //
-        // REWARD ON SKIP (owner, 2026-09-21): a genuine skip now STILL grants the reward.
-        //
-        // THIS DECISION HAS FLIPPED TWICE -- read before "fixing" it back. It was built as
-        // reward-on-skip once, the owner chose "genuine skip = no reward" on 2026-09-14, and he
-        // reversed it again on 2026-09-21. The current instruction is: always reward.
-        //
-        // We still DISTINGUISH a skip from a completion: the parent bridge keeps reporting the
-        // truth (only status.type === "complete" sets rewarded), and the skip is tracked as its own
-        // GA4 event (ad_skipped_rewarded) so the skip/completion ratio stays measurable. Nothing
-        // here tells AppLixir an ad completed when it did not.
-        //
-        // A skip does NOT fall through to the rest of the ad chain: the visitor already chose to
-        // bail, so showing them another ad and then rewarding them anyway is worse for everyone.
-        // AppLixir's own integration guidance is "grant the reward only when status.type ===
-        // complete", so this is a deliberate departure -- see the note in CLAUDE.md about the
-        // completion-rate/eCPM risk.
-        const USER_SKIP_REASONS = ['skip', 'skipped', 'userClose', 'manuallyEnded', 'adSkippedNoReward'];
-        function isUserSkip(err) {
-            const msg = (err && err.message) || '';
-            // reason arrives as "applixir_bridge_<reason>" -- see finish() in
-            // the game-side bridge below.
-            return USER_SKIP_REASONS.some((r) => msg === 'applixir_bridge_' + r);
-        }
-
+        // Chain: HilltopAds VAST (primary) -> house fallback video (last resort).
+        // A skip still grants the reward when CONFIG.vast.rewardOnSkip is true, and is
+        // tracked separately so the skip/completion ratio stays measurable.
         let rewardGranted = false;
 
         try {
-            console.log('[PokiSDK] Strategy: AppLixir');
-            await showApplixirRewardedAd();
-            console.log('[PokiSDK] ✅ AppLixir ad completed');
-            rewardGranted = true;
+            console.log('[PokiSDK] Strategy: HilltopAds VAST');
+            const result = await showVastRewardedAd();
+            if (result.skipped) {
+                trackAdEvent('ad_skipped' + (CONFIG.vast.rewardOnSkip ? '_rewarded' : ''), { ad_source: 'hilltopads', ad_type: 'rewarded' });
+                rewardGranted = !!CONFIG.vast.rewardOnSkip;
+            } else {
+                console.log('[PokiSDK] \u2705 VAST ad completed');
+                trackAdEvent('ad_watched', { ad_source: 'hilltopads', ad_type: 'rewarded' });
+                rewardGranted = true;
+            }
             await hideLoadingIndicator();
             unfreezeGame();
-        } catch (applixirError) {
-            if (isUserSkip(applixirError)) {
-                console.log('[PokiSDK] AppLixir ad skipped by the visitor -- rewarding anyway (owner policy 2026-09-21):', applixirError.message);
-                trackAdEvent('ad_skipped_rewarded', { ad_source: 'applixir', ad_type: 'rewarded' });
-                await hideLoadingIndicator();
-                unfreezeGame();
-                isAdActive = false;
-                return true;
-            }
-            console.warn('[PokiSDK] AppLixir failed (not a skip), falling back to GPT:', applixirError.message);
+        } catch (vastError) {
+            const reason = (vastError && vastError.message) || 'vast_failed';
+            console.warn('[PokiSDK] VAST failed, using fallback video:', reason);
+            trackAdEvent('ad_failed', { ad_source: 'hilltopads', ad_type: 'rewarded', reason: String(reason).slice(0, 60) });
             await hideLoadingIndicator();
-            showLoadingIndicator();
-            try {
-                console.log('[PokiSDK] Strategy: Direct GPT');
-                await showGPTRewardedAd();
-                console.log('[PokiSDK] ✅ GPT ad completed');
-                rewardGranted = true;
-                await hideLoadingIndicator();
-                unfreezeGame();
-            } catch (gptError) {
-                console.warn('[PokiSDK] GPT failed, using fallback:', gptError.message);
-                await hideLoadingIndicator();
-                await playFallbackVideo();
-                // preserves pre-existing behavior: the house fallback video always
-                // counts as a completed watch, since it has no network fill signal.
-                rewardGranted = true;
-            }
+            await playFallbackVideo();
+            // the house fallback video always counts as a completed watch (no fill signal)
+            rewardGranted = true;
         } finally {
             isAdActive = false;
             unfreezeGame();
         }
 
         console.log('[PokiSDK] Rewarding user:', rewardGranted);
-
         return rewardGranted;
     }
 
@@ -853,15 +867,9 @@
         settle(PokiSDK.login(), () => bridgeSend('loginResolved'), () => bridgeSend('loginRejected'));
     };
 
-    // Some Unity/PokiSDK plugin builds call this from their JS bridge (e.g.
-    // _JS_PokiSDK_redirect, _JS_PokiSDK_destroyAd) to stringify whatever value
-    // they're about to hand to a PokiSDK method -- it was never defined in this
-    // stub, so any game whose build calls it threw an uncaught TypeError before
-    // it could do anything else (found via Kiwi Clicker, 2026-09-08). Every
-    // PokiSDK method it feeds into here is itself a no-op (see e.g. customEvent
-    // above), so exact fidelity to Poki's real implementation doesn't matter --
-    // this only needs to turn whatever it's given into a string without
-    // throwing, so execution can continue past this call.
+    // Some Unity/PokiSDK plugin builds call this from their JS bridge to stringify
+    // whatever value they're about to hand to a PokiSDK method. It only needs to turn
+    // its input into a string without throwing.
     window.properUnityStringify = function (v) {
         try {
             if (v == null) return '';
@@ -871,8 +879,6 @@
 
     injectStyles();
     loadFallbackList();
-    initGPT();
 
-    console.log("%c PokiSDK V6.2.1 Ready ", "background: #222; color: #fbff00; padding: 5px; border-radius: 3px;");
+    console.log("%c PokiSDK V6.3.0 Ready ", "background: #222; color: #fbff00; padding: 5px; border-radius: 3px;");
 })();
-
