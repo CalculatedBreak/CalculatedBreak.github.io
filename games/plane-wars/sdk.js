@@ -39,7 +39,7 @@
 
   // Load the core implementation from the same folder (relative path only).
   var s = document.createElement("script");
-  s.src = "/poki-sdk-core.js";
+  s.src = "poki-sdk-core.js";
   s.async = false;
   document.head.appendChild(s);
 })();
