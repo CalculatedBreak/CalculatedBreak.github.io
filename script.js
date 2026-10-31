@@ -129,7 +129,7 @@ const GAME_MODULES = [
   { href: "games/fancade",           img: "/images/fancade.jpg",                                                   title: "Fancade",            cat: "puzzle"        },
   { href: "games/escape-road-3",           img: "/images/escape-road-3.png",                                                   title: "Escape Road 3",            cat: "action"        },
   { href: "/reel-league/ndex.html",           img: "/images/reel-league.avif",                                                   title: "Reel League",            cat: "sports"        },
-
+  { href: "/minecraft-mods/index.html",           img: "/images/arnav.jpg",                                                   title: "movies",            cat: "movie"        },
 ]
 
 /* =============================================================================
