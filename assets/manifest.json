@@ -1,5 +1,5 @@
 {
-  "$comment": "Visual models only; gameplay never depends on meshes. Files are relative to publicassets/. Set an assignment to null (or remove it) to restore the built-in placeholder. rotationOffset = Euler XYZ degrees that turns the model to face +X with +Y up (glTF convention). Cars are auto-fitted to the hitbox length unless 'scale' is given.",
+  "$comment": "Visual models only; gameplay never depends on meshes. Files are relative to public/assets/. Set an assignment to null (or remove it) to restore the built-in placeholder. rotationOffset = Euler XYZ degrees that turns the model to face +X with +Y up (glTF convention). Cars are auto-fitted to the hitbox length unless 'scale' is given.",
   "version": 1,
   "models": [
     {

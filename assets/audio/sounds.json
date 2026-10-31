@@ -1,5 +1,5 @@
 {
-  "$comment": "Generated from tools/rl-audio-map.json by scripts/import-rl-audio.mjs (or the Sound Lab). Paths are relative to publicassets/audio/. Each slot has layers (played together; several files in a layer = random variants, minStrength/maxStrength gate layers by impact strength) and optional \"others\" files used for other cars (mono/3D versions).",
+  "$comment": "Generated from tools/rl-audio-map.json by scripts/import-rl-audio.mjs (or the Sound Lab). Paths are relative to public/assets/audio/. Each slot has layers (played together; several files in a layer = random variants, minStrength/maxStrength gate layers by impact strength) and optional \"others\" files used for other cars (mono/3D versions).",
   "boostStart": {
     "layers": [
       {
@@ -583,6 +583,208 @@
           "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0031.ogg"
         ],
         "volume": 0.45
+      }
+    ]
+  },
+  "crowdDemo": {
+    "layers": [
+      {
+        "files": [
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0071.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0093.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0112.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0116.ogg"
+        ],
+        "volume": 0.45
+      },
+      {
+        "files": [
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0018.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0129.ogg"
+        ],
+        "volume": 0.5,
+        "minStrength": 0.8
+      }
+    ]
+  },
+  "crowdNearMiss": {
+    "layers": [
+      {
+        "files": [
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0060.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0146.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0033.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0151.ogg"
+        ],
+        "volume": 0.9
+      }
+    ]
+  },
+  "crowdSave": {
+    "layers": [
+      {
+        "files": [
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0035.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0065.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0097.ogg",
+          "rl/Crowds/SFX_BG_Crowd/SFX_BG_Crowd_0101.ogg"
+        ],
+        "volume": 0.5
+      }
+    ]
+  },
+  "ambBeachWaves": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Beach_Day/SFX_AMB_Beach_Day_0006.ogg",
+          "rl/Ambiance/SFX_AMB_Beach_Day/SFX_AMB_Beach_Day_0007.ogg",
+          "rl/Ambiance/SFX_AMB_Beach_Day/SFX_AMB_Beach_Day_0024.ogg"
+        ],
+        "volume": 2
+      }
+    ]
+  },
+  "ambBeachGulls": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Beach_Common/SFX_AMB_Beach_Common_0001.ogg",
+          "rl/Ambiance/SFX_AMB_Beach_Common/SFX_AMB_Beach_Common_0002.ogg",
+          "rl/Ambiance/SFX_AMB_Beach_Common/SFX_AMB_Beach_Common_0017.ogg"
+        ],
+        "volume": 0.25
+      }
+    ]
+  },
+  "ambBeachNight": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Beach_Night/SFX_AMB_Beach_Night_0021.ogg"
+        ],
+        "volume": 2
+      }
+    ]
+  },
+  "ambParkBreeze": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Park/SFX_AMB_Park_0050.ogg"
+        ],
+        "volume": 2
+      }
+    ]
+  },
+  "ambParkBirds": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Park/SFX_AMB_Park_0014.ogg",
+          "rl/Ambiance/SFX_AMB_Park/SFX_AMB_Park_0015.ogg",
+          "rl/Ambiance/SFX_AMB_Park/SFX_AMB_Park_0022.ogg",
+          "rl/Ambiance/SFX_AMB_Park/SFX_AMB_Park_0033.ogg"
+        ],
+        "volume": 1.2
+      }
+    ]
+  },
+  "ambCrickets": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Farm_Night/SFX_AMB_Farm_Night_0001.ogg",
+          "rl/Ambiance/SFX_AMB_Farm_Night/SFX_AMB_Farm_Night_0011.ogg",
+          "rl/Ambiance/SFX_AMB_Farm_Night/SFX_AMB_Farm_Night_0014.ogg"
+        ],
+        "volume": 1
+      }
+    ]
+  },
+  "ambCityTraffic": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Street/SFX_AMB_Street_0002.ogg"
+        ],
+        "volume": 2
+      }
+    ]
+  },
+  "ambCityHorns": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Street/SFX_AMB_Street_0003.ogg"
+        ],
+        "volume": 0.3
+      }
+    ]
+  },
+  "ambWater": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_CHN/SFX_AMB_CHN_0031.ogg"
+        ],
+        "volume": 1
+      }
+    ]
+  },
+  "ambTempleBirds": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_CHN/SFX_AMB_CHN_0007.ogg",
+          "rl/Ambiance/SFX_AMB_CHN/SFX_AMB_CHN_0046.ogg",
+          "rl/Ambiance/SFX_AMB_CHN/SFX_AMB_CHN_0029.ogg",
+          "rl/Ambiance/SFX_AMB_CHN/SFX_AMB_CHN_0016.ogg",
+          "rl/Ambiance/SFX_AMB_CHN/SFX_AMB_CHN_0002.ogg"
+        ],
+        "volume": 1.6
+      }
+    ]
+  },
+  "ambCanyonWind": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Winter/SFX_AMB_Winter_0002.ogg"
+        ],
+        "volume": 1.8
+      }
+    ]
+  },
+  "ambCanyonGusts": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Winter/SFX_AMB_Winter_0004.ogg",
+          "rl/Ambiance/SFX_AMB_Winter/SFX_AMB_Winter_0008.ogg",
+          "rl/Ambiance/SFX_AMB_Wasteland/SFX_AMB_Wasteland_0022.ogg"
+        ],
+        "volume": 2
+      }
+    ]
+  },
+  "ambCanyonHawk": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Outlaw/SFX_AMB_Outlaw_0003.ogg"
+        ],
+        "volume": 1
+      }
+    ]
+  },
+  "ambUtopiaHum": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_AMB_Utopia_Lux/SFX_AMB_Utopia_Lux_0003.ogg"
+        ],
+        "volume": 0.6
       }
     ]
   },
