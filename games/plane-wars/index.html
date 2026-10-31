@@ -11,14 +11,14 @@
         <title>Plane Wars</title>
         <!-- Inline SVG data URI rather than an .ico: it is a roundel, which is four
          circles, so the whole icon is smaller than the request that would fetch
-         it — and it costs no round trip on the critical path. Scales cleanly to
+         it â€” and it costs no round trip on the critical path. Scales cleanly to
          whatever size the tab, the bookmark bar or an installed icon asks for. -->
         <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1c2c'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%237dffb2'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='%230b1c2c'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ff5a5a'/%3E%3C/svg%3E"/>
         <!-- Shared links resolved to a blank card before this. Nothing here runs. -->
-        <meta name="description" content="A mobile-first low-poly 3D dogfighting game. Fly a fighter over a 12 km theatre against a squadron of named pilots — no menus, no throttle, hold to fire."/>
+        <meta name="description" content="A mobile-first low-poly 3D dogfighting game. Fly a fighter over a 12 km theatre against a squadron of named pilots â€” no menus, no throttle, hold to fire."/>
         <meta property="og:type" content="website"/>
         <meta property="og:title" content="Plane Wars"/>
-        <meta property="og:description" content="A mobile-first low-poly 3D dogfighting game. Fly a fighter over a 12 km theatre against a squadron of named pilots — no menus, no throttle, hold to fire."/>
+        <meta property="og:description" content="A mobile-first low-poly 3D dogfighting game. Fly a fighter over a 12 km theatre against a squadron of named pilots â€” no menus, no throttle, hold to fire."/>
         <meta name="twitter:card" content="summary_large_image"/>
         <!-- PokiSDK must exist before the module entry point calls init(). Keeping
          this parser-ordered prevents a fast module fetch from racing the CDN
@@ -28,16 +28,25 @@
         <script type="module" crossorigin src="./assets/index-wDSgTPQL.js"></script>
         <link rel="modulepreload" crossorigin href="./assets/three-BIut9GC5.js">
         <link rel="stylesheet" crossorigin href="./assets/style-CLMlBJFF.css">
-</head>
+
+  <!-- Google Analytics Tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV0H0442XN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-FV0H0442XN');
+  </script></head>
     <body>
         <div id="app">
-            <!-- ── 3D layer ───────────────────────────────────────────────── -->
+            <!-- â”€â”€ 3D layer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
             <canvas id="game-canvas"></canvas>
-            <!-- ── 2D HUD layer (pointer-events:none except buttons) ───────── -->
+            <!-- â”€â”€ 2D HUD layer (pointer-events:none except buttons) â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
             <!-- Not `aria-hidden` as a whole any more: the crosshairs, the markers,
            the arcs and the standings are instruments and stay hidden from a
            screen reader one by one, but the lock prompt, the flight guide and
-           the kill feed are SENTENCES — the only ones a first flight has — and
+           the kill feed are SENTENCES â€” the only ones a first flight has â€” and
            a layer-wide hide kept every one of them from being read. -->
             <div id="hud">
                 <!-- Dynamic crosshair #1: where the player is STEERING (target rotation) -->
@@ -48,7 +57,7 @@
              points. The hit marker is a CHILD of it rather than a sibling pinned to
              the middle of the screen: the confirmation belongs where the rounds
              went, and parenting it means it tracks the gun for zero per-frame
-             work — the crosshair's transform is already being written. -->
+             work â€” the crosshair's transform is already being written. -->
                 <div id="crosshair-nose" class="crosshair" aria-hidden="true">
                     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJAAAACQCAMAAADQmBKKAAAABGdBTUEAALGPC/xhBQAAADlQTFRFm5ubZmZmODg4UFBQ5OTkeXl59vb22traAAAAAAAAAAAAAAAAAAAAxMTEi4uLAAAAAAAAAAAA////B+Yr3gAAABJ0Uk5Ttp6Oluem999QeCgUZM+uPH8AEBfqnQAAAc9JREFUeNrt2etygyAQhuG0zcGICtn7v9h6aMYxdTEFRDrz8hNmss8kKHyb06OwcQIECBAgQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECNC/BxlrTcx6apB1/bDh66lBfb2u81TcWk8NGuqJ6BW31lODzFhPr2jndZMFZKd6mujpGdZtFlDlWtFFs0daV2UB1c4jWnhcnWdTNwuRWdtfk6fJ9dgvRHZ1f4V6Al+Ms+hln1TzfJgn9Oh4il73ST3Ph3mCD9dJ9LuuNr//aT9UXqurze9//WiGA7R5f37/+5C93+1f5jNe0Or7+K2YFJ+VAjTefoZRlwHq386nWz8uzpUBqtxlfBdev5wtAuTcbXo731J8RUlAP8eXANJA57J+sqa0Td0/9h9XkfNnKY/9cOeYhikE9DDj0VEdfXRo+T0818eBtPwekeujQFp+j8n1MSAtv0fl+giQlt+3cv+O/aHOn8u67P0h8ecyyd8fEl8ukyP6Q6LnMjmmPyRaLpOD+kOtlsvaY/pDWj7Vcv/e/SE9L0fl++D+kK9eTL4P7g9560Xk+9CjYyO/h+d7/g0CBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAiQPr4BkcxcLAgt21EAAAAASUVORK5CYII=" alt="" width="48" height="48"/>
                     <div id="hit-marker">
@@ -61,7 +70,7 @@
              with up to 32 aircraft in the sky, creating nodes per frame is the one
              thing on this layer that would actually cost frames.
 
-             The diamond sits ABOVE the silhouette, not on it — a marker drawn over
+             The diamond sits ABOVE the silhouette, not on it â€” a marker drawn over
              an aircraft hides the thing it is pointing at. No range readout: at
              these distances the number changed every frame and nobody was making a
              firing solution off it, so it was eight DOM writes a frame of noise. -->
@@ -111,9 +120,9 @@
                     <div class="board-title" data-i18n="hud.leaderboard">STANDINGS</div>
                     <ol id="board-rows"></ol>
                 </div>
-                <!-- Top-right: wallet. Deliberately the same object as the menu's — same
-             plate, same icon, same fixed width — because it is the same number.
-             The dollar sign it used to carry is gone: the icon says it — and a
+                <!-- Top-right: wallet. Deliberately the same object as the menu's â€” same
+             plate, same icon, same fixed width â€” because it is the same number.
+             The dollar sign it used to carry is gone: the icon says it â€” and a
              labelled group says it to a reader, which the icon cannot. -->
                 <div id="cash" role="group" aria-label="Cash" data-i18n-aria-label="hud.cash">
                     <img src="./assets/cashicon-Ci5DlIsD.png" alt="" width="26" height="19"/>
@@ -126,17 +135,17 @@
              that never lets the lock prompt or the guide through. The rows are
              a log a reader can visit; they are not read as they land. -->
                 <div id="killfeed" role="log" aria-live="off"></div>
-                <!-- There is no hull bar. Damage is drawn on the AIRCRAFT — an engine
+                <!-- There is no hull bar. Damage is drawn on the AIRCRAFT â€” an engine
              plume that thickens and blackens as the hull goes, then catches fire
              (see Smoke.ts). A bar in the corner reported a number the player has
              no relationship with, and it was read by looking away from the fight. -->
                 <!-- Directional damage. Four pooled arcs, each rotated to point at where
-             a round came from — without this, being shot from behind is entirely
+             a round came from â€” without this, being shot from behind is entirely
              invisible from a chase camera and reads as the game cheating.
 
              The fifth, blue, is the same instrument for a different question:
              somebody is ON YOUR SIX and lining you up. It is persistent rather
-             than pooled, because it answers "is he still there" — which is the
+             than pooled, because it answers "is he still there" â€” which is the
              only thing worth knowing about a threat you cannot see. -->
                 <div id="damage" aria-hidden="true">
                     <div class="dmg-arc"></div>
@@ -150,7 +159,7 @@
                 <!-- Flight guide: one line of control hint for a player who has not
              flown yet, cleared by DOING the thing it asks for (see Game.ts,
              updateGuide). Hud.ts writes the text and picks the icon per
-             pointer — mouse or finger — so the text node carries no data-i18n:
+             pointer â€” mouse or finger â€” so the text node carries no data-i18n:
              a language sweep would overwrite the variant. It sits ABOVE the
              crosshair rather than below it, because below the crosshair on a
              phone is under the thumb that is about to try the drag. -->
@@ -169,14 +178,14 @@
                     <span data-i18n="hud.lockMouse">Click to lock mouse</span>
                 </div>
             </div>
-            <!-- ── Doubling offer ──────────────────────────────────────────────────
+            <!-- â”€â”€ Doubling offer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
            The only screen in the game that asks the player for something, and
            it is deliberately the smallest one: a wreck on the ground behind it,
            one sentence with the amount in it, one button, one way out, and a
            bar that runs out on its own.
 
            It sits ABOVE the HUD and BELOW the menu, which is where it lives in
-           time as well — it happens on the wreck, seconds before the menu takes
+           time as well â€” it happens on the wreck, seconds before the menu takes
            over, and the two are never on screen together. That is the reason it
            is here rather than on the result plate: this is the moment the
            number means something, because the player has just watched the
@@ -187,7 +196,7 @@
            ADS.doubleMin. -->
             <!-- An alert dialog to a reader: it appears on its own, it has a clock on
            it, and the sentence inside is what the two buttons are about. The
-           clock pauses while a button in here holds focus — see Game.updateDeath. -->
+           clock pauses while a button in here holds focus â€” see Game.updateDeath. -->
             <div id="double-offer" role="alertdialog" aria-label="Double your take" data-i18n-aria-label="offer.title" aria-describedby="offer-line" hidden>
                 <div class="offer-card">
                     <span class="offer-title" data-i18n="offer.title">DOUBLE YOUR TAKE</span>
@@ -206,7 +215,7 @@
                     </p>
                     <button class="btn ad large" id="offer-take" type="button">
                         <img src="data:image/png;base64,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" alt="" width="26" height="26"/>
-                        <span id="offer-take-label">WATCH AD · DOUBLE $0</span>
+                        <span id="offer-take-label">WATCH AD Â· DOUBLE $0</span>
                     </button>
                     <button class="btn large offer-skip" id="offer-skip" type="button" data-i18n="offer.skip">
             NO THANKS
@@ -219,27 +228,27 @@
                     </div>
                 </div>
             </div>
-            <!-- ── Menu layer ──────────────────────────────────────────────────────
+            <!-- â”€â”€ Menu layer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
            Not a start screen: boot goes straight to the runway, and this is
            what a DEATH leads to (see src/ui/Menu.ts). It sits above the HUD,
            takes the pointer back, and the flight carries on being rendered
-           behind it — the squadron is still up there, which is the honest
+           behind it â€” the squadron is still up there, which is the honest
            picture of what the player is about to return to.
 
-           ── Shape ────────────────────────────────────────────────────────────
+           â”€â”€ Shape â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
            A fixed full-screen shell, never a page: three bands that always fit
            the viewport, and NOTHING scrolls anywhere. Anything that would not
            fit is either scaled to fit (the hangar grid, sized in JS) or lifted
            into a modal (the settings). A menu you have to scroll to reach PLAY
            is a web page wearing a game's colours.
 
-               ┌ TOP ───────────────────────────────────────────────┐
-               │ round result plate            wallet   ⚙          │
-               ├ MAIN ──────────────────────────────────────────────┤
-               │  aircraft portrait + action  │  hangar grid        │
-               ├ BOTTOM ────────────────────────────────────────────┤
-               │ multiplayer (soon)                    ▶ PLAY       │
-               └────────────────────────────────────────────────────┘
+               â”Œ TOP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+               â”‚ round result plate            wallet   âš™          â”‚
+               â”œ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+               â”‚  aircraft portrait + action  â”‚  hangar grid        â”‚
+               â”œ BOTTOM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+               â”‚ multiplayer (soon)                    â–¶ PLAY       â”‚
+               â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
            In portrait the two halves of MAIN stack; everything else holds.
 
@@ -248,14 +257,14 @@
            buttons, and with the band after them PLAY was the twenty-sixth Tab
            stop from the top of the screen. Now it is the sixth, and a reader
            hears the result, the wallet, the four buttons and PLAY before the
-           shop — which is the order a player who has just died wants them in.
+           shop â€” which is the order a player who has just died wants them in.
 
            The twenty hangar cards are NOT here: how many aircraft the fleet has
            is a fact about planes.glb, so the grid is built in Menu.ts from the
            shop table and its pictures are rendered off the models themselves. -->
             <div id="menu" hidden>
                 <div class="menu-layout">
-                    <!-- ── Top band ─────────────────────────────────────────────────── -->
+                    <!-- â”€â”€ Top band â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                     <header class="menu-top">
                         <!-- The scoreboard for the life that just ended. Hidden on any open
                  that did not follow a death. -->
@@ -273,7 +282,7 @@
                                     <span data-i18n="result.kills">KILLS</span>
                                 </div>
                                 <div class="stat">
-                                    <b id="stat-place">—</b>
+                                    <b id="stat-place">â€”</b>
                                     <span data-i18n="result.place">PLACE</span>
                                 </div>
                                 <div class="stat gold">
@@ -299,8 +308,8 @@
                             </button>
                         </div>
                     </header>
-                    <!-- ── Bottom band ──────────────────────────────────────────────── -->
-                    <!-- Before MAIN in the document, last on the screen — see the note
+                    <!-- â”€â”€ Bottom band â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                    <!-- Before MAIN in the document, last on the screen â€” see the note
                on the shape of this layout above. -->
                     <footer class="menu-bottom">
                         <!-- Every button in this band carries a `title` as well as its
@@ -308,7 +317,7 @@
                  pictures stay, and a long press or a hover is then the only
                  way to ask what a picture is. -->
                         <!-- The way online. Live now: the SOON badge and the `disabled` are
-                 gone, and nothing is bound here — the panel behind this button
+                 gone, and nothing is bound here â€” the panel behind this button
                  is built in JS (see src/ui/MultiplayerPanel.ts) and main.ts
                  owns the one line that opens it, exactly as it does for the
                  achievements panel beside it. -->
@@ -317,7 +326,7 @@
                             <span data-i18n="menu.multiplayer">MULTIPLAYER</span>
                         </button>
                         <!-- The global board. Hidden outright when there is no game id
-                 configured (see BOARD in config.ts) — a button that can only
+                 configured (see BOARD in config.ts) â€” a button that can only
                  fail is worse than no button, which is the same rule the
                  account block in the settings follows. -->
                         <button class="btn ghost board-open" id="board-open" type="button" aria-label="Leaderboard" data-i18n-aria-label="menu.leaderboard" title="Leaderboard" data-i18n-title="menu.leaderboard" hidden>
@@ -326,7 +335,7 @@
                         </button>
                         <!-- Twenty-three things worth having done, none of which pay a dollar.
                  Beside the board on purpose: the two answer the same kind of
-                 question — how am I doing — and a player who has just been
+                 question â€” how am I doing â€” and a player who has just been
                  handed a result plate is already asking it.
 
                  A star from assets/ui like every other icon in this band: the
@@ -342,10 +351,10 @@
               PLAY
             </button>
                     </footer>
-                    <!-- ── Main band ────────────────────────────────────────────────── -->
+                    <!-- â”€â”€ Main band â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                     <main class="menu-main">
                         <!-- The hero shot: what you are flying, or what you are looking at
-                 buying. Rendered from the model itself — see PlaneGallery.ts. -->
+                 buying. Rendered from the model itself â€” see PlaneGallery.ts. -->
                         <section class="showcase">
                             <div class="showcase-art">
                                 <img id="portrait" alt=""/>
@@ -368,7 +377,7 @@
 
                      The labels are markup because they are two words that
                      translate themselves; the pips are not, because how many
-                     there are is STAT_PIPS in config.ts — the same rule the
+                     there are is STAT_PIPS in config.ts â€” the same rule the
                      board's fifty rows follow. -->
                                 <span class="showcase-stats" id="plane-stats" role="img" aria-label="Speed, dive, armor">
                                     <span class="showcase-stat stat-speed">
@@ -416,10 +425,10 @@
                         </section>
                     </main>
                 </div>
-                <!-- ── Settings ───────────────────────────────────────────────────────
+                <!-- â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
              A modal, not a panel in the column. On a phone an inline settings
              card is the difference between a screen that fits and a screen you
-             have to scroll — and it is on screen permanently to serve something
+             have to scroll â€” and it is on screen permanently to serve something
              a player touches twice a session. -->
                 <!-- One-time forced hangar guide. Menu.ts positions its circular focus. -->
                 <div id="hangar-tutorial" class="hangar-tutorial" hidden aria-hidden="true">
@@ -432,11 +441,11 @@
                         <h2 class="modal-title" data-i18n="settings.title">SETTINGS</h2>
                         <!-- The band that gives. The card holds its size and this is what
                  scrolls when a landscape phone cannot fit account, name, two
-                 switches and the language between the title and DONE — the
+                 switches and the language between the title and DONE â€” the
                  same shape as the board's list band. It used to be
                  transform-scaled to fit instead; see `.settings-body`. -->
                         <div class="settings-body">
-                            <!-- Who you are, above what you are called — the callsign below is
+                            <!-- Who you are, above what you are called â€” the callsign below is
                  seeded from the account name the first time somebody signs in,
                  so the two belong next to each other. The whole block leaves
                  when there is no PokiSDK to sign in to: outside Poki this
@@ -472,7 +481,7 @@
                  and a native <select> rather than a custom list: eleven options
                  is exactly the length at which a hand-rolled dropdown starts
                  needing scrolling, keyboard handling and a way to close, and
-                 the OS picker already does all three — better, on a phone,
+                 the OS picker already does all three â€” better, on a phone,
                  than anything that could be built in this file. It is dressed
                  to match the plate; see LOCALISATION in style.css. The options
                  are named in their own languages: "Japanese" is no use to the
@@ -487,25 +496,25 @@
             </button>
                     </div>
                 </div>
-                <!-- ── The global board ───────────────────────────────────────────────
+                <!-- â”€â”€ The global board â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
              A second modal on the same plate as the settings, opened from the
              button beside MULTIPLAYER. Everything it shows comes from Poki's
              AUDS; see src/core/Auds.ts for the transport, src/game/Scores.ts
              for what this game is willing to publish and believe.
 
-             ── Two boards, one panel ──────────────────────────────────────────
+             â”€â”€ Two boards, one panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
              CASH and KILLS are never on screen together. They answer different
              questions about the same fifty people, and side by side they would
-             be read as one table with two score columns — which is the one
+             be read as one table with two score columns â€” which is the one
              thing they are not, because the ordering is different in each. The
              switch at the top is the whole navigation.
 
-             ── The one place in the menu that scrolls ─────────────────────────
+             â”€â”€ The one place in the menu that scrolls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
              Fifty rows do not fit on a phone, and there is no honest way to
              make them: the list IS the content here, unlike the hangar grid,
              which is twenty cards that can be made smaller. So the list scrolls
              INSIDE the card while the switch, the pinned row and DONE stay
-             put — nothing the player needs to press is ever behind a scroll,
+             put â€” nothing the player needs to press is ever behind a scroll,
              which is what the menu's no-scrolling rule is actually protecting.
 
              The rows are built in JS: how many there are is a constant in
@@ -515,7 +524,7 @@
                     <div class="modal-scrim" id="board-scrim"></div>
                     <div class="modal-card board-card" role="dialog" aria-modal="true" aria-label="Leaderboard" data-i18n-aria-label="board.title">
                         <h2 class="modal-title" data-i18n="board.title">LEADERBOARD</h2>
-                        <!-- One pill, two halves, and a marker that slides between them —
+                        <!-- One pill, two halves, and a marker that slides between them â€”
                  the same object as the settings switches, which is the point:
                  this is a control with two positions, and the player has
                  already met it twice on the screen behind this one. -->
@@ -542,13 +551,13 @@
                    the list is not there yet. -->
                             <p class="board-note" id="board-note" hidden></p>
                         </div>
-                        <!-- The player's own standing, pinned below the list — and shown
+                        <!-- The player's own standing, pinned below the list â€” and shown
                  ONLY when they are not already somewhere in it. A leaderboard
                  that cannot tell you where YOU are is a list of strangers,
                  which is the same rule the HUD's board follows. -->
                         <ol class="board-list board-pin" id="board-pin" hidden></ol>
-                        <!-- Signed out. The board still reads — it is a public list, and
-                 hiding it would be hiding the reason to sign in — but nothing
+                        <!-- Signed out. The board still reads â€” it is a public list, and
+                 hiding it would be hiding the reason to sign in â€” but nothing
                  of this player's is published until there is an account to
                  publish it under. -->
                         <div class="account board-gate" id="board-gate" hidden>
@@ -568,7 +577,7 @@
             </div>
             <!-- Boot-time only: removed from the DOM as soon as the fleet is loaded,
            so nothing here is ever paid for during play. It is on screen for a
-           real number of seconds on a phone — the fleet is ~1.2 MB — which makes
+           real number of seconds on a phone â€” the fleet is ~1.2 MB â€” which makes
            it the first thing anybody sees of the game.
 
            Structure: a pre-blurred in-game screenshot as the backdrop (blurred

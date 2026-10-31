@@ -732,6 +732,32 @@
       }
     ]
   },
+  "ambAquaBed": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_Amb_Aquatic/SFX_Amb_Aquatic_0059.ogg"
+        ],
+        "volume": 1.4
+      }
+    ]
+  },
+  "ambAquaLife": {
+    "layers": [
+      {
+        "files": [
+          "rl/Ambiance/SFX_Amb_Aquatic/SFX_Amb_Aquatic_0033.ogg",
+          "rl/Ambiance/SFX_Amb_Aquatic/SFX_Amb_Aquatic_0043.ogg",
+          "rl/Ambiance/SFX_Amb_Aquatic/SFX_Amb_Aquatic_0058.ogg",
+          "rl/Ambiance/SFX_Amb_Aquatic/SFX_Amb_Aquatic_0008.ogg",
+          "rl/Ambiance/SFX_Amb_Aquatic/SFX_Amb_Aquatic_0037.ogg",
+          "rl/Ambiance/SFX_Amb_Aquatic/SFX_Amb_Aquatic_0017.ogg",
+          "rl/Ambiance/SFX_Amb_Aquatic/SFX_Amb_Aquatic_0023.ogg"
+        ],
+        "volume": 1
+      }
+    ]
+  },
   "ambTempleBirds": {
     "layers": [
       {

@@ -132,6 +132,7 @@ const GAME_MODULES = [
   { href: "/minecraft-mods/index.html",           img: "/images/arnav.jpeg",                                                   title: "movies",            cat: "movie"        },
   { href: "games/8-ball-pool",           img: "/images/8-ball-pool.jpg",                                                   title: "8 Ball Pool",            cat: "sports"        },
   { href: "games/speedstars",           img: "/images/speed-stars.jpg",                                                   title: "Speedstars",            cat: "racing"        },
+  { href: "games/flappy-tower",           img: "/images/flappy-tower.jpg",                                                   title: "Big Flappy Tower VS Tiny Square",            cat: "action"        },
 ]
 
 /* =============================================================================

@@ -3282,7 +3282,7 @@
     stateLow: "dry_ice",
     state: "gas",
     density: 1.977,
-    alias: ["CO2","CO₂"]
+    alias: ["CO2","COâ‚‚"]
 },
 "oil": {
     color: "#470e00",
@@ -9426,9 +9426,9 @@
             0: 65, // null -> 0
             58: 65, // : -> A
             91: 97, // [ -> a
-            123: 192, // { -> À
-            215: 216, // × -> Ø
-            247: 248, // ÷ -> ø
+            123: 192, // { -> Ã€
+            215: 216, // Ã— -> Ã˜
+            247: 248, // Ã· -> Ã¸
             688: 880,
             884: 886,
             888: 891,
@@ -10597,9 +10597,9 @@
         }
 
         shiftDownTypes = {
-            1: "[↑ ]",
+            1: "[â†‘ ]",
             2: "[A ]",
-            3: "[ ↑]",
+            3: "[ â†‘]",
             4: "[ A]"
         }
         // Update stats
@@ -10635,10 +10635,10 @@
 
         function formatTemp(temp) { // temp is Celcius
             if (!settings["units"] || settings["units"] === "m") { // Celsius
-                return Math.round(temp)+"°C"
+                return Math.round(temp)+"Â°C"
             }
             else if (settings["units"] === "i") { // Fahrenheit
-                return Math.round(temp*1.8+32)+"°F"
+                return Math.round(temp*1.8+32)+"Â°F"
             }
             else if (settings["units"] === "s") { // Kelvin
                 return Math.round(temp+273.15)+"K"
@@ -10651,14 +10651,14 @@
             else if (density > 10) { digits = 1; }
             // default/metric = kg/m3, imperial = lb/ft3, si = g/cm3
             if (!settings["units"] || settings["units"] === "m") { // kg/m3
-                return density.toFixed(digits)+" kg⁄m<sup>3</sup>"
+                return density.toFixed(digits)+" kgâ„m<sup>3</sup>"
             }
             else if (settings["units"] === "i") { // lb/ft3
-                return (density/16.018).toFixed(digits)+" lb⁄ft<sup>3</sup>"
+                return (density/16.018).toFixed(digits)+" lbâ„ft<sup>3</sup>"
             }
             else if (settings["units"] === "s") { // g/cm3
                 // round to 2 decimal places
-                return ((density/10)/100).toFixed(digits)+" g⁄cm<sup>3</sup>"
+                return ((density/10)/100).toFixed(digits)+" gâ„cm<sup>3</sup>"
             }
         }
 
@@ -10873,7 +10873,7 @@ for (var k = 0; k < b0.split(" AND ").length; k++) {
                 }
                 else if (element === "") {
                     infoTitle.innerHTML = "Browse";
-                    infoText.innerHTML = "\n"+infoLink("all")+" • "+infoLink("undiscovered")+" • "+infoLink("discovered")+"\n\n";
+                    infoText.innerHTML = "\n"+infoLink("all")+" â€¢ "+infoLink("undiscovered")+" â€¢ "+infoLink("discovered")+"\n\n";
                     var temptext = "";
                     for (var i = 0; i < categoryList.length; i++) {
                         temptext += infoLink(categoryList[i]) + "\n";
@@ -11808,7 +11808,7 @@ for (var k = 0; k < b0.split(" AND ").length; k++) {
             }
             // Set the first button in categoryControls div to be the current category
             document.getElementById("categoryControls").children[0].click()
-            document.getElementById("extraInfo").insertAdjacentHTML("beforeend", "<small><p>v" + currentversion + " • " + elementCount + " elements, including " + hiddenCount + " hidden ones.</p><p>©2021-" + new Date().getFullYear() + ". All Rights Reserved. <a style='color:#00ffff' href='https://r74n.com'>R74n</a></p></small>");
+            document.getElementById("extraInfo").insertAdjacentHTML("beforeend", "<small><p>v" + currentversion + " â€¢ " + elementCount + " elements, including " + hiddenCount + " hidden ones.</p><p>Â©2021-" + new Date().getFullYear() + ". All Rights Reserved. <a style='color:#00ffff' href='https://r74n.com'>R74n</a></p></small>");
             selectElement(currentElement);
             focusGame();
             // For every button element, onkeyup="event.preventDefault()"
@@ -11849,7 +11849,16 @@ for (var k = 0; k < b0.split(" AND ").length; k++) {
         }
     </script>
   <link rel="stylesheet" type="text/css" href="style.css?nocache=3">
-</head>
+
+  <!-- Google Analytics Tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV0H0442XN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-FV0H0442XN');
+  </script></head>
 
 <body>
     <h1 class="pagetitle" id="pagetitle"><a href="https://R74n.com" class="backbutton" target="_blank">&lt;</a></h1>
@@ -11897,7 +11906,7 @@ for (var k = 0; k < b0.split(" AND ").length; k++) {
                 <div id="categoryControls"></div>
                 <div id="elementControls"></div>
             </div>
-            <div id="extraInfo"><small><a href="changelog.txt" id="changelogButton" target="_blank">Changelog</a> • <a href="https://docs.google.com/forms/d/e/1FAIpQLSfyNRsMTnEND8WgZ2GdbKr_ZO1vA2T66p31sXXFua-NqTreFQ/viewform?usp=sf_link" target="_blank">Feedback</a> • <a href="https://reddit.com/r/Sandboxels" target="_blank">Reddit</a> • <a href="https://discord.gg/ejUc6YPQuS" target="_blank" style="text-shadow: 0px 2px 10px #FF00FF;">Discord</a><span id="install-button" style="display:none">&nbsp;• <a onclick="deferredPrompt.prompt(); return false" style="text-shadow: 0px 2px 10px #FF00FF; cursor:pointer">Install Offline</a></span></small></div>
+            <div id="extraInfo"><small><a href="changelog.txt" id="changelogButton" target="_blank">Changelog</a> â€¢ <a href="https://docs.google.com/forms/d/e/1FAIpQLSfyNRsMTnEND8WgZ2GdbKr_ZO1vA2T66p31sXXFua-NqTreFQ/viewform?usp=sf_link" target="_blank">Feedback</a> â€¢ <a href="https://reddit.com/r/Sandboxels" target="_blank">Reddit</a> â€¢ <a href="https://discord.gg/ejUc6YPQuS" target="_blank" style="text-shadow: 0px 2px 10px #FF00FF;">Discord</a><span id="install-button" style="display:none">&nbsp;â€¢ <a onclick="deferredPrompt.prompt(); return false" style="text-shadow: 0px 2px 10px #FF00FF; cursor:pointer">Install Offline</a></span></small></div>
             <script>
                 // version check
                 if (!settings["lastversion"] || settings["lastversion"]!==currentversion) {
@@ -11912,7 +11921,7 @@ for (var k = 0; k < b0.split(" AND ").length; k++) {
         <div id="infoParent">
             <div id="infoScreen"> <!--Element Info Page-->
                 <button class="XButton" onclick="closeMenu();">-</button>
-                <span class='infoLink noselect' id="infoBackButton" onclick='infoBack()' style='text-decoration:none!important;display:none'>←&nbsp;</span><span class="menuTitle" id="infoTitle">Title</span>
+                <span class='infoLink noselect' id="infoBackButton" onclick='infoBack()' style='text-decoration:none!important;display:none'>â†&nbsp;</span><span class="menuTitle" id="infoTitle">Title</span>
                 <div class="menuText" id="infoText">Text</div>
             </div>
             <input type="text" id="infoSearch" placeholder="Element..." oninput="showInfo(this.value);"></input>
@@ -12052,7 +12061,7 @@ Cancer, Landmine, Grenade, Smoke Grenade">?</span> <select onchange="setSetting(
             <tr><td>Intensify effect</td>   <td><kbd>Shift</kbd> + <kbd style="background-color:red;">Heat</kbd>/<kbd style="background-color:blue;">Cool</kbd>/<kbd style="background-color:yellow;color:black">Shock</kbd></td></tr>
             <tr><td>Draw line</td>   <td><kbd>Shift</kbd> + <kbd>Click</kbd></td></tr>
             <tr><td>Change cursor size</td>   <td><kbd>Scroll</kbd> or <kbd>+</kbd><kbd>-</kbd> or <kbd>[</kbd><kbd>]</kbd></td></tr>
-            <tr><td>Change category</td>   <td><kbd>←</kbd><kbd>→</kbd></td></tr>
+            <tr><td>Change category</td>   <td><kbd>â†</kbd><kbd>â†’</kbd></td></tr>
             <tr><td>Select by name</td>   <td><kbd>E</kbd></td></tr>
             <tr><td>Element info</td>   <td><kbd>I</kbd> or <kbd>/</kbd></td></tr>
             <tr><td>Open settings</td>   <td><kbd>\</kbd></td></tr>
