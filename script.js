@@ -49,7 +49,6 @@ const GAME_MODULES = [
   { href: "games/bike-obby/",               img: "games/bike-obby/bike-obby.webp",                                                  title: "Bike Obby",                cat: "racing"     },
   { href: "games/i-a/",                     img: "games/99-n/i-a.jpg",                                                              title: "Idle Ants",                cat: "idle"        },
   { href: "games/d-d/",                     img: "games/d-d/d-d.png",                                                               title: "Deadly Descent",           cat: "action"     },
-  { href: "games/m-m/",                     img: "games/m-m/m-m.webp",                                                              title: "Monkey Mart",              cat: "idle"        },
   { href: "games/g-s/",                     img: "games/g-s/g-s.webp",                                                              title: "Gun Spin",                 cat: "action"     },
   { href: "games/s-r/",                     img: "games/s-r/s-r.png",                                                               title: "Snow Rider",               cat: "racing"     },
   { href: "games/basket-random/",           img: "games/basket-random/basket.png",                                                  title: "Basket Random",            cat: "sports"     },
@@ -133,6 +132,7 @@ const GAME_MODULES = [
   { href: "games/8-ball-pool",           img: "/images/8-ball-pool.jpg",                                                   title: "8 Ball Pool",            cat: "sports"        },
   { href: "games/speedstars",           img: "/images/speed-stars.jpg",                                                   title: "Speedstars",            cat: "racing"        },
   { href: "games/flappy-tower",           img: "/images/flappy-tower.jpg",                                                   title: "Big Flappy Tower VS Tiny Square",            cat: "action"        },
+  { href: "games/m-m/",                     img: "games/m-m/m-m.webp",                                                              title: "Monkey Mart",              cat: "idle"        },
 ]
 
 /* =============================================================================
