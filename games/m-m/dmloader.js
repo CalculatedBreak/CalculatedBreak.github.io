@@ -583,7 +583,7 @@ var GameArchiveLoader = {
             try { // see if already and stored
                 const stat = FS.stat(path);
                 if (stat) {
-                    let matches = (file.size == stat.size);
+                    let matches = (typeof file.size === 'number' && file.size == stat.size);
                     if (matches && file.sha1) {
                         const stream = FS.open(path, "r");
                         if (stream) {
@@ -661,16 +661,17 @@ var GameArchiveLoader = {
         } else if (1 == file.pieces.length) {
             file.data = piece.data;
         } else {
-            if (!file.data) {
-               file.data = new Uint8Array(file.size);
-            }
             var start = piece.offset;
             var end = start + piece.data.length;
             if (0 > start) {
                 throw RangeError("Buffer underflow. Start: " + start);
             }
-            if (end > file.data.length) {
-                throw RangeError("Buffer overflow. End : " + end + ", data length: " + file.data.length);
+            if (!file.data || end > file.data.length) {
+                var data = new Uint8Array(end);
+                if (file.data) {
+                    data.set(file.data);
+                }
+                file.data = data;
             }
             file.data.set(piece.data, piece.offset);
         }
@@ -708,13 +709,10 @@ var GameArchiveLoader = {
     },
 
     verifyFile: function(file) {
-        // verify that we downloaded as much as we were supposed to
-        var actualSize = 0;
+        var assembledSize = 0;
         for (var i=0;i<file.pieces.length; ++i) {
-            actualSize += file.pieces[i].dataLength;
-        }
-        if (actualSize != file.size) {
-            return Promise.reject(new Error("Unexpected data size: " + file.name + ", expected size: " + file.size + ", actual size: " + actualSize));
+            var piece = file.pieces[i];
+            assembledSize = Math.max(assembledSize, piece.offset + piece.dataLength);
         }
 
         // verify the pieces
@@ -743,7 +741,7 @@ var GameArchiveLoader = {
             let data = file.data;
             if (file.stream) {
                 try {
-                    data = FS.mmap(file.stream, file.size, 0, 0x01, 0x01); //PROT_READ, MAP_SHARED
+                    data = FS.mmap(file.stream, assembledSize, 0, 0x01, 0x01); //PROT_READ, MAP_SHARED
                 } catch(e) { }
             }
             if(data) {
