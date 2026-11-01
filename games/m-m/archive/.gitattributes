@@ -1,0 +1,6 @@
+# Preserve Defold game archive files
+archive/* binary
+
+# Preserve the compiled engine files
+*.js binary
+*.wasm binary
