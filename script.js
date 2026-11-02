@@ -4,14 +4,11 @@
  * This file:
  *  1. Reads game metadata from GAME_MODULES (populated from the games catalogue)
  *  2. Renders module cards on dashboard.html
- *  3. Launches EVERY game through the player wrapper (player.html) so the
- *     WGPlayer ad tag loads on every game, regardless of folder path.
+ *  3. Launches games through the player wrapper (player.html) so the
+ *     WGPlayer ad tag loads on every game. Games with non-standard paths open directly.
  *
  * player.html also loads this file and builds its "More Games" catalog from
  * GAME_MODULES, so this is the only list you need to maintain.
- *
- * player.html receives the game location as ?src=<path>&title=<title>.
- * (The old ?game=<id> format is still supported by the snippet in player.html.)
  */
 
 /* =============================================================================
@@ -134,7 +131,8 @@ const GAME_MODULES = [
   { href: "/minecraft-mods/index.html", img: "/images/movie.jpg", title: "movies", cat: "movie" },
   { href: "games/8-ball-pool", img: "/images/8-ball-pool.jpg", title: "8 Ball Pool", cat: "sports" },
   { href: "games/speedstars", img: "/images/speed-stars.jpg", title: "Speedstars", cat: "racing" },
-  { href: "/monkey-mart/index.htm", img: "games/m-m/m-m.webp", title: "Monkey Mart", cat: "idle" },
+  { href: "/monkey-mart/index.htm", img: "/games/m-m/m-m.webp", title: "Monkey Mart", cat: "idle" },
+  { href: "games/rodha-2/", img: "/images/rodha-2.webp", title: "Rodha 2", cat: "action" },
 ];
 
 /* =============================================================================
@@ -199,23 +197,18 @@ function escapeHtml(text) {
    ============================================================================= */
 
 /**
- * Normalizes a game href so it can be passed to player.html.
- * - Folder-style paths without a trailing slash get one
- *   ("games/tiny-fishing" -> "games/tiny-fishing/")
- * - Paths that point at a file ("/monkey-mart/index.htm") are left alone
+ * Returns the game folder id for standard paths like "games/drive-mad/",
+ * "/games/drive-mad" or "games/Idle Breakout/". Returns null for anything
+ * else (e.g. "/moto-x3m/", "/Level-Devil", "/car-machines/games/car-machines/").
  */
-function normalizeGameSrc(href) {
-  let src = String(href || '').trim();
-  if (!src) return '';
-  const last = src.split('/').pop();
-  const looksLikeFile = /\.[a-z0-9]+$/i.test(last);
-  if (!looksLikeFile && !src.endsWith('/')) src += '/';
-  return src;
+function getGameId(href) {
+  const match = String(href || '').match(/^\/?games\/([^/]+)\/?$/);
+  return match ? match[1] : null;
 }
 
 /**
- * Opens any game in a new tab through player.html so the WGPlayer ad tag
- * loads. Works for every path, not just ones starting with "games/".
+ * Opens a game in a new tab. Standard games go through player.html so the
+ * WGPlayer ad tag is loaded; non-standard paths open directly as before.
  */
 function launchSimulation(href, title) {
   if (!href) {
@@ -223,11 +216,14 @@ function launchSimulation(href, title) {
     return;
   }
 
-  const params = new URLSearchParams({
-    src: normalizeGameSrc(href),
-    title: title || 'Game'
-  });
-  window.open('player.html?' + params.toString(), '_blank');
+  const id = getGameId(href);
+
+  if (id) {
+    const params = new URLSearchParams({ game: id, title: title || id });
+    window.open('player.html?' + params.toString(), '_blank');
+  } else {
+    window.open(href, '_blank');
+  }
 }
 
 /* =============================================================================
