@@ -134,6 +134,7 @@ const GAME_MODULES = [
   { href: "/monkey-mart/index.htm", img: "/games/m-m/m-m.webp", title: "Monkey Mart", cat: "idle" },
   { href: "games/rodha-2/", img: "/images/rodha-2.webp", title: "Rodha 2", cat: "action" },
   { href: "games/shortcut-race/", img: "/images/shortcut-race.png", title: "Shortcut Race", cat: "racing" },
+  { href: "games/power-badminton/", img: "/images/power-badminton.jpg", title: "Power Badminton", cat: "sports" },
 ];
 
 /* =============================================================================
