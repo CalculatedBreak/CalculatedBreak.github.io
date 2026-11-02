@@ -2,401 +2,44 @@
 <html lang="en">
 
 <head>
-<script src="/cloudsave.js"></script>
-
-<script>
-(function() {
-    // Suppress WASM/game errors silently
-    window.addEventListener('error', function(e) {
-        if (e.message && (e.message.indexOf('responseType') !== -1 || e.message.indexOf('InvalidAccessError') !== -1)) {
-            e.preventDefault();
-            e.stopPropagation();
-            return true;
-        }
-    }, true);
-
-    window.addEventListener('unhandledrejection', function(e) {
-        e.preventDefault();
-    });
-
-    // Block ALL sitelock redirects first (before anything else)
-    var _origOpen = window.open;
-    window.open = function(url) {
-        if (url && url.toString().indexOf('sitelock') !== -1) {
-            console.log('[Proxy] Blocked sitelock popup:', url);
-            return null;
-        }
-        return _origOpen.apply(this, arguments);
-    };
-
-    // Store original location methods before any overrides
-    var _realLocation = window.location;
-    var _origAssign = _realLocation.assign.bind(_realLocation);
-    var _origReplace = _realLocation.replace.bind(_realLocation);
-
-    // Wrap location methods to block sitelock
-    function isSitelock(url) {
-        return url && url.toString().indexOf('sitelock') !== -1;
-    }
-
-    // Extract game domain from pathname (e.g., "uuid.poki-gdn.com")
-    var pathMatch = location.pathname.match(/^\/proxy\/([^\/]+\.poki-gdn\.com)/);
-    var gameDomain = pathMatch ? pathMatch[1] : null;
-    var fakeOrigin = gameDomain ? 'https://' + gameDomain : null;
-    var fakePath = gameDomain ? (location.pathname.replace('/proxy/' + gameDomain, '') || '/') : null;
-
-    // Create fake location object
-    var fakeLocation = {
-        get hostname() { return gameDomain || _realLocation.hostname; },
-        get host() { return gameDomain || _realLocation.host; },
-        get origin() { return fakeOrigin || _realLocation.origin; },
-        get href() { return fakeOrigin ? fakeOrigin + fakePath + _realLocation.search + _realLocation.hash : _realLocation.href; },
-        get pathname() { return fakePath || _realLocation.pathname; },
-        get protocol() { return 'https:'; },
-        get search() { return _realLocation.search; },
-        get hash() { return _realLocation.hash; },
-        get port() { return ''; },
-        toString: function() { return this.href; },
-        assign: function(url) {
-            if (isSitelock(url)) { console.log('[Proxy] Blocked assign:', url); return; }
-            _origAssign(url);
-        },
-        replace: function(url) {
-            if (isSitelock(url)) { console.log('[Proxy] Blocked replace:', url); return; }
-            _origReplace(url);
-        },
-        reload: function() { _realLocation.reload(); }
-    };
-
-    // Override window.location
-    try {
-        Object.defineProperty(window, 'location', {
-            get: function() { return fakeLocation; },
-            set: function(url) {
-                if (isSitelock(url)) { return; }
-                _realLocation.href = url;
-            },
-            configurable: true
-        });
-    } catch(e) { /* Expected on HTTPS - browsers block location override */ }
-
-    // Override document.location
-    try {
-        Object.defineProperty(document, 'location', {
-            get: function() { return fakeLocation; },
-            set: function(url) {
-                if (isSitelock(url)) { console.log('[Proxy] Blocked doc location set:', url); return; }
-                _realLocation.href = url;
-            },
-            configurable: true
-        });
-    } catch(e) {}
-
-    // Override document.referrer
-    try {
-        Object.defineProperty(document, 'referrer', {
-            get: function() { return 'https://poki.com/'; },
-            configurable: true
-        });
-    } catch(e) {}
-
-    // Override document.URL (some games check this instead of location)
-    try {
-        Object.defineProperty(document, 'URL', {
-            get: function() { return fakeOrigin ? fakeOrigin + fakePath + _realLocation.search + _realLocation.hash : _realLocation.href; },
-            configurable: true
-        });
-    } catch(e) {}
-
-    // Override document.domain
-    try {
-        Object.defineProperty(document, 'domain', {
-            get: function() { return gameDomain || _realLocation.hostname; },
-            set: function() {},
-            configurable: true
-        });
-    } catch(e) {}
-
-    // CRITICAL: Make window.top and window.self point to window
-    // This prevents iframe/frame-buster detection
-    try {
-        Object.defineProperty(window, 'top', {
-            get: function() { return window; },
-            configurable: true
-        });
-    } catch(e) { /* Expected on HTTPS */ }
-
-    try {
-        Object.defineProperty(window, 'parent', {
-            get: function() { return window; },
-            configurable: true
-        });
-    } catch(e) {}
-
-    try {
-        Object.defineProperty(window, 'self', {
-            get: function() { return window; },
-            configurable: true
-        });
-    } catch(e) {}
-
-    // Also override frames.length to return 0
-    try {
-        Object.defineProperty(window, 'frames', {
-            get: function() { return { length: 0 }; },
-            configurable: true
-        });
-    } catch(e) {}
-
-    // Override frameElement to hide iframe detection
-    try {
-        Object.defineProperty(window, 'frameElement', {
-            get: function() { return null; },
-            configurable: true
-        });
-    } catch(e) {}
-
-    // NUCLEAR: Block any navigation that tries to change top/parent location
-    // This catches frame-busters even when window.top override fails on HTTPS
-    if (window.navigation) {
-        window.navigation.addEventListener('navigate', function(e) {
-            // Block navigations triggered by frame-buster code
-            if (e.destination && e.destination.url) {
-                var destUrl = e.destination.url;
-                // Allow same-origin navigations, block cross-origin frame-busting
-                if (destUrl.indexOf(location.origin) === -1 && destUrl.indexOf('/proxy/') === -1) {
-                    console.log('[Proxy] Blocked navigation:', destUrl);
-                    e.preventDefault();
-                }
-            }
-        });
-    }
-
-    // Block atob for sitelock-related base64 decoding
-    var _origAtob = window.atob;
-    window.atob = function(str) {
-        var decoded = _origAtob(str);
-        // If decoding reveals sitelock URL, return safe value
-        if (decoded.indexOf('sitelock') !== -1) {
-            console.log('[Proxy] Blocked atob sitelock:', decoded);
-            return 'javascript:void(0)';
-        }
-        // If it's a domain check, make it always pass
-        if (decoded === '.poki-gdn.com' || decoded === '.poki.com') {
-            return '.';  // Any hostname contains a dot
-        }
-        return decoded;
-    };
-
-    // Intercept fetch and XHR to rewrite poki-gdn.com URLs
-    var pokiGdnPattern = /^(https?:)?\/\/([a-f0-9\-]+\.poki-gdn\.com)/i;
-
-    function rewritePokiUrl(url) {
-        if (!url) return url;
-        var urlStr = url.toString();
-        var match = urlStr.match(pokiGdnPattern);
-        if (match) {
-            return urlStr.replace(pokiGdnPattern, '/proxy/$2');
-        }
-        return url;
-    }
-
-    // Block/mock external ad and analytics requests that cause hangs
-    var blockPatterns = [
-        /ppub_config/i,
-        /latest\.json.*date=/i,
-        /apstag/i,
-        /amazon-adsystem/i,
-        /pubads/i,
-        /doubleclick/i,
-        /googlesyndication/i,
-        /googletagservices/i,
-        /gpt\.js/i,
-        /rum$/i,
-        /poki\.io/i,
-        /a\.poki\.com/i,
-        /geo\.poki/i,
-        /config\?src=/i,
-        /aps_csm/i,
-        /prebid/i,
-        /ima3\.js/i
-    ];
-
-    function shouldBlock(url) {
-        if (!url) return false;
-        var urlStr = url.toString();
-        for (var i = 0; i < blockPatterns.length; i++) {
-            if (blockPatterns[i].test(urlStr)) return true;
-        }
-        return false;
-    }
-
-    // Override fetch to block ad/analytics requests and rewrite poki-gdn URLs
-    var _origFetch = window.fetch;
-    window.fetch = function(input, init) {
-        var url = (typeof input === 'string') ? input : (input instanceof Request ? input.url : '');
-        if (shouldBlock(url)) {
-            console.log('[Proxy] Blocked fetch:', url);
-            // Return empty successful response
-            return Promise.resolve(new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } }));
-        }
-        if (typeof input === 'string') {
-            input = rewritePokiUrl(input);
-        } else if (input instanceof Request) {
-            var newUrl = rewritePokiUrl(input.url);
-            if (newUrl !== input.url) {
-                input = new Request(newUrl, input);
-            }
-        }
-        return _origFetch.call(this, input, init);
-    };
-
-    // Override XHR to block ad/analytics and rewrite poki-gdn URLs
-    var _origXhrOpen = XMLHttpRequest.prototype.open;
-    var _origXhrSend = XMLHttpRequest.prototype.send;
-    XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-        this._url = url;
-        this._blocked = shouldBlock(url);
-        if (this._blocked) {
-            console.log('[Proxy] Blocked XHR:', url);
-        }
-        url = rewritePokiUrl(url);
-        return _origXhrOpen.call(this, method, url, async, user, password);
-    };
-    XMLHttpRequest.prototype.send = function(body) {
-        if (this._blocked) {
-            // Simulate successful empty response
-            var self = this;
-            Object.defineProperty(self, 'readyState', { value: 4, writable: false });
-            Object.defineProperty(self, 'status', { value: 200, writable: false });
-            Object.defineProperty(self, 'responseText', { value: '{}', writable: false });
-            Object.defineProperty(self, 'response', { value: '{}', writable: false });
-            setTimeout(function() {
-                if (self.onreadystatechange) self.onreadystatechange();
-                if (self.onload) self.onload();
-            }, 0);
-            return;
-        }
-        return _origXhrSend.call(this, body);
-    };
-
-    // NUCLEAR OPTION: Replace XMLHttpRequest constructor entirely
-    // to force all sync requests to async
-    var OriginalXHR = window.XMLHttpRequest;
-    window.XMLHttpRequest = function() {
-        var xhr = new OriginalXHR();
-        var _open = xhr.open;
-        var _isSync = false;
-
-        xhr.open = function(method, url, async) {
-            _isSync = (async === false);
-            // Force async to avoid responseType errors
-            return _open.call(this, method, url, true, arguments[3], arguments[4]);
-        };
-
-        // Override responseType to not throw
-        var _responseType = '';
-        Object.defineProperty(xhr, 'responseType', {
-            get: function() { return _responseType; },
-            set: function(val) {
-                try {
-                    _responseType = val;
-                    Object.getOwnPropertyDescriptor(OriginalXHR.prototype, 'responseType').set.call(xhr, val);
-                } catch(e) {
-                    // Silently handle - workaround applied
-                }
-            }
-        });
-
-        return xhr;
-    };
-    window.XMLHttpRequest.prototype = OriginalXHR.prototype;
-    window.XMLHttpRequest.DONE = OriginalXHR.DONE;
-    window.XMLHttpRequest.HEADERS_RECEIVED = OriginalXHR.HEADERS_RECEIVED;
-    window.XMLHttpRequest.LOADING = OriginalXHR.LOADING;
-    window.XMLHttpRequest.OPENED = OriginalXHR.OPENED;
-    window.XMLHttpRequest.UNSENT = OriginalXHR.UNSENT;
-
-    // Block script loading for ad libraries
-    var _origCreateElement = document.createElement;
-    document.createElement = function(tagName) {
-        var el = _origCreateElement.call(document, tagName);
-        if (tagName.toLowerCase() === 'script') {
-            var _origSetAttr = el.setAttribute;
-            el.setAttribute = function(name, value) {
-                if (name === 'src' && shouldBlock(value)) {
-                    console.log('[Proxy] Blocked script:', value);
-                    return; // Don't set src
-                }
-                return _origSetAttr.call(this, name, value);
-            };
-            Object.defineProperty(el, 'src', {
-                set: function(value) {
-                    if (shouldBlock(value)) {
-                        console.log('[Proxy] Blocked script src:', value);
-                        return;
-                    }
-                    _origSetAttr.call(el, 'src', value);
-                },
-                get: function() { return el.getAttribute('src'); }
-            });
-        }
-        return el;
-    };
-
-    // Location spoofing active for: gameDomain
-})();
-</script>
-
-	<meta name="monetization" content="$ilp.uphold.com/eJ3JRYkeJGGw">
+	<script src="/cloudsave.js"></script>
 
 	<meta http-equiv="content-type" content="text/html; charset=UTF8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="#382C2A">
 	<meta name="viewport"
 		content="height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
-	<script src="poki-sdk.js"></script>
-
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest">
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-	<meta name="msapplication-TileColor" content="#da532c">
 	<meta name="theme-color" content="#ffffff">
 
-	<link rel="preload" href="./assets/su.png" as="image">
-
-
-	<title>SushiParty.io</title>
-	<meta name="description" content="Sushi Party is a Kawaii styled snake game similar to Slither and Wormax. Beat high scores, unlock achievements and collect more than 30 hats"/>
+	<title>Sushi Party</title>
+	<meta name="description" content="Kawaii styled snake game. Beat high scores, unlock achievements and collect more than 30 hats"/>
 	<link href="./s.css" media="screen" rel="stylesheet" type="text/css">
 	<svg style="position:absolute; height:0" xmlns="http://www.w3.org/2000/svg" width="0" height="0">
 		<defs>
 			<filter id="sq0">
-				<feTurbulence id="turbulence" baseFrequency=".02" numOctaves="3" result="noise" seed="0" />
-				<feDisplacementMap id="displacement" in="SourceGraphic" in2="noise" scale="6" />
+				<feTurbulence baseFrequency=".02" numOctaves="3" result="noise" seed="0" />
+				<feDisplacementMap in="SourceGraphic" in2="noise" scale="6" />
 			</filter>
 			<filter id="sq1">
-				<feTurbulence id="turbulence" baseFrequency=".02" numOctaves="3" result="noise" seed="1" />
+				<feTurbulence baseFrequency=".02" numOctaves="3" result="noise" seed="1" />
 				<feDisplacementMap in="SourceGraphic" in2="noise" scale="8" />
 			</filter>
 			<filter id="sq2">
-				<feTurbulence id="turbulence" baseFrequency=".02" numOctaves="3" result="noise" seed="2" />
+				<feTurbulence baseFrequency=".02" numOctaves="3" result="noise" seed="2" />
 				<feDisplacementMap in="SourceGraphic" in2="noise" scale="6" />
 			</filter>
 			<filter id="sq3">
-				<feTurbulence id="turbulence" baseFrequency=".02" numOctaves="3" result="noise" seed="3" />
+				<feTurbulence baseFrequency=".02" numOctaves="3" result="noise" seed="3" />
 				<feDisplacementMap in="SourceGraphic" in2="noise" scale="8" />
 			</filter>
 			<filter id="sq4">
-				<feTurbulence id="turbulence" baseFrequency=".02" numOctaves="3" result="noise" seed="4" />
+				<feTurbulence baseFrequency=".02" numOctaves="3" result="noise" seed="4" />
 				<feDisplacementMap in="SourceGraphic" in2="noise" scale="6" />
 			</filter>
 			<filter id="squi">
-				<feTurbulence id="turbulence" baseFrequency=".02" numOctaves="3" result="noise" seed="4" />
+				<feTurbulence baseFrequency=".02" numOctaves="3" result="noise" seed="4" />
 				<feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
 			</filter>
 		</defs>
@@ -404,26 +47,12 @@
 </head>
 
 <body>
-	<script>
-		window.navigateToPoki = function () {
-			if(!window.location.href.includes('poki')){
-				window.location.href = 'https://poki.com/en/g/sushi-party-io';
-			}
-		}
-	</script>
 	<div id="mm">
-		<a id="cl" href="https://coil.com/" target="_blank">
-			<img src="./no-ads-coil.png"></img>
-		</a>
 		<div id="pc"></div>
 		<div id="lg" class="ab">
 			<img src="./assets/l.png"></img>
 		</div>
 		<div id="sc">
-			<div style="position:absolute;top:10px;right:10px;display:grid;cursor:pointer" onclick="window.navigateToPoki()">
-				<span style="color: #382d2b;">Partner:</span>
-				<img style="pointer-events: all; position:unset; margin-left:6px; width:40px" src="./assets/poki.png"></img>
-			</div>
 			<input tabindex="1" type="text" id="name" name="name" value="Snake123" autocomplete="off">
 			<div id="bl">
 				<div id="ht"><svg style="height: 42px; width: 42px;">
@@ -452,7 +81,6 @@
 			</ul>
 		</div>
 	</div>
-	</div>
 	<div id="sh">
 		<div id="gr"></div>
 		<div class="bk"><svg style="height: 42px; width: 42px;">
@@ -467,9 +95,7 @@
 	<svg id="sp" width="104px" height="104px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"
 		preserveAspectRatio="xMidYMid" class="ab lds-infinity" style="background: none;">
 		<defs>
-			<path id="p" class="cc" fill="none" ng-attr-stroke="{{config.stroke}}"
-				ng-attr-stroke-width="{{config.width}}" ng-attr-stroke-dasharray="{{config.dasharray}}"
-				ng-attr-stroke-linecap="{{config.linecap}}"
+			<path id="p" class="cc" fill="none"
 				d="M24.3,30C11.4,30,5,43.3,5,50s6.4,20,19.3,20c19.3,0,32.1-40,51.4-40 C88.6,30,95,43.3,95,50s-6.4,20-19.3,20C56.4,70,43.6,30,24.3,30z"
 				stroke-dasharray="133.42624267578125 123.162685546875" stroke-linecap="round">
 				<animate attributeName="stroke-dashoffset" calcMode="linear" values="0;256.58892822265625"
@@ -480,56 +106,48 @@
 		<use stroke="#FFF0E5" stroke-width="7" xlink:href="#p" />
 	</svg>
 	<img id="stb" src="./assets/st.svg" class="ab bu"></img>
-	<script>
-		openCMP = () => {
-			window.__tcfapi('displayConsentUi', 2, () => {});
-		};
-	</script>
-	<div id="st" class = 'cl'>
+	<div id="st" class="cl">
 		<label class="tgl">
 			<input class="tgl-cb" type="checkbox" checked>
 			<div class="tgl-sw"></div>
 			<span class="tgl-label">Audio</span>
 		</label>
-		<a href="https://sushiparty.io/policy.html">Privacy Policy</a>
-		<a href="https://sushiparty.io/about.html">About</a>
-		<a style="text-decoration: underline;cursor:pointer"onclick="openCMP()">Manage Consent</a>
 	</div>
-	<script type="text/javascript" src="./scripts/l.js"></script>
+
+	<!-- Remove old service worker and block re-registration -->
 	<script>
-		// Save Restore - Client
-		var iframe = document.createElement('iframe');
-		iframe.src = 'https://sushiparty.io/save-restore.html';
-		document.body.appendChild(iframe);
-		iframe.style.position = 'absolute';
-		iframe.style.top = '5000px';
-		window.addEventListener("message", event => {
-			if (event.data && event.data.type === 'restoreSaveData'){
-				var localStorageKeysToRecover = ['sushisnakeio-211020'];
-				var saveData = event.data.saveData;
-				let keysRestored = 0;
-				for(var i = 0; i<localStorageKeysToRecover.length; i++){
-					var key = localStorageKeysToRecover[i];
-					if(saveData[key] !== undefined){
-						try{
-							console.log("Save Restore - Restored key:", key)
-							localStorage.setItem(key, saveData[key]);
-							keysRestored++;
-						}catch(error){
-							console.log("Save Restore - restore issue:", error)
-						}
-					}
-				}
-				if(keysRestored>0){
-					window.location.reload();
-				}
-			}
-		}, false);
-		setTimeout(function(){
-			iframe.parentNode.removeChild(iframe)
-		}, 3000)
-		// Save Restore - End Client
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.getRegistrations().then(function (regs) {
+				regs.forEach(function (r) { r.unregister(); });
+			});
+			navigator.serviceWorker.register = function () { return Promise.resolve(); };
+		}
 	</script>
+
+	<!-- PokiSDK stub: any missing method becomes a no-op. Must load BEFORE l.js -->
+	<script>
+		(function () {
+			var noop = function () {};
+			var base = {
+				init: function () { return Promise.resolve(); },
+				initWithVideoHB: function () { return Promise.resolve(); },
+				isAdBlocked: function () { return false; },
+				getURLParam: function () { return null; },
+				shareableURL: function () { return Promise.resolve(''); },
+				commercialBreak: function () { return Promise.resolve(); },
+				rewardedBreak: function () { return Promise.resolve(true); }
+			};
+			window.PokiSDK = new Proxy(base, {
+				get: function (target, prop) {
+					if (prop in target) return target[prop];
+					if (prop === 'then') return undefined;
+					return noop;
+				}
+			});
+		})();
+	</script>
+
+	<script type="text/javascript" src="./scripts/l.js"></script>
 </body>
 
 </html>
