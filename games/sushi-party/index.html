@@ -147,6 +147,43 @@
 		})();
 	</script>
 
+	<script>
+		(function () {
+			var mouseEvents = {
+				touchstart: "mousedown",
+				touchmove: "mousemove",
+				touchend: "mouseup",
+				touchcancel: "mouseup"
+			};
+
+			Object.keys(mouseEvents).forEach(function (touchType) {
+				document.addEventListener(touchType, function (event) {
+					var touch = event.changedTouches[0];
+					if (!touch) return;
+
+					var mouseEvent = document.createEvent("MouseEvents");
+					mouseEvent.initMouseEvent(
+						mouseEvents[touchType],
+						true,
+						true,
+						window,
+						1,
+						touch.screenX,
+						touch.screenY,
+						touch.clientX,
+						touch.clientY,
+						false,
+						false,
+						false,
+						false,
+						0,
+						null
+					);
+					document.dispatchEvent(mouseEvent);
+				});
+			});
+		})();
+	</script>
 	<script type="text/javascript" src="./scripts/l.js"></script>
 </body>
 
