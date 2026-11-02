@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Save Restore</title>
+</head>
+<body>
+	<script>
+		console.log('Save Restore - Attempting to restore Data');
+		const localStorageKeysToRecover = ['sushisnakeio-211020'];
+		const saveData = {};
+		let restoredKeys = 0;
+		try{
+			for(let i = 0; i<localStorageKeysToRecover.length; i++){
+				const key = localStorageKeysToRecover[i];
+				const data = localStorage.getItem(key);
+				if(data){
+					saveData[key] = data;
+					localStorage.removeItem(key);
+					restoredKeys++;
+				}
+			}
+		}catch(error){
+			console.log('Save Restore - failed recovering local storage', error);
+		}
+		if(restoredKeys>0){
+			console.log('Save Restore - sending to parent:', saveData);
+			parent.postMessage({type:"restoreSaveData", saveData}, "*")
+		}else{
+			console.log('Save Restore - No data to restore');
+		}
+	</script>
+</body>
+</html>

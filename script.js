@@ -135,6 +135,7 @@ const GAME_MODULES = [
   { href: "games/rodha-2/", img: "/images/rodha-2.webp", title: "Rodha 2", cat: "action" },
   { href: "games/shortcut-race/", img: "/images/shortcut-race.png", title: "Shortcut Race", cat: "racing" },
   { href: "games/power-badminton/", img: "/images/power-badminton.jpg", title: "Power Badminton", cat: "sports" },
+  { href: "games/sushi-party/", img: "/images/sushi-party.webp", title: "Sushi Party", cat: "action" },
 ];
 
 /* =============================================================================

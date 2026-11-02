@@ -1,0 +1,41 @@
+
+window.PokiSDK = {
+  init: () => Promise.resolve(),
+  initWithVideoHB: () => Promise.resolve(),
+  gameLoadingStart: () => {},
+  gameLoadingProgress: (data) => {},
+  gameLoadingFinished: () => Promise.resolve(),
+  gameplayStart: () => {},
+  gameplayStop: () => {},
+  gameInteractive: () => {},
+  commercialBreak: (options) => Promise.resolve(),
+  rewardedBreak: (options) => Promise.resolve(true),
+  displayAd: (container, type, options, onClose, onError) => {
+    if (onClose) setTimeout(onClose, 0);
+    return Promise.resolve();
+  },
+  destroyAd: (container) => {},
+  setDebug: (enabled) => {},
+  setLogging: (enabled) => {},
+  setPlayerAge: (age) => {},
+  getURLParam: (k) => new URLSearchParams(window.location.search).get(k) || '',
+  shareableURL: (params) => Promise.resolve(window.location.href),
+  getLanguage: () => navigator.language.toLowerCase().split('-')[0] || 'en',
+  isAdBlocked: () => Promise.resolve(false),
+  customEvent: (noun, verb, data) => {},
+  roundStart: () => {},
+  roundEnd: () => {},
+  happyTime: (intensity) => {},
+  measure: (category, action, label) => {},
+  muteAd: () => {},
+  captureError: (error) => {},
+  logError: (error) => {},
+  getUser: () => Promise.resolve(null),
+  getToken: () => Promise.resolve(null),
+  login: () => Promise.resolve(null),
+  getLeaderboard: () => Promise.resolve([]),
+  sendHighscore: (score) => Promise.resolve(),
+  openExternalLink: (url) => { window.open(url, '_blank'); },
+  enableEventTracking: () => {},
+};
+console.log('[Proxy] PokiSDK ready');
