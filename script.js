@@ -137,6 +137,7 @@ const GAME_MODULES = [
   { href: "games/power-badminton/", img: "/images/power-badminton.jpg", title: "Power Badminton", cat: "sports" },
   { href: "games/sushi-party/", img: "/images/sushi-party.webp", title: "Sushi Party", cat: "action" },
   { href: "games/sling-star-kick/", img: "/images/sling-star-kick.jpg", title: "Sling Star Kick Soccer Game", cat: "sports" },
+  { href: "games/unicycle-legend/", img: "/images/unicycle-legend.avif", title: "Unicycle Legend", cat: "sports" },
 ];
 
 /* =============================================================================
