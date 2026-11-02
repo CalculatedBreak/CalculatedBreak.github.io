@@ -133,6 +133,7 @@ const GAME_MODULES = [
   { href: "games/speedstars", img: "/images/speed-stars.jpg", title: "Speedstars", cat: "racing" },
   { href: "/monkey-mart/index.htm", img: "/games/m-m/m-m.webp", title: "Monkey Mart", cat: "idle" },
   { href: "games/rodha-2/", img: "/images/rodha-2.webp", title: "Rodha 2", cat: "action" },
+  { href: "games/shortcut-race/", img: "/images/shortcut-race.png", title: "Shortcut Race", cat: "racing" },
 ];
 
 /* =============================================================================
