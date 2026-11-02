@@ -138,6 +138,7 @@ const GAME_MODULES = [
   { href: "games/sushi-party/", img: "/images/sushi-party.webp", title: "Sushi Party", cat: "action" },
   { href: "games/sling-star-kick/", img: "/images/sling-star-kick.jpg", title: "Sling Star Kick Soccer Game", cat: "sports" },
   { href: "games/unicycle-legend/", img: "/images/unicycle-legend.avif", title: "Unicycle Legend", cat: "sports" },
+  { href: "games/idle-startup-tycoon/", img: "/images/idle-startup-tycoon.png", title: "Idle Startup Tycoon", cat: "idle" },
 ];
 
 /* =============================================================================
