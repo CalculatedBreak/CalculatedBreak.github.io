@@ -38,8 +38,9 @@
   window.PokiSDK = fallback;
 
   // Load the core implementation from the same folder (relative path only).
-  var s = document.createElement("script");
-  s.src = "poki-sdk-core.js";
-  s.async = false;
-  document.head.appendChild(s);
+  // Disabled loading of Poki core SDK to prevent site lock redirects.
+// var s = document.createElement("script");
+// s.src = "poki-sdk-core.js";
+// s.async = false;
+// document.head.appendChild(s);
 })();
