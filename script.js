@@ -28,7 +28,7 @@ const GAME_MODULES = [
   { href: "games/Idle Breakout/", img: "games/Idle Breakout/image.png", title: "Idle Breakout", cat: "idle" },
   { href: "games/getaway-shootout/", img: "games/getaway-shootout/images.jpg", title: "Getaway Shootout", cat: "multiplayer" },
   { href: "games/bitlife/", img: "games/bitlife/logo.png", title: "BitLife", cat: "idle" },
-  { href: "games/subway-surfers-ny/", img: "games/subway-surfers-ny/NewYorkIcon.png", title: "Subway Surfers NY", cat: "action" },
+  { href: "games/subway-surfers-ny/", img: "images/subway-surfers-ny.webp", title: "Subway Surfers Bali", cat: "action" },
   { href: "games/just-fall/", img: "games/just-fall/unnamed.png", title: "Just Fall", cat: "multiplayer" },
   { href: "games/2048/", img: "games/2048/2048.png", title: "2048", cat: "puzzle" },
   { href: "games/vex3/", img: "images/vex3.jpg", title: "Vex 3", cat: "action" },
