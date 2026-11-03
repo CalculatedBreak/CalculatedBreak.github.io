@@ -36,10 +36,10 @@ xlocation= new Proxy(location, {
         return "localhost";
       }
       if (property== "href") {
-        return "https://localhost/";
+        return "https://localhost/1234";
       }
       if (property== "origin") {
-        return "https://localhost/";
+        return "https://localhost/1234";
       }
       return targetObj;
     }
