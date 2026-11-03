@@ -1,0 +1,1758 @@
+/* account.js -- the nav account icon's drawer: register / log in with Google, and the signed-in panel.
+ *
+ * Shipped site-wide 2026-09-18. Ported verbatim (CSS, markup and logic) from the owner-approved preview at
+ * html/labs/profile-icon-preview/index.html, which had the whole feature inlined into one page. Nothing about
+ * the design changed in the port; what changed is where it lives and when it loads -- see below.
+ *
+ * WHERE THE FEATURE LIVES
+ *   this file                 the drawer's CSS, its markup and all of its behaviour (one cacheable copy)
+ *   tools/nav-parts.js        the nav account icon <a class="pz-icon-btn pz-account-btn"> + the ~14 lines of
+ *                             CSS that style it (badge, tooltip, red nudge dot). Generated into every page
+ *                             because it is visible at first paint and sits in the nav's flex order.
+ *   tools/sweep-account-nav.js   the re-runnable sweep that puts both of those onto pages already on disk.
+ *
+ * Cache-busted as /jsload/account.js?v=N on every page that loads it -- bump ACCOUNT_VERSION in
+ * tools/nav-parts.js and re-run the sweep on EVERY change to this file, or returning visitors keep the old
+ * one (shared scripts here sit behind a ~62-day Cloudflare cache).
+ *
+ * WHAT IS LAZY, AND WHY (this is the only substantive difference from the labs page)
+ *   supabase-js (218 KB / 55 KB gz) was a plain synchronous <script> on the preview. Here it is injected only
+ *   when a Supabase call is actually about to happen -- see clientReady(). The session bridge iframe (which
+ *   pulls its own copy of the library on the games origin) runs once per tab-session, at browser idle, and
+ *   its "signed out" answer is cached in sessionStorage. A signed-out visitor who never opens the drawer
+ *   therefore pays for this feature exactly once: this file. Page weight is a primary metric on this site and
+ *   most of the audience is on slow school Chromebooks behind a filter.
+ *
+ * Escape hatch: window.PZ_NO_ACCOUNT = true before this runs disables it entirely.
+ *
+ * ACCOUNT FIXES (2026-10-05, owner-approved "do all of the account fixes"; ships with games-origin save-sync.js v14
+ * and session-bridge.html v6 -- see the audit write-up in CLAUDE.md):
+ *   * "Sign out" is THIS DEVICE ONLY; "Sign out everywhere" in the ... menu is the old global sign-out.
+ *   * The portal can no longer refresh a session, by construction: this page's own client has its fetch wrapped
+ *     so a POST /auth/v1/token?grant_type=refresh_token never reaches the network -- it is answered from the
+ *     bridge's current session instead (the games origin is the one refresher). "Add a passkey" goes through
+ *     freshClient(); the sign-out / delete fallbacks call /logout directly with the in-memory token instead of
+ *     client.auth.signOut() (which would refresh first if the token were near expiry).
+ *   * After any sign-in or sign-out on this page, every games-origin iframe on it (the game being played, two
+ *     frames down) is told {type:"pz-account-changed"}, so a running game checks in at once instead of on its
+ *     next load. A game that cannot use storage at all asks with {type:"pz-account-query"} and is answered.
+ *   * "On this device" in the signed-in drawer: games whose progress on this device was replaced by the account's
+ *     save (with a one-tap way to get the device's copy back, via the game's own banner), games that cannot sync
+ *     (save too big, restore failed), and a browser that blocks site data so nothing can sync at all.
+ */
+(function () {
+  "use strict";
+
+  var CSS = `
+/* ---- what this sheet needs from the page, and does not assume it has ----
+   The labs preview this is ported from loaded NO stylesheet at all, so it inherited three things from its own
+   inline <style> that no real page provides. They are restated here so the drawer renders identically on all
+   five of the site's stylesheets (and on /search, which is on the one sheet with no global box-sizing rule):
+     1. --pz-panel-2. nav-parts.js declares --pz-accent/-hot/-bg/-panel/-line/-text/-muted on :root, but NOT
+        this one; the drawer uses it unguarded for the close button, hero, avatar ring, tiles, cards and modal.
+     2. border-box. /style/style.css (Tailwind preflight), /style/searchpage.css and /css/searchpage.css set it
+        globally; /css/style.css -- the sheet /search is on -- does not, and .pz-acct-google is
+        'width:100%; padding:0 72px', i.e. 144px of overflow without it.
+     3. .tile-badge, the corner sticker. It is a homepage-mosaic component that lives in html/index.html's own
+        inline CSS, not in any shared sheet (what the shared sheets carry is the differently-named .new-badge).
+        Scoped to .pz-acct here so it can never collide with the homepage's copy or with .new-badge. */
+:root { --pz-panel-2: #262626; }
+.pz-acct, .pz-acct *, .pz-acct *::before, .pz-acct *::after,
+.pz-acct-scrim, .pz-acct-modal, .pz-acct-modal *, .pz-acct-modal *::before, .pz-acct-modal *::after { box-sizing: border-box; }
+.pz-acct .tile-badge { position: absolute; top: 8px; left: -6px; z-index: 3; width: 27px; height: 28px; display: grid; place-items: center; border-radius: 3px 14px 14px 0; background: var(--badge-bg, var(--pz-accent)); color: #111; box-shadow: 1px 2px 3px 1px rgba(0,0,0,.35); pointer-events: none; opacity: 1; transition: opacity .15s ease; }
+.pz-acct .tile-badge::before { content: ""; position: absolute; top: 28px; left: 0; width: 4px; height: 4px; background: var(--badge-bg, var(--pz-accent)); }
+.pz-acct .tile-badge::after { content: ""; position: absolute; top: 28px; left: 0; width: 6px; height: 8px; border-radius: 4px 0 0 4px; background: var(--badge-fold, #a8930b); z-index: 1; }
+.pz-acct .tile-badge svg { width: 18px; height: 18px; display: block; position: relative; z-index: 2; }
+.pz-acct .tile-badge.is-recent { --badge-bg: var(--pz-panel); --badge-fold: #3a3a3a; color: #fff; box-shadow: inset 0 0 0 1px var(--pz-line), 1px 2px 3px 1px rgba(0,0,0,.45); }
+
+/* ---- account drawer (slides in from the right) ----
+   Redesigned 2026-09-17 after the owner called the first version "dry and very very boring" and sent
+   Poki's own account panel as the structure to match (hero card + stat pills, round edge-mounted close
+   arrow, "Ready for another round?" recent-games row, "Your most played", "Your top category").
+   Colours are ours: --pz-panel/-2, --pz-line, --pz-accent. Tile hover = shadow + name reveal + the site's
+   hover-preview clip (see .pz-acct-row) -- NO lift (removed 2026-09-17, owner) and no brightness tint, per
+   the 2026-09-07 site-wide removal. */
+html.pz-acct-lock { overflow: hidden; }
+.pz-acct-scrim { position: fixed; inset: 0; z-index: 1100; background: rgba(0,0,0,.62); opacity: 0; visibility: hidden; transition: opacity .28s ease, visibility 0s linear .28s; }
+.pz-acct-scrim.is-open { opacity: 1; visibility: visible; transition: opacity .28s ease; }
+.pz-acct { position: fixed; top: 0; right: 0; bottom: 0; width: min(640px, 100vw); z-index: 1101; background: var(--pz-panel); border-left: 1px solid var(--pz-line); box-shadow: -24px 0 64px rgba(0,0,0,.55); color: var(--pz-text); font-family: "Rubik","Rubik Fallback",sans-serif; transform: translateX(104%); visibility: hidden; outline: none; transition: transform .34s cubic-bezier(.2,.8,.25,1), visibility 0s linear .34s; }
+.pz-acct.is-open { transform: none; visibility: visible; transition: transform .34s cubic-bezier(.2,.8,.25,1); }
+@media (prefers-reduced-motion: reduce) { .pz-acct, .pz-acct-scrim, .pz-icon-btn .pz-account-badge, .pz-acct-tile, .pz-acct-menu, .pz-acct-close, .pz-acct-cat, .pz-acct-row-btn { transition-duration: 0s !important; } }
+/* scrolling lives on an inner column so the round close button can straddle the panel's left edge without being clipped */
+.pz-acct-scroll { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 24px 28px 40px 36px; display: flex; flex-direction: column; gap: 26px; }
+.pz-acct-close { position: absolute; left: -26px; top: 24px; z-index: 5; width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255,255,255,.14); background: var(--pz-panel-2); color: #fff; cursor: pointer; display: grid; place-items: center; box-shadow: 0 8px 22px rgba(0,0,0,.5); transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .2s cubic-bezier(.2,.9,.3,1.2); }
+.pz-acct-close svg { width: 22px; height: 22px; display: block; transition: transform .2s ease; }
+.pz-acct-close:hover, .pz-acct-close:focus-visible { background: var(--pz-accent); color: #111; border-color: transparent; outline: none; transform: scale(1.06); }
+.pz-acct-close:hover svg { transform: translateX(2px); }
+.pz-acct-close:active { transform: scale(.96); }
+@media (max-width: 640px) { .pz-acct-close { left: 12px; top: 12px; width: 44px; height: 44px; } .pz-acct-scroll { padding: 70px 16px 32px; gap: 22px; } }
+
+/* signed-out: header + tabs + Google button (unchanged mechanics) */
+/* NO persistent "Your account" title at the top of the drawer any more (owner, round 4): the top is unbranded chrome, the only
+   headings are the per-tab one (signed out) and the hero card's own (signed in). The dialog is labelled by aria-label instead. */
+/* round 4 (owner, 2026-09-17: "too wide, sits too high"): tabs + signed-out body are one centred 440px column (was the
+   full 575px), and the column is pushed DOWN (vertical axis only -- it stays horizontally centred): the tabs start 134px below the drawer's
+   top edge (110px margin on top of the column's 24px padding; before this round they sat ~70px down under the old title).
+   Phones keep a smaller offset because height is scarce there. */
+.pz-acct-tabs { display: flex; width: 100%; max-width: 440px; margin: 110px auto 0; border-bottom: 1px solid var(--pz-line); }
+@media (max-width: 640px) { .pz-acct-tabs { margin-top: 36px; } }
+.pz-acct[data-state="out"] .pz-acct-body { width: 100%; max-width: 440px; margin: 0 auto; }
+.pz-acct-tab { flex: 1 1 0; appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 12px 0 11px; font: 600 15px/1 "Rubik","Rubik Fallback",sans-serif; color: var(--pz-muted); cursor: pointer; transition: color .15s ease, border-color .15s ease; }
+.pz-acct-tab:hover { color: #fff; }
+.pz-acct-tab[aria-selected="true"] { color: #fff; border-bottom-color: var(--pz-accent); }
+.pz-acct-tab:focus-visible { outline: 2px solid var(--pz-accent); outline-offset: -2px; border-radius: 6px; }
+/* signed-out body, restructured 2026-09-17 to Poki's own register screen (owner's reference screenshot): one big centred
+   heading, then a vertical stack of tall fully-rounded provider pills (provider icon at the LEFT inside the pill, label
+   centred), then a single disclaimer line under a hairline. Deliberately NO subtitle paragraph between heading and
+   buttons, no logo and (since round 4) no "Your account" title above the tabs either. Colours are ours, not Poki's
+   white/blue: --pz-accent outline + text on the panel, filling solid accent on hover. */
+.pz-acct-body { display: flex; flex-direction: column; gap: 24px; }
+.pz-acct-h { margin: 8px 0 0; font: 700 28px/1.2 "Rubik","Rubik Fallback",sans-serif; color: #fff; letter-spacing: -.01em; text-align: center; }
+/* the ONE line of incentive copy (owner, round 4): why sign up = your game progress gets saved. Single short line, muted,
+   tucked under the heading (-12px eats most of the body gap) -- not the old descriptive paragraph, which stays gone. */
+.pz-acct-why { margin: -12px 0 0; font: 400 15px/1.45 "Rubik","Rubik Fallback",sans-serif; color: var(--pz-muted); text-align: center; }
+.pz-acct-why b { color: #fff; font-weight: 600; }
+.pz-acct-providers { display: flex; flex-direction: column; gap: 14px; }
+.pz-acct-google { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 64px; padding: 0 72px; border-radius: 999px; background: transparent; color: var(--pz-accent); border: 2px solid var(--pz-accent); font: 700 18px/1 "Rubik","Rubik Fallback",sans-serif; cursor: pointer; transition: background-color .15s ease, color .15s ease, box-shadow .15s ease, transform .1s ease; }
+/* hover: a faint accent tint + soft shadow, text and outline unchanged. The first cut filled the pill solid yellow and the
+   owner called it "much too harsh" (round 4) -- keep this subtle. */
+.pz-acct-google:hover { background: rgba(240,210,16,.12); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.pz-acct-google:active { transform: scale(.985); box-shadow: none; background: rgba(240,210,16,.2); }
+.pz-acct-google:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.pz-acct-google[disabled] { opacity: .6; cursor: default; }
+/* Secondary sign-in methods (Passkey, Microsoft). Same geometry as the Google button -- same height,
+   radius, icon well and label -- but a quieter outline so Google stays the primary call to action.
+   They are rendered ONLY when the Supabase project actually has them enabled (see providerCaps()),
+   so Microsoft simply appears the moment the owner finishes the Azure setup, with no code change. */
+.pz-acct-alt { display: none; flex-direction: column; gap: 12px; margin-top: 12px; }
+.pz-acct-alt.is-on { display: flex; }
+.pz-acct-alt2 { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 56px; padding: 0 72px; border-radius: 999px; background: transparent; color: #fff; border: 1.5px solid var(--pz-line); font: 600 16px/1 "Rubik","Rubik Fallback",sans-serif; cursor: pointer; transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .1s ease; }
+.pz-acct-alt2:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.28); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.pz-acct-alt2:active { transform: scale(.985); box-shadow: none; background: rgba(255,255,255,.1); }
+.pz-acct-alt2:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.pz-acct-alt2[disabled] { opacity: .6; cursor: default; }
+.pz-acct-alt2-ic { position: absolute; left: 11px; top: 50%; width: 34px; height: 34px; margin-top: -17px; border-radius: 50%; background: rgba(255,255,255,.08); display: grid; place-items: center; }
+.pz-acct-alt2-ic svg { width: 19px; height: 19px; display: block; }
+.pz-acct-or { display: flex; align-items: center; gap: 12px; margin: 16px 0 4px; color: var(--pz-muted); font: 500 13px/1 "Rubik","Rubik Fallback",sans-serif; }
+.pz-acct-or::before, .pz-acct-or::after { content: ""; flex: 1; height: 1px; background: var(--pz-line); }
+.pz-acct-or.is-on { display: flex; }
+.pz-acct-or { display: none; }
+/* the provider icon sits in a white disc at the pill's left edge so the coloured G stays legible on both the dark and the hover-filled pill */
+.pz-acct-google-ic { position: absolute; left: 11px; top: 50%; width: 40px; height: 40px; margin-top: -20px; border-radius: 50%; background: #fff; display: grid; place-items: center; }
+.pz-acct-google-ic svg { width: 22px; height: 22px; display: block; }
+.pz-acct-status { display: none; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--pz-panel-2, #262626); border: 1px solid var(--pz-line); font: 400 13.5px/1.5 "Rubik","Rubik Fallback",sans-serif; color: #ddd; }
+.pz-acct-status.is-shown { display: flex; }
+.pz-acct-status.is-error { border-color: rgba(252,88,73,.5); color: #ffb8b0; }
+.pz-acct-status.is-info { border-color: rgba(240,210,16,.45); }
+.pz-acct-status-text { flex: 1 1 auto; min-width: 0; }
+.pz-acct-cancel { appearance: none; background: none; border: 0; padding: 0; margin-left: 4px; font: 600 13px/1.5 "Rubik","Rubik Fallback",sans-serif; color: var(--pz-accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; flex: 0 0 auto; }
+.pz-acct-spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.18); border-top-color: var(--pz-accent); border-radius: 50%; animation: pz-acct-spin .8s linear infinite; flex: 0 0 auto; margin-top: 2px; }
+@keyframes pz-acct-spin { to { transform: rotate(360deg); } }
+.pz-acct-legal { margin: 0; padding-top: 18px; border-top: 1px solid var(--pz-line); font: 400 13px/1.5 "Rubik","Rubik Fallback",sans-serif; color: #8d8d8d; text-align: center; }
+.pz-acct-legal a { color: #bdbdbd; text-decoration: underline; text-underline-offset: 2px; }
+.pz-acct-legal a:hover { color: var(--pz-accent); }
+.pz-acct[data-state="in"] .pz-acct-out-only, .pz-acct[data-state="out"] .pz-acct-in-only { display: none; }
+/* ---- "pending": the session answer is not known yet ----
+   The drawer's markup has to start in SOME state, and starting it in "out" meant a signed-in visitor who
+   opened the drawer before the session check resolved saw the register/Google screen for a few frames and
+   then watched it snap to their account (owner, 2026-09-19). "pending" shows neither view -- just three
+   dots -- and render() replaces it with the real answer the moment there is one. Purely additive: a browser
+   that somehow never reaches render() shows a loader rather than the wrong screen, which is the safer of
+   the two. */
+.pz-acct[data-state="pending"] .pz-acct-out-only, .pz-acct[data-state="pending"] .pz-acct-in-only { display: none; }
+.pz-acct-loading { display: none; padding: 84px 0 96px; place-items: center; gap: 18px; }
+.pz-acct[data-state="pending"] .pz-acct-loading { display: grid; }
+.pz-acct-dots { display: flex; gap: 9px; }
+.pz-acct-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--pz-muted, #8d8d8d); animation: pz-acct-dot 1.05s ease-in-out infinite both; }
+.pz-acct-dots i:nth-child(2) { animation-delay: .14s; }
+.pz-acct-dots i:nth-child(3) { animation-delay: .28s; }
+@keyframes pz-acct-dot { 0%, 72%, 100% { opacity: .26; transform: translateY(0) scale(.86); } 34% { opacity: 1; transform: translateY(-5px) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .pz-acct-dots i { animation-duration: 0s; opacity: .55; } }
+.pz-acct-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* ---- signed-in: hero card ---- */
+.pz-acct-hero { position: relative; border-radius: 22px; border: 1px solid var(--pz-line); background: radial-gradient(90% 80% at 0% 0%, rgba(240,210,16,.18), transparent 58%), radial-gradient(70% 70% at 100% 100%, rgba(252,88,73,.10), transparent 60%), radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.2px) 0 0 / 14px 14px, var(--pz-panel-2); padding: 30px 26px 26px; display: grid; grid-template-columns: 124px 1fr; gap: 24px; align-items: center; }
+.pz-acct-menu-btn { position: absolute; top: 14px; right: 14px; z-index: 6; width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: #fff; cursor: pointer; display: grid; place-items: center; transition: background-color .15s ease, color .15s ease, transform .15s ease; }
+.pz-acct-menu-btn svg { width: 18px; height: 18px; display: block; }
+.pz-acct-menu-btn:hover, .pz-acct-menu-btn:focus-visible, .pz-acct-menu-btn[aria-expanded="true"] { background: var(--pz-accent); color: #111; border-color: transparent; outline: none; }
+/* red "there's something in here" dot on the ... button, top-right, exactly as on Poki's own panel (owner's reference screenshot) */
+.pz-acct-menu-btn::after { content: ""; position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: var(--pz-hot); border: 2px solid var(--pz-panel-2); pointer-events: none; }
+.pz-acct-fig { position: relative; width: 124px; height: 124px; justify-self: center; }
+.pz-acct-fig-pad { position: absolute; inset: 6px; border-radius: 30px; background: linear-gradient(150deg, #ffe45c 0%, #f0d210 55%, #d9bd08 100%); color: #161616; display: grid; place-items: center; transform: rotate(-8deg); box-shadow: 0 16px 30px rgba(0,0,0,.5), inset 0 -5px 0 rgba(0,0,0,.14), inset 0 2px 0 rgba(255,255,255,.35); transition: transform .35s cubic-bezier(.2,.9,.3,1.2); }
+.pz-acct-hero:hover .pz-acct-fig-pad { transform: rotate(-3deg) translateY(-2px); }
+.pz-acct-fig-pad svg { width: 66px; height: 66px; display: block; }
+.pz-acct-fig::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -16px; height: 14px; border-radius: 50%; background: rgba(0,0,0,.4); filter: blur(3px); }
+/* the avatar is ALWAYS the initial letter (owner, 2026-09-17) -- the Google profile photo is never requested, see render() */
+.pz-acct-avatar { position: absolute; right: -6px; bottom: -6px; z-index: 2; width: 46px; height: 46px; border-radius: 50%; border: 3px solid var(--pz-panel-2); background: #fff; color: #111; display: flex; align-items: center; justify-content: center; font: 700 18px/1 "Rubik","Rubik Fallback",sans-serif; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,.45); }
+.pz-acct-who { min-width: 0; }
+.pz-acct-hero-h { margin: 0; font: 400 36px/1 "Bebas Neue","Bebas Neue Fallback",sans-serif; letter-spacing: .03em; color: #fff; }
+.pz-acct-hero-h b { color: var(--pz-accent); font-weight: 400; }
+.pz-acct-hero-sub { margin: 7px 0 0; font: 400 14.5px/1.45 "Rubik","Rubik Fallback",sans-serif; color: var(--pz-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pz-acct-hero-sub .pz-acct-name { color: #fff; font-weight: 700; }
+.pz-acct-email { margin-top: 2px; font: 400 12.5px/1.4 "Rubik","Rubik Fallback",sans-serif; color: #8d8d8d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pz-acct-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+/* stat pills are BUTTONS, closed by default (owner, 2026-09-17): games = icon + bare number (no "games" word), hours = icon only.
+   Click slides them open: the games pill drops a list of the games played below the pills, the hours pill slides its
+   "3h12m" out inline. Both are REAL account data since 2026-09-18 (game_play + game_saves, see fetchStats). */
+.pz-acct-stat { appearance: none; display: inline-flex; align-items: center; gap: 0; height: 40px; padding: 0 13px 0 12px; border-radius: 999px; background: rgba(22,22,22,.55); border: 1px solid rgba(255,255,255,.12); font: 700 15.5px/1 "Rubik","Rubik Fallback",sans-serif; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); cursor: pointer; transition: background-color .15s ease, border-color .15s ease, transform .1s ease; }
+.pz-acct-stat:hover, .pz-acct-stat:focus-visible { background: rgba(22,22,22,.8); border-color: rgba(240,210,16,.55); outline: none; }
+.pz-acct-stat:active { transform: scale(.97); }
+.pz-acct-stat[aria-expanded="true"] { background: rgba(240,210,16,.14); border-color: rgba(240,210,16,.55); }
+.pz-acct-stat svg { width: 19px; height: 19px; color: var(--pz-accent); flex: 0 0 auto; }
+.pz-acct-stat .pz-cat-icon { width: 21px; height: 21px; }
+.pz-acct-stat-n { margin-left: 8px; }
+/* the slide-open value: a 0fr -> 1fr grid column so the width animates without a magic max-width */
+.pz-acct-stat-val { display: grid; grid-template-columns: 0fr; transition: grid-template-columns .3s ease; }
+.pz-acct-stat-val > span { display: block; min-width: 0; overflow: hidden; white-space: nowrap; opacity: 0; transition: opacity .2s ease; }
+.pz-acct-stat-val > span > span { display: inline-block; padding-left: 8px; }
+.pz-acct-stat[aria-expanded="true"] .pz-acct-stat-val { grid-template-columns: 1fr; }
+.pz-acct-stat[aria-expanded="true"] .pz-acct-stat-val > span { opacity: 1; transition-delay: .08s; }
+.pz-acct-stat-chev { width: 14px !important; height: 14px !important; margin-left: 5px; color: var(--pz-muted) !important; transition: transform .25s ease; }
+.pz-acct-stat[aria-expanded="true"] .pz-acct-stat-chev { transform: rotate(180deg); color: var(--pz-accent) !important; }
+/* the games-list panel: spans the hero card, slides open on 0fr -> 1fr rows; -24px cancels the hero's row-gap while shut */
+.pz-acct-stat-panel { grid-column: 1 / -1; margin-top: -24px; display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows .32s ease, visibility 0s linear .32s; }
+.pz-acct-stat-panel.is-open { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows .32s ease; }
+.pz-acct-stat-panel-in { min-height: 0; overflow: hidden; }
+.pz-acct-stat-panel-box { margin-top: 18px; padding: 14px 14px 12px; border-radius: 14px; background: rgba(22,22,22,.45); border: 1px solid rgba(255,255,255,.1); text-align: left; }
+.pz-acct-stat-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.pz-acct-stat-panel-head b { font: 700 13px/1.2 "Rubik","Rubik Fallback",sans-serif; color: #fff; }
+.pz-acct-stat-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+.pz-acct-stat-list a { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 4px 6px 4px 4px; border-radius: 9px; color: #fff; text-decoration: none; font: 500 13px/1.2 "Rubik","Rubik Fallback",sans-serif; transition: background-color .12s ease; }
+.pz-acct-stat-list a:hover, .pz-acct-stat-list a:focus-visible { background: rgba(255,255,255,.08); outline: none; }
+.pz-acct-stat-list a:hover .pz-acct-stat-list-name { color: var(--pz-accent); }
+.pz-acct-stat-list picture { display: contents; }
+.pz-acct-stat-list img { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; flex: 0 0 auto; display: block; }
+.pz-acct-stat-list-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pz-acct-stat-list small { flex: 0 0 auto; margin-left: auto; font: 500 11.5px/1 "Rubik","Rubik Fallback",sans-serif; color: var(--pz-muted); }
+.pz-acct-stat-more { margin: 8px 0 0; font: 400 12px/1.3 "Rubik","Rubik Fallback",sans-serif; color: #8d8d8d; }
+@media (max-width: 640px) { .pz-acct-hero { grid-template-columns: 1fr; padding: 26px 18px 22px; text-align: center; } .pz-acct-fig { margin: 0 auto 10px; } .pz-acct-stats { justify-content: center; } .pz-acct-hero-sub { white-space: normal; } .pz-acct-stat-list { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .pz-acct-stat, .pz-acct-stat-val, .pz-acct-stat-val > span, .pz-acct-stat-chev, .pz-acct-stat-panel { transition-duration: 0s !important; transition-delay: 0s !important; } }
+
+/* the ... menu (Sign out / Delete account) */
+.pz-acct-menu { position: absolute; top: 58px; right: 14px; z-index: 7; min-width: 224px; padding: 6px; border-radius: 14px; background: #2c2c2c; border: 1px solid rgba(255,255,255,.12); box-shadow: 0 18px 40px rgba(0,0,0,.55); opacity: 0; transform: translateY(-6px) scale(.98); transform-origin: top right; pointer-events: none; transition: opacity .16s ease, transform .16s ease; }
+.pz-acct-menu.is-open { opacity: 1; transform: none; pointer-events: auto; }
+.pz-acct-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 12px; border: 0; border-radius: 9px; background: none; color: #fff; font: 500 14px/1 "Rubik","Rubik Fallback",sans-serif; cursor: pointer; text-align: left; transition: background-color .12s ease; }
+.pz-acct-menu-item:hover, .pz-acct-menu-item:focus-visible { background: rgba(255,255,255,.08); outline: none; }
+.pz-acct-menu-item[disabled] { opacity: .55; cursor: default; }
+.pz-acct-menu-item svg { width: 18px; height: 18px; color: var(--pz-muted); flex: 0 0 auto; }
+.pz-acct-menu-item.is-danger { color: #ff8f85; }
+.pz-acct-menu-item.is-danger svg { color: inherit; }
+.pz-acct-menu-sep { height: 1px; margin: 4px 6px; background: rgba(255,255,255,.08); }
+
+/* full-screen confirm modal for Sign out AND Delete account (owner's reference, 2026-09-17: a dimmed backdrop over the
+   whole screen, drawer included; a centred card; a small glyph beside the question; two pills side by side where the
+   STAY option is the solid, prominent one and the destructive "Yes, ..." is only outlined -- that weighting gently
+   discourages the destructive action). It replaced the ... menu's old inline confirm step. Sits above the drawer
+   (1101) and its scrim (1100). The card is our panel token, not the reference's white. */
+.pz-acct-modal { position: fixed; inset: 0; z-index: 1150; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.6); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); opacity: 0; transition: opacity .18s ease; }
+.pz-acct-modal[hidden] { display: none; }
+.pz-acct-modal.is-open { opacity: 1; }
+.pz-acct-modal-card { width: 100%; max-width: 560px; padding: 22px 24px 24px; border-radius: 20px; background: var(--pz-panel-2); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 30px 80px rgba(0,0,0,.6); color: #fff; font-family: "Rubik","Rubik Fallback",sans-serif; transform: translateY(8px) scale(.97); transition: transform .2s cubic-bezier(.2,.8,.25,1); }
+.pz-acct-modal.is-open .pz-acct-modal-card { transform: none; }
+.pz-acct-modal-head { display: flex; align-items: center; gap: 12px; }
+.pz-acct-modal-ic { flex: 0 0 auto; width: 24px; height: 24px; color: #fff; display: grid; place-items: center; }
+.pz-acct-modal-ic svg { width: 24px; height: 24px; display: block; }
+.pz-acct-modal-h { margin: 0; font: 700 19px/1.3 "Rubik","Rubik Fallback",sans-serif; color: #fff; letter-spacing: -.01em; }
+.pz-acct-modal-p { margin: 8px 0 0 36px; font: 400 14px/1.5 "Rubik","Rubik Fallback",sans-serif; color: var(--pz-muted); }
+.pz-acct-modal-p[hidden] { display: none; }
+.pz-acct-modal-row { display: flex; gap: 14px; margin-top: 20px; }
+.pz-acct-modal-row button { flex: 1 1 0; height: 54px; border-radius: 999px; font: 700 16px/1 "Rubik","Rubik Fallback",sans-serif; cursor: pointer; transition: background-color .15s ease, color .15s ease, transform .1s ease, box-shadow .15s ease, filter .15s ease; }
+.pz-acct-modal-yes { background: transparent; color: var(--pz-accent); border: 2px solid var(--pz-accent); }
+.pz-acct-modal-yes:hover { background: rgba(240,210,16,.12); }
+.pz-acct-modal-no { background: var(--pz-accent); color: #111; border: 2px solid var(--pz-accent); }
+.pz-acct-modal-no:hover { filter: brightness(1.08); box-shadow: 0 8px 22px rgba(240,210,16,.25); }
+.pz-acct-modal-row button:active { transform: scale(.985); }
+.pz-acct-modal-row button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+/* delete variant: same layout, trash glyph, the outlined destructive pill goes red */
+.pz-acct-modal[data-kind="delete"] .pz-acct-modal-ic { color: #ff8f85; }
+.pz-acct-modal[data-kind="delete"] .pz-acct-modal-yes { color: #ff8f85; border-color: rgba(252,88,73,.8); }
+.pz-acct-modal[data-kind="delete"] .pz-acct-modal-yes:hover { background: rgba(252,88,73,.12); }
+/* phones: stack the two pills. flex-basis must go back to auto here or a column flexbox collapses the 54px height to the text height */
+@media (max-width: 480px) { .pz-acct-modal-row { flex-direction: column; } .pz-acct-modal-row button { flex: 0 0 auto; } .pz-acct-modal-p { margin-left: 0; } }
+@media (prefers-reduced-motion: reduce) { .pz-acct-modal, .pz-acct-modal-card { transition-duration: 0s !important; } }
+
+/* ---- sections ---- */
+.pz-acct-sec { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.pz-acct-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pz-acct-sec-h { margin: 0; display: flex; align-items: center; gap: 9px; font: 700 18px/1.2 "Rubik","Rubik Fallback",sans-serif; color: #fff; letter-spacing: -.01em; }
+.pz-acct-sec-h::before { content: ""; width: 4px; height: 18px; border-radius: 3px; background: var(--pz-accent); flex: 0 0 auto; }
+.pz-acct-device[hidden] { display: none; }
+.pz-acct-device-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pz-acct-device-list li { display: flex; align-items: center; gap: 12px; padding: 11px 13px; border-radius: 12px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.08); font: 400 13.5px/1.35 "Rubik","Rubik Fallback",sans-serif; color: rgba(255,255,255,.86); }
+.pz-acct-device-list li span { flex: 1 1 auto; min-width: 0; }
+.pz-acct-device-list li b { color: #fff; font-weight: 600; }
+.pz-acct-device-list li.is-warn { border-color: rgba(255,143,133,.35); }
+.pz-acct-device-list button { flex: 0 0 auto; border: 0; border-radius: 999px; padding: 8px 13px; background: #1f6dff; color: #fff; font: 600 12.5px/1 "Rubik","Rubik Fallback",sans-serif; cursor: pointer; }
+.pz-acct-device-list button[disabled] { opacity: .6; cursor: default; }
+.pz-acct-sec-h .pz-acct-count { font: 600 12px/1 "Rubik","Rubik Fallback",sans-serif; color: var(--pz-muted); padding: 5px 8px; border-radius: 999px; background: rgba(255,255,255,.06); }
+.pz-acct-tag { font: 600 10.5px/1 "Rubik","Rubik Fallback",sans-serif; letter-spacing: .07em; text-transform: uppercase; color: #8d8d8d; border: 1px dashed rgba(255,255,255,.2); border-radius: 999px; padding: 5px 8px; white-space: nowrap; cursor: help; }
+.pz-acct-row-wrap { position: relative; }
+/* 8px of horizontal padding pulled back with a matching negative margin: the tiles sit exactly where they did, but the
+   corner sticker (.tile-badge, left:-6px on the first tile) now lands INSIDE the scroll container's padding box instead of
+   being clipped by its overflow -- the same clip the homepage's "New" badge had before the padding trick there.
+   scroll-padding keeps the snap points on the content box so nothing visibly moved. */
+/* Both rows ALSO carry the class 'game-grid' (see MARKUP). That is purely the hook /jsload/hoverpreview.js keys on
+   ('.game-grid a[href^="/g/"]') so the drawer's tiles get the site's real hover-preview clips without editing that
+   shared file -- the same trick the homepage mosaic uses ('class="mosaic game-grid"'). A game with no clip is
+   hoverpreview's documented no-op.
+   THE CATCH, and why the reset below exists: /style/style.css DOES define .game-grid -- it is the related-tile grid on
+   every game page, a hard 'display:grid' with grid-template-areas, redefined again inside six @media blocks. The labs
+   page loaded no stylesheets so this never came up there; on the real site it would collapse both rows. The reset wins
+   at every width because '.pz-acct .pz-acct-row.game-grid' is (0,3,0) against that sheet's bare '.game-grid' (0,1,0).
+   Its descendant rules are all scoped to 'a.focusable' / '.new-badge' / 'a.ir0', none of which these tiles carry.
+   The clip element (.pz-preview-video) is absolute, z-index 0, border-radius inherit: it covers the <img> and sits under
+   the name scrim (z 2), the corner sticker and the "Played" pill (z 3). */
+.pz-acct-row { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 8px; scrollbar-width: none; padding: 6px 8px 10px; margin: -6px -8px -10px; }
+.pz-acct-row::-webkit-scrollbar { display: none; }
+.pz-acct .pz-acct-row.game-grid { display: flex; grid-auto-flow: row; grid-auto-rows: auto; grid-template-columns: none; grid-template-areas: none; justify-content: flex-start; padding: 6px 8px 10px; margin: -6px -8px -10px; }
+.pz-acct .pz-acct-row-recent.game-grid { gap: 14px; }
+.pz-acct .pz-acct-row-most.game-grid { gap: 12px; }
+/* hover = shadow + name reveal + clip. NO translateY lift (owner, 2026-09-17: "remove the lift-on-hover" on these tiles). */
+.pz-acct-tile { position: relative; flex: 0 0 var(--tw); width: var(--tw); aspect-ratio: 1 / 1; border-radius: 16px; background: var(--pz-panel-2); color: #fff; text-decoration: none; scroll-snap-align: start; transition: box-shadow .15s ease; }
+.pz-acct-tile img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 16px; }
+.pz-acct-tile picture { display: contents; }
+.pz-acct-tile:hover, .pz-acct-tile:focus-visible { box-shadow: 0 10px 16px 4px rgba(0,0,0,.45); outline: none; z-index: 2; }
+.pz-acct-tile-name { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; border-radius: 0 0 16px 16px; padding: 30px 10px 9px; background: linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0)); color: #fff; font: 700 13px/1.2 "Rubik","Rubik Fallback",sans-serif; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; transform: translateY(8px); transition: opacity .15s ease, transform .15s ease; pointer-events: none; }
+.pz-acct-tile:hover .pz-acct-tile-name, .pz-acct-tile:focus-visible .pz-acct-tile-name { opacity: 1; transform: none; }
+.pz-acct-tile:hover .tile-badge, .pz-acct-tile:focus-visible .tile-badge { opacity: 0; }
+.pz-acct-tile .tile-badge b { font: 700 13px/1 "Rubik","Rubik Fallback",sans-serif; position: relative; z-index: 2; }
+.pz-acct-tile-pill { position: absolute; top: 8px; right: 8px; z-index: 3; display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px 0 7px; border-radius: 999px; background: rgba(22,22,22,.8); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.14); font: 500 11.5px/1 "Rubik","Rubik Fallback",sans-serif; color: #d6d6d6; white-space: nowrap; pointer-events: none; max-width: calc(100% - 16px); overflow: hidden; text-overflow: ellipsis; }
+.pz-acct-tile-pill b { color: #fff; font-weight: 700; }
+.pz-acct-tile-pill svg { width: 12px; height: 12px; color: var(--pz-accent); }
+/* row arrows: .is-next on the right (shown while there is more ahead), .is-prev mirrored on the left (shown once scrolled).
+   The scroll itself is a requestAnimationFrame tween on scrollLeft (bindRowScroll) -- NOT scrollBy({behavior:"smooth"}) and
+   not a :hover-gated transition -- so leaving the button mid-animation cannot cut it short. */
+.pz-acct-row-btn { position: absolute; top: 50%; z-index: 4; width: 40px; height: 40px; margin-top: -20px; border-radius: 50%; border: 1px solid rgba(255,255,255,.14); background: var(--pz-panel-2); color: #fff; cursor: pointer; display: none; place-items: center; box-shadow: 0 6px 16px rgba(0,0,0,.5); transition: background-color .15s ease, color .15s ease; }
+.pz-acct-row-btn.is-next { right: -10px; }
+.pz-acct-row-btn.is-prev { left: -10px; }
+.pz-acct-row-btn svg { width: 18px; height: 18px; display: block; }
+.pz-acct-row-btn.is-prev svg { transform: scaleX(-1); }
+.pz-acct-row-btn:hover, .pz-acct-row-btn:focus-visible { background: var(--pz-accent); color: #111; outline: none; }
+.pz-acct-row-wrap.has-more .pz-acct-row-btn.is-next { display: grid; }
+.pz-acct-row-wrap.has-prev .pz-acct-row-btn.is-prev { display: grid; }
+.pz-acct-row-recent { --tw: calc((100% - 28px) / 3); }
+/* "Your most played" is capped at 3 tiles and never scrolls (owner, 2026-09-17), so it is a plain row: no snap, no arrow,
+   overflow visible (nothing to clip the rank sticker or the hover shadow) */
+.pz-acct-row-most { --tw: calc((100% - 24px) / 3); gap: 12px; overflow: visible; scroll-snap-type: none; }
+.pz-acct-empty[hidden], .pz-acct-row-wrap[hidden], .pz-acct-count[hidden] { display: none; }
+.pz-acct-empty { display: flex; align-items: center; gap: 16px; padding: 18px 18px; border-radius: 16px; border: 1px dashed rgba(255,255,255,.18); background: rgba(255,255,255,.025); }
+.pz-acct-empty-ic { flex: 0 0 auto; width: 52px; height: 52px; border-radius: 16px; background: rgba(240,210,16,.12); color: var(--pz-accent); display: grid; place-items: center; }
+.pz-acct-empty-ic svg { width: 28px; height: 28px; }
+.pz-acct-empty-txt { flex: 1 1 auto; min-width: 0; }
+.pz-acct-empty-txt b { display: block; font: 700 14.5px/1.3 "Rubik","Rubik Fallback",sans-serif; color: #fff; }
+.pz-acct-empty-txt span { display: block; margin-top: 3px; font: 400 13px/1.45 "Rubik","Rubik Fallback",sans-serif; color: var(--pz-muted); }
+.pz-acct-empty a { flex: 0 0 auto; display: inline-flex; align-items: center; height: 38px; padding: 0 16px; border-radius: 999px; background: var(--pz-accent); color: #111; font: 700 13.5px/1 "Rubik","Rubik Fallback",sans-serif; text-decoration: none; transition: filter .15s ease, transform .1s ease; }
+.pz-acct-empty a:hover { filter: brightness(1.1); }
+.pz-acct-empty a:active { transform: scale(.97); }
+.pz-acct-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+@media (max-width: 640px) { .pz-acct-duo { grid-template-columns: 1fr; } .pz-acct-empty { flex-wrap: wrap; } }
+.pz-acct-cat { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 16px; background: var(--pz-panel-2); border: 1px solid var(--pz-line); color: #fff; text-decoration: none; aspect-ratio: 3 / 1; min-height: 88px; transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease; }
+.pz-acct-cat:hover, .pz-acct-cat:focus-visible { border-color: rgba(240,210,16,.6); transform: translateY(-3px); box-shadow: 0 10px 16px 4px rgba(0,0,0,.35); outline: none; }
+.pz-acct-cat-ic { flex: 0 0 auto; width: 54px; height: 54px; border-radius: 15px; background: rgba(240,210,16,.14); color: var(--pz-accent); display: grid; place-items: center; transition: background-color .15s ease, color .15s ease; }
+.pz-acct-cat-ic svg, .pz-acct-cat-ic .pz-cat-icon { width: 28px; height: 28px; }
+.pz-acct-cat:hover .pz-acct-cat-ic { background: var(--pz-accent); color: #111; }
+.pz-acct-cat-txt { min-width: 0; }
+.pz-acct-cat-name, .pz-acct-cat-sub { display: block; }
+.pz-acct-cat-name { font: 700 14px/1.2 "Rubik","Rubik Fallback",sans-serif; letter-spacing: .07em; text-transform: uppercase; color: #fff; }
+.pz-acct-cat:hover .pz-acct-cat-name { color: var(--pz-accent); }
+.pz-acct-cat-sub { margin-top: 5px; font: 400 12.5px/1.4 "Rubik","Rubik Fallback",sans-serif; color: var(--pz-muted); }
+`;
+
+  var MARKUP = `
+<div class="pz-acct-scrim" id="pzAcctScrim"></div>
+<aside class="pz-acct" id="pzAcct" role="dialog" aria-modal="true" aria-label="Account" aria-hidden="true" tabindex="-1" data-state="pending">
+  <!-- round close arrow straddling the panel's left edge, pointing back at the grid the panel is covering -->
+  <button type="button" class="pz-acct-close" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <div class="pz-acct-scroll">
+    <!-- ---- the session answer is not known yet: neither view, just three dots (see data-state="pending") ---- -->
+    <div class="pz-acct-loading" role="status" aria-live="polite">
+      <span class="pz-acct-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="pz-acct-sr">Checking your account…</span>
+    </div>
+
+    <!-- ---- signed-out ---- (no title above the tabs: the per-tab heading in the body is the only heading here) -->
+    <div class="pz-acct-tabs pz-acct-out-only" role="tablist" aria-label="Register or log in">
+      <button type="button" class="pz-acct-tab" role="tab" id="pzAcctTabRegister" aria-selected="true" aria-controls="pzAcctPanel" data-tab="register">Register</button>
+      <button type="button" class="pz-acct-tab" role="tab" id="pzAcctTabLogin" aria-selected="false" aria-controls="pzAcctPanel" data-tab="login" tabindex="-1">Login</button>
+    </div>
+
+    <!-- ---- signed-in: hero card ---- -->
+    <section class="pz-acct-hero pz-acct-in-only" aria-label="Your account">
+      <button type="button" class="pz-acct-menu-btn" aria-label="Account options" aria-haspopup="menu" aria-expanded="false" aria-controls="pzAcctMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="2.1" fill="currentColor"/><circle cx="12" cy="12" r="2.1" fill="currentColor"/><circle cx="12" cy="18.5" r="2.1" fill="currentColor"/></svg></button>
+      <!-- both items open the full-screen confirm modal (#pzAcctModal, after the drawer) -- there is no inline confirm step any more -->
+      <div class="pz-acct-menu" id="pzAcctMenu" role="menu">
+        <div class="pz-acct-menu-list">
+          <button type="button" class="pz-acct-menu-item pz-acct-addpasskey" role="menuitem" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M10.5 14H8a5 5 0 0 0-5 5v1h9"/><path d="M15.5 14.5a2.5 2.5 0 1 1 3.9 2.06V21l-1.4-1.2-1.4 1.2v-4.44a2.5 2.5 0 0 1-1.1-2.06z"/></svg>Add a passkey</button>
+          <button type="button" class="pz-acct-menu-item pz-acct-signout" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg>Sign out</button>
+          <button type="button" class="pz-acct-menu-item pz-acct-signout-all" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg>Sign out everywhere</button>
+          <div class="pz-acct-menu-sep"></div>
+          <button type="button" class="pz-acct-menu-item is-danger pz-acct-delete" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Delete account</button>
+        </div>
+      </div>
+      <div class="pz-acct-fig" aria-hidden="true">
+        <div class="pz-acct-fig-pad"><svg viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M20 14h24c9.4 0 17 7.6 17 17v9.6c0 6.3-5.1 11.4-11.4 11.4-3.7 0-7.1-1.8-9.3-4.8L37.5 43h-11l-2.8 4.2A11.4 11.4 0 0 1 14.4 52C8.1 52 3 46.9 3 40.6V31c0-9.4 7.6-17 17-17zm-2 11a2.5 2.5 0 0 0-2.5 2.5V30H12a2.5 2.5 0 0 0 0 5h3.5v2.5a2.5 2.5 0 0 0 5 0V35H24a2.5 2.5 0 0 0 0-5h-3.5v-2.5A2.5 2.5 0 0 0 18 25zm25 1.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm7 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg></div>
+        <div class="pz-acct-avatar"></div>
+      </div>
+      <div class="pz-acct-who">
+        <h2 class="pz-acct-hero-h">Your <b>account</b></h2>
+        <p class="pz-acct-hero-sub">Logged in with Google as <span class="pz-acct-name"></span></p>
+        <div class="pz-acct-email"></div>
+        <!-- TODO: wire to real per-account play stats once the account backend tracks this. Both pills are SAMPLE numbers for the preview.
+             Closed by default; click slides them open. The games icon is the site's own "2 player" category icon (nav-parts.js
+             CATICON["2player"]), cloned at runtime from the page's own inlined nav copy -- see catIcon(). -->
+        <div class="pz-acct-stats" title="Games you have played and time spent playing, on this account across all your devices">
+          <button type="button" class="pz-acct-stat pz-acct-stat-games-btn" aria-expanded="false" aria-controls="pzAcctGamesPanel" aria-label="Games played — show the list"><span class="pz-acct-stat-ic"></span><span class="pz-acct-stat-n pz-acct-stat-games">0</span><svg class="pz-acct-stat-chev" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5l6 6 6-6"/></svg></button>
+          <button type="button" class="pz-acct-stat pz-acct-stat-time-btn" aria-expanded="false" aria-label="Time played — show it"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg><span class="pz-acct-stat-val"><span><span class="pz-acct-stat-time">0m</span></span></span></button>
+        </div>
+      </div>
+      <!-- games-list panel behind the games pill: every game this account has played, most played first (REAL: game_play + game_saves) -->
+      <div class="pz-acct-stat-panel" id="pzAcctGamesPanel" inert>
+        <div class="pz-acct-stat-panel-in">
+          <div class="pz-acct-stat-panel-box">
+            <div class="pz-acct-stat-panel-head"><b>Games you've played</b></div>
+            <ul class="pz-acct-stat-list"></ul>
+            <p class="pz-acct-stat-more"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- signed-out: heading + provider pill(s) + disclaimer (Poki's register-screen structure; no subtitle paragraph) ---- -->
+    <div class="pz-acct-body" id="pzAcctPanel" role="tabpanel" aria-labelledby="pzAcctTabRegister">
+      <h3 class="pz-acct-h pz-acct-out-only">Create a Pizza Edition account</h3>
+      <p class="pz-acct-why pz-acct-out-only">Sign up to <b>save your game progress</b>.</p>
+      <div class="pz-acct-providers pz-acct-out-only">
+        <button type="button" class="pz-acct-google">
+          <span class="pz-acct-google-ic" aria-hidden="true"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></span>
+          <span class="pz-acct-google-label">Sign up with Google</span>
+        </button>
+        <div class="pz-acct-or" aria-hidden="true">or</div>
+        <div class="pz-acct-alt">
+          <button type="button" class="pz-acct-alt2 pz-acct-passkey" hidden>
+            <span class="pz-acct-alt2-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M10.5 14H8a5 5 0 0 0-5 5v1h9"/><path d="M15.5 14.5a2.5 2.5 0 1 1 3.9 2.06V21l-1.4-1.2-1.4 1.2v-4.44a2.5 2.5 0 0 1-1.1-2.06z"/></svg></span>
+            <span class="pz-acct-passkey-label">Sign in with a passkey</span>
+          </button>
+          <button type="button" class="pz-acct-alt2 pz-acct-microsoft" hidden>
+            <span class="pz-acct-alt2-ic" aria-hidden="true"><svg viewBox="0 0 23 23"><path fill="#f35325" d="M1 1h10v10H1z"/><path fill="#81bc06" d="M12 1h10v10H12z"/><path fill="#05a6f0" d="M1 12h10v10H1z"/><path fill="#ffba08" d="M12 12h10v10H12z"/></svg></span>
+            <span class="pz-acct-microsoft-label">Continue with Microsoft</span>
+          </button>
+        </div>
+      </div>
+      <div class="pz-acct-status" role="status" aria-live="polite"><span class="pz-acct-spin" hidden></span><span class="pz-acct-status-text"></span><button type="button" class="pz-acct-cancel" hidden>Cancel</button></div>
+      <p class="pz-acct-legal pz-acct-out-only">By continuing you agree to our <a href="/tos">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.</p>
+    </div>
+
+    <!-- ---- signed-in: Ready for another round? (REAL data: the same recentlyPlayedPerLocale localStorage list the homepage reads) ---- -->
+    <!-- this device's sync situation (session-bridge.html v6 pz-device-info); hidden when there is nothing to say -->
+    <section class="pz-acct-sec pz-acct-in-only pz-acct-device" id="pzAcctDevice" hidden aria-label="Progress on this device">
+      <div class="pz-acct-sec-head"><h3 class="pz-acct-sec-h">On this device</h3></div>
+      <ul class="pz-acct-device-list"></ul>
+    </section>
+    <section class="pz-acct-sec pz-acct-in-only" id="pzAcctRecent">
+      <div class="pz-acct-sec-head"><h3 class="pz-acct-sec-h">Ready for another round? <span class="pz-acct-count" hidden></span></h3></div>
+      <div class="pz-acct-row-wrap">
+        <button type="button" class="pz-acct-row-btn is-prev" aria-label="Scroll back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <!-- 'game-grid' = the hook /jsload/hoverpreview.js keys on for the hover clips (see the CSS comment on .pz-acct-row) -->
+        <div class="pz-acct-row pz-acct-row-recent game-grid" aria-label="Recently played games"></div>
+        <button type="button" class="pz-acct-row-btn is-next" aria-label="Scroll to more games"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div class="pz-acct-empty" hidden>
+        <div class="pz-acct-empty-ic"></div>
+        <div class="pz-acct-empty-txt"><b>Nothing here yet</b><span>Play any game and it'll be waiting for you here next time.</span></div>
+        <a href="/g">Find a game</a>
+      </div>
+    </section>
+
+    <!-- ---- signed-in: Your most played + Your top category (REAL: ranked by the account's visible play time, see fetchStats) ---- -->
+    <div class="pz-acct-duo pz-acct-in-only">
+      <section class="pz-acct-sec" id="pzAcctMost">
+        <div class="pz-acct-sec-head"><h3 class="pz-acct-sec-h">Your most played</h3></div>
+        <!-- exactly 3 tiles, no scrolling, no arrow (owner, 2026-09-17) -->
+        <div class="pz-acct-row-wrap">
+          <div class="pz-acct-row pz-acct-row-most game-grid" aria-label="Your most played games"></div>
+        </div>
+      </section>
+      <section class="pz-acct-sec" id="pzAcctCat">
+        <div class="pz-acct-sec-head"><h3 class="pz-acct-sec-h">Your top category</h3></div>
+        <a class="pz-acct-cat" href="/g"><span class="pz-acct-cat-ic"></span><span class="pz-acct-cat-txt"><span class="pz-acct-cat-name">All games</span><span class="pz-acct-cat-sub">Play a few games and your favourite kind shows up here.</span></span></a>
+      </section>
+    </div>
+  </div>
+</aside>
+<!-- full-screen confirm modal (Sign out / Delete account): a sibling of the drawer, above it and its scrim. Copy, glyph and
+     the yes-handler are filled in by openModal() in the script; "No, ..." only closes it. -->
+<div class="pz-acct-modal" id="pzAcctModal" role="alertdialog" aria-modal="true" aria-labelledby="pzAcctModalH" aria-describedby="pzAcctModalP" data-kind="leave" hidden>
+  <div class="pz-acct-modal-card">
+    <div class="pz-acct-modal-head"><span class="pz-acct-modal-ic" aria-hidden="true"></span><h2 class="pz-acct-modal-h" id="pzAcctModalH">Are you sure you want to log out?</h2></div>
+    <p class="pz-acct-modal-p" id="pzAcctModalP" hidden></p>
+    <div class="pz-acct-modal-row"><button type="button" class="pz-acct-modal-yes">Yes, leave</button><button type="button" class="pz-acct-modal-no">No, stay</button></div>
+  </div>
+</div>
+`;
+  /* Google sign-in via Supabase, as a plain full-page redirect (owner's explicit
+     call 2026-09-18, after trying the popup version -- prefers the tab that was already open just navigating
+     to Google and back, not a second window):
+     1. click "Continue with Google" -> supabase-js redirects this same tab to Google's consent screen;
+     2. Google redirects back to Supabase's callback, which redirects back here with ?code= (PKCE) in the URL;
+     3. detectSessionInUrl:true (set on the client below) picks that code up automatically on page load and
+        exchanges it for a session -- no code here needs to parse the URL by hand;
+     4. onAuthStateChange re-renders the nav icon (badge + tooltip) and the drawer.
+
+     SESSION BRIDGE (2026-09-18; the linkIdentity carry-over was removed the same day) -- how the account reaches
+     the games. A signed-in account's Supabase session lives in games.pizzaedition.com's localStorage (where
+     games.pizzaedition.com/scripts/save-sync.js runs) -- a different origin, invisible from here. This script
+     embeds games.pizzaedition.com/session-bridge.html in a hidden iframe and talks to it over postMessage
+     (origin + source checked both ways): on load it asks for the current session and adopts it in memory; after
+     the OAuth return it hands the freshly exchanged session over ("adopt") so the games origin persists and
+     owns it -- and the bridge then COPIES the guest's saves into the account, which is what makes "sign up and
+     your progress carries over" true. Guests have NO Supabase session (their saves live in the self-hosted
+     store on the games origin; Supabase bills per monthly active user), so both tabs' Google button is a plain
+     signInWithOAuth and the bridge answers null for a guest.
+     THE ONE RULE: the games origin is the only session store and the only thing that ever REFRESHES a token.
+     Supabase rotates refresh tokens and a rotated token reused after the reuse window revokes the whole session
+     family, so if this page also refreshed the shared session it would sooner or later kill it. Hence: the
+     client below keeps its session in MEMORY only (custom storage adapter; only the PKCE code-verifier keys go
+     to localStorage), autoRefreshToken is off, and before any Supabase read (the stats) a fresh copy is
+     requested from the bridge when the adopted token is close to expiry (freshClient). Sign-out is routed
+     through the bridge for the same reason.
+
+     Drawer CONTENT redesigned 2026-09-17 (Poki-structured hero card / recent row / most played / top category).
+     What is real in the signed-in view (everything, since 2026-09-18):
+       REAL    name + email (from the Google session; the avatar is ALWAYS the initial letter -- the Google
+               profile photo is deliberately never requested, owner 2026-09-17); "Ready for another round?"
+               (the same recentlyPlayedPerLocale localStorage list every game page writes and the homepage
+               reads); Sign out (real Supabase signOut, behind the full-screen "Are you sure" modal).
+       REAL    the two stat pills (closed by default, click to slide open -- games list / "1h15m"), "Your most
+               played" (capped at 3, no scrolling), "Your top category" -- from the account's game_play +
+               game_saves rows in Supabase, see fetchStats() / renderStats() below.
+       REAL    "Delete account": the same full-screen confirm modal; "Yes, delete" calls the delete_own_account() RPC
+               (proposals/supabase-delete-account.sql -- until the owner applies it the old "not available yet" notice
+               shows), then signs out through the bridge. See doDeleteAccount().
+     Signed-out view restructured 2026-09-17 to Poki's register screen: heading, one short "saves your progress"
+     line, provider pill(s), disclaimer -- no descriptive paragraph (COPY carries the per-tab strings). */
+  var SUPA_URL = "https://nudftayhujlpcnznmwbg.supabase.co";
+  var SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51ZGZ0YXlodWpscGNuem5td2JnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTA5NDcsImV4cCI6MjEwNTI2Njk0N30.dieVei5-I8oDMPFfLwJoKTM4dtJOYz0cFXP1xibjWbo";
+
+  /* REAL per-account stats (2026-09-18, replaces the PLACEHOLDER sample data). Sources, both Supabase, both
+     RLS-scoped to the signed-in account so the same numbers appear on every device the account logs into:
+       game_play  (proposals/supabase-game-play.sql) -- visible seconds + play count per game, written by
+                  games.pizzaedition.com/scripts/save-sync.js via bump_play_time() while signed in;
+       game_saves -- one row per game the account has a save for (a game played before play time existed
+                  still counts as played).
+     Names and categories come from /jsload/game-meta.json (tools/build-game-meta.js, from g/index.html);
+     "Your top category" = the category with the most play time across the account's games. */
+  var GAME_META_VERSION = 21;   /* bump when tools/build-game-meta.js is re-run (Cloudflare caches /jsload/* ~62 days). v2 = 3rd element, the artwork basename, for the 49 games whose art is not named after their slug */
+  var GAME_META_URL = "/jsload/game-meta.json?v=" + GAME_META_VERSION;
+  var CAT_NAMES = { action: "Action", racing: "Racing", sports: "Sports", puzzle: "Puzzle", platformer: "Platformer", shooter: "Shooter", "2player": "2 Player", clicker: "Clicker & Idle", horror: "Horror", casual: "Casual" };
+
+  if (window.PZ_NO_ACCOUNT) return;
+  /* There can be TWO account buttons on a page: the one tools/nav-parts.js generates into .pz-nav-inner (the
+     desktop icon, hidden below 900px by experiment.js's mobile-nav rules) and the copy experiment.js clones
+     from it into the mobile three-icon strip. Both are driven from here so the badge, the red "sign up" dot
+     and the tooltip can never say different things; btns[0] is the generated one and is what state is read
+     back from. Same shape as the site's three [data-random] buttons, which NAV.JS binds the same way. */
+  var btns = Array.prototype.slice.call(document.querySelectorAll(".pz-account-btn"));
+  if (!btns.length) return;                         /* a page whose nav has no account icon: no-op */
+  var btn = btns[0];
+  if (document.getElementById("pzAcct")) return;    /* never build twice */
+
+  /* CSS and markup are injected here rather than generated into ~313 pages, the same way
+     votingcontroller.js / iphone-play.js / hoverpreview.js / backtotop.js ship theirs: the drawer is ~34 KB
+     of CSS and ~10 KB of markup that most visitors never see, and keeping it in one cacheable file means
+     there is exactly one copy of it to change. The only part of this feature that IS generated into the
+     pages is the nav icon itself and the handful of rules that style it (tools/nav-parts.js) -- that one has
+     to be in the HTML, because it is visible at first paint and sits in the nav's flex order. */
+  try {
+    var st = document.createElement("style");
+    st.id = "pz-account-styles";
+    st.appendChild(document.createTextNode(CSS));
+    (document.head || document.documentElement).appendChild(st);
+  } catch (e) {}
+  var holder = document.createElement("div");
+  holder.innerHTML = MARKUP;
+  while (holder.firstChild) document.body.appendChild(holder.firstChild);
+
+  var scrim = document.getElementById("pzAcctScrim"), drawer = document.getElementById("pzAcct");
+  if (!scrim || !drawer) return;
+  var $ = function (sel) { return drawer.querySelector(sel); };
+  var eachBtn = function (fn) { btns.forEach(fn); };
+  var closeBtn = $(".pz-acct-close"), tabs = Array.prototype.slice.call(drawer.querySelectorAll(".pz-acct-tab")), panel = $(".pz-acct-body");
+  var passkeyBtn = $(".pz-acct-passkey"), msBtn = $(".pz-acct-microsoft"), altWrap = $(".pz-acct-alt"), orRow = $(".pz-acct-or"), addPasskeyBtn = $(".pz-acct-addpasskey");
+  var googleBtn = $(".pz-acct-google"), googleLabel = $(".pz-acct-google-label"), heading = $(".pz-acct-h"), why = $(".pz-acct-why");
+  var status = $(".pz-acct-status"), statusText = $(".pz-acct-status-text"), statusSpin = $(".pz-acct-status .pz-acct-spin"), cancelBtn = $(".pz-acct-cancel");
+  var signOutBtn = $(".pz-acct-signout"), avatar = $(".pz-acct-avatar"), nameEl = $(".pz-acct-name"), emailEl = $(".pz-acct-email");
+  var menuBtn = $(".pz-acct-menu-btn"), menu = $(".pz-acct-menu"), delBtn = $(".pz-acct-delete"), signOutAllBtn = $(".pz-acct-signout-all");
+  var deviceSec = $("#pzAcctDevice"), deviceList = deviceSec.querySelector(".pz-acct-device-list");
+  var modal = document.getElementById("pzAcctModal"), modalIc = modal.querySelector(".pz-acct-modal-ic"), modalH = modal.querySelector(".pz-acct-modal-h"), modalP = modal.querySelector(".pz-acct-modal-p"), modalYes = modal.querySelector(".pz-acct-modal-yes"), modalNo = modal.querySelector(".pz-acct-modal-no");
+  var recentSec = $("#pzAcctRecent"), recentRow = recentSec.querySelector(".pz-acct-row"), recentEmpty = recentSec.querySelector(".pz-acct-empty"), recentCount = recentSec.querySelector(".pz-acct-count");
+  var mostRow = $("#pzAcctMost .pz-acct-row"), catCard = $(".pz-acct-cat");
+  var statGames = $(".pz-acct-stat-games"), statTime = $(".pz-acct-stat-time");
+
+  /* per-tab copy: heading, the one-line "why" (progress saving is the incentive -- owner, round 4) and the Google button's label
+     ("Sign up with" vs "Log in with", not one generic wording). The old descriptive paragraph stays removed. */
+  var COPY = {
+    register: { h: "Create a Pizza Edition account", why: "Sign up to <b>save your game progress</b>.", btn: "Sign up with Google" },
+    login: { h: "Log in to Pizza Edition", why: "Get your <b>saved game progress</b> back.", btn: "Log in with Google" }
+  };
+
+  eachBtn(function (b) {
+    b.setAttribute("aria-haspopup", "dialog");
+    b.setAttribute("aria-controls", "pzAcct");
+    b.setAttribute("aria-expanded", "false");
+  });
+
+  /* ---------- Supabase client ----------
+     Memory-only session storage (see the SESSION BRIDGE note at the top): supabase-js's default storage key is
+     sb-<ref>-auth-token; that key and anything else it stores live in `mem` for this page load only. The PKCE
+     code-verifier keys (…-code-verifier) MUST survive the round trip to Google, so those alone go to localStorage. */
+  var AUTH_KEY = "sb-nudftayhujlpcnznmwbg-auth-token";
+  var mem = {};
+  var memStorage = {
+    getItem: function (k) {
+      if (/-code-verifier$/.test(k)) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+      return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null;
+    },
+    setItem: function (k, v) {
+      if (/-code-verifier$/.test(k)) { try { localStorage.setItem(k, v); } catch (e) {} return; }
+      mem[k] = String(v);
+    },
+    removeItem: function (k) {
+      if (/-code-verifier$/.test(k)) { try { localStorage.removeItem(k); } catch (e) {} return; }
+      delete mem[k];
+    }
+  };
+  /* the pre-bridge version of the drawer persisted its session in localStorage; a stale copy of a token family the
+     games origin now owns must never be refreshed from here, so drop it (no network, no sign-out call) */
+  try { localStorage.removeItem(AUTH_KEY); localStorage.removeItem(AUTH_KEY + "-user"); } catch (e) {}
+
+  /* Did we just come back from Google? Read before the client is created (it strips ?code= itself). Supabase
+     puts link failures in the query for PKCE (?error=…&error_code=…&error_description=…), so check both. */
+  var returnParams = new URLSearchParams(location.search.replace(/^\?/, "") + "&" + location.hash.replace(/^#/, ""));
+  var cameBack = returnParams.has("code"), returnErrorCode = returnParams.get("error_code"), returnErrorText = returnParams.get("error_description");
+
+  /* ---------- supabase-js, loaded ON DEMAND ----------
+     The labs page pulled /scripts/supabase/2.116.0/supabase.js in as a plain synchronous <script>. That file
+     is 218 KB (55 KB gzipped) and this script now ships on every page of the site, so loading it
+     unconditionally would be the heaviest thing on a page after the game art -- for a panel most visitors
+     never open. It is therefore injected only when a Supabase call is actually about to happen:
+       * the page came back from Google with ?code= / ?error= (that return trip must be exchanged now);
+       * the session bridge handed back a REAL (non-anonymous) session, i.e. the visitor is signed in and the
+         hero card needs their name and email;
+       * the drawer was opened, so the library is ready by the time "Sign up with Google" is clicked.
+     A signed-out visitor who never opens the drawer downloads none of it. Everything that used to read
+     `client` synchronously now goes through clientReady(), which resolves with the client or with null
+     (never rejects) -- a null is the same "sign-in unavailable" state the labs page showed when the library
+     was blocked, which is exactly what a school filter does to a script it does not like. */
+  var SUPA_LIB = "/scripts/supabase/2.116.0/supabase.js";
+  var client = null, clientErr = null, clientP = null;
+  function loadLib() {
+    if (window.supabase && typeof window.supabase.createClient === "function") return Promise.resolve(window.supabase);
+    return new Promise(function (res, rej) {
+      var s = document.querySelector("script[data-pz-supabase]");
+      if (!s) {
+        s = document.createElement("script");
+        s.async = true;
+        s.setAttribute("data-pz-supabase", "");
+        s.src = SUPA_LIB;
+        document.head.appendChild(s);
+      }
+      s.addEventListener("load", function () {
+        if (window.supabase && typeof window.supabase.createClient === "function") res(window.supabase);
+        else rej(new Error("the sign-in library loaded but was empty"));
+      });
+      s.addEventListener("error", function () { rej(new Error("the sign-in library could not be loaded on this network")); });
+    });
+  }
+  function guardedFetch(input, init) {
+    var url = typeof input === "string" ? input : (input && input.url) || "";
+    if (/\/auth\/v1\/token\?(?:[^#]*&)?grant_type=refresh_token/.test(url)) return refreshFromBridge();
+    return window.fetch(input, init);
+  }
+  function jsonResponse(status, obj) { return new Response(JSON.stringify(obj), { status: status, headers: { "Content-Type": "application/json" } }); }
+  function refreshFromBridge() {
+    try { console.info("[account] a session refresh was requested on the portal -- answered from the games origin's current session instead (the portal never refreshes)"); } catch (e) {}
+    var u = session && session.user;
+    return bridge.current(BRIDGE_CLICK_MS, 600).then(function (s) {
+      var left = s ? Number(s.expires_at) - Date.now() / 1000 : 0;
+      if (!s || s.is_anonymous || !u || s.user_id !== u.id || left < 60) throw new Error("no usable session from the games origin");
+      return jsonResponse(200, { access_token: s.access_token, refresh_token: s.refresh_token, token_type: "bearer", expires_at: Number(s.expires_at), expires_in: Math.round(left), user: u });
+    }).then(null, function () {
+      return jsonResponse(400, { error: "invalid_grant", error_description: "the portal does not refresh sessions; sign in again", code: "refresh_token_not_found" });
+    });
+  }
+  function clientReady() {
+    if (clientP) return clientP;
+    clientP = loadLib().then(function (lib) {
+      client = lib.createClient(SUPA_URL, SUPA_KEY, {
+        auth: { flowType: "pkce", persistSession: true, autoRefreshToken: false, detectSessionInUrl: true, storage: memStorage,
+                 /* supabase-js 2.116.0 gates the passkey API behind this flag and throws without it:
+                    "the passkey API is experimental and disabled by default". Verified in the vendored
+                    library, not assumed -- see the CLAUDE.md note about it still being experimental. */
+                 experimental: { passkey: true } },
+        /* THE ONE RULE, enforced rather than hoped for: supabase-js refreshes inside getSession() whenever fewer
+           than 90 s remain, whatever autoRefreshToken says, and EVERY client method calls getSession() first. A
+           refresh from here would reuse a refresh token the games origin has long since rotated, and Supabase
+           answers token reuse by revoking the whole session family (the account then silently stops syncing on
+           every device). So this client's refresh request never reaches the network: it is answered from the
+           bridge's CURRENT session (the games origin is the one refresher). */
+        global: { fetch: guardedFetch }
+      });
+      window.PZ_SUPABASE = client;   /* handy in devtools */
+      client.auth.onAuthStateChange(function (event, s) {
+        if (event === "SIGNED_OUT" || s) session = s || null;
+        render();
+      });
+      return client;
+    }).catch(function (e) {
+      clientErr = "Sign-in is unavailable right now — " + ((e && e.message) || e) + ".";
+      try { console.warn("[account] " + clientErr); } catch (x) {}
+      return null;
+    });
+    return clientP;
+  }
+
+  var session = null, isOpen = false, lastFocus = null, badgeT = null, menuOpen = false, modalOpen = false, modalOnYes = null, modalT = null;
+  var bootstrapped = false;   /* true once the bridge has answered (or timed out): nothing is rendered before that, so a signed-in visitor never flashes the "sign up" dot */
+  var currentTab = "register";
+
+  /* ---------- session bridge (hidden iframe on games.pizzaedition.com, see /session-bridge.html there) ---------- */
+  var GAMES_ORIGIN = "https://games.pizzaedition.com";
+  var BRIDGE_URL = GAMES_ORIGIN + "/session-bridge.html?v=6";   /* bump ?v= together with any edit to that file (Cloudflare caches it -- v=1 was a cached 404 from a probe made before the file existed; v=3 = self-hosted supabase-js; v=4 = guest-save copy on adopt; v=5 = guests are no longer backed up, so that copy is a no-op and each game captures its own baseline on next open) */
+  var BRIDGE_LOAD_MS = 4000, BRIDGE_CLICK_MS = 2500, BRIDGE_WRITE_MS = 8000;
+  var bridge = (function () {
+    var frame = null, waiting = {}, seq = 0, readyRes = null, readyP = null, loadSession = null, loadDone = false, lastPersisted = null;
+    function validSession(s) {
+      return !!s && typeof s === "object" && typeof s.access_token === "string" && typeof s.refresh_token === "string" &&
+        typeof s.user_id === "string" && typeof s.is_anonymous === "boolean" && Number(s.expires_at) > 0;
+    }
+    function ensure() {
+      if (frame) return;
+      readyP = new Promise(function (res) { readyRes = res; });
+      frame = document.createElement("iframe");
+      frame.src = BRIDGE_URL;
+      frame.title = "Sign-in session bridge";
+      frame.setAttribute("aria-hidden", "true");
+      frame.tabIndex = -1;
+      frame.style.cssText = "position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none";
+      document.body.appendChild(frame);
+    }
+    window.addEventListener("message", function (ev) {
+      /* both checks, like applixir-parent-bridge.js: origin alone would trust any games-origin frame (a game
+         iframe, an ad), source alone would trust a frame that navigated itself somewhere else */
+      if (ev.origin !== GAMES_ORIGIN || !frame || !ev.source || ev.source !== frame.contentWindow) return;
+      var d = ev.data;
+      if (d && typeof d === "object" && d.type === "pz-bridge-reply" && typeof d.reqId === "string") {
+        var w2 = waiting[d.reqId];
+        if (!w2) return;
+        delete waiting[d.reqId]; clearTimeout(w2.t);
+        if (d.error) w2.rej(new Error(String(d.error))); else w2.res(d.result);
+        return;
+      }
+      if (!d || typeof d !== "object" || d.type !== "pz-session-handoff" || typeof d.reqId !== "string") return;
+      if (typeof d.persisted === "boolean") lastPersisted = d.persisted;
+      var s = validSession(d.session) ? d.session : null;
+      if (d.reqId === "load") {
+        if (loadDone) return;
+        loadDone = true; loadSession = s;
+        if (readyRes) { readyRes(); readyRes = null; }
+        return;
+      }
+      var w = waiting[d.reqId];
+      if (!w) return;
+      delete waiting[d.reqId]; clearTimeout(w.t);
+      if (d.error) w.rej(new Error(String(d.error))); else w.res(s);
+    });
+    /* request(msg, ms): resolves with a session (or null), rejects on timeout / bridge error. Never hangs: the
+       caller's timeout covers both waiting for the bridge to load and waiting for its reply. */
+    function request(msg, ms) {
+      ensure();
+      var deadline = Date.now() + ms;
+      return new Promise(function (res, rej) {
+        var timer = setTimeout(function () { rej(new Error("session bridge did not load")); }, ms);
+        readyP.then(function () {
+          clearTimeout(timer);
+          var left = deadline - Date.now();
+          if (left <= 0) return rej(new Error("session bridge did not load"));
+          var id = "r" + (++seq);
+          waiting[id] = { res: res, rej: rej, t: setTimeout(function () { delete waiting[id]; rej(new Error("session bridge timed out")); }, left) };
+          msg.reqId = id;
+          try { frame.contentWindow.postMessage(msg, GAMES_ORIGIN); }
+          catch (e) { clearTimeout(waiting[id].t); delete waiting[id]; rej(e); }
+        });
+      });
+    }
+    /* the unsolicited load-time handoff, so the first read costs no extra round trip */
+    function initial(ms) {
+      ensure();
+      return new Promise(function (res, rej) {
+        var timer = setTimeout(function () { rej(new Error("session bridge did not load")); }, ms);
+        readyP.then(function () { clearTimeout(timer); res(loadSession); });
+      });
+    }
+    return {
+      initial: initial,
+      current: function (ms, minSeconds) { return request({ type: "pz-session-request", minSeconds: minSeconds || 0 }, ms); },
+      adopt: function (s, ms) { return request({ type: "pz-session-adopt", access_token: s.access_token, refresh_token: s.refresh_token }, ms); },
+      signOut: function (ms, scope) { return request({ type: "pz-session-signout", scope: scope === "global" ? "global" : "local" }, ms); },
+      deviceInfo: function (ms) { return request({ type: "pz-device-info" }, ms); },
+      armBackup: function (slug, ms) { return request({ type: "pz-backup-arm", slug: slug }, ms); },
+      persisted: function () { return lastPersisted; },
+      loaded: function () { return loadDone; }
+    };
+  })();
+  window.PZ_SESSION_BRIDGE = bridge;
+
+  function secondsLeft(s) { return (s && s.expires_at) ? Number(s.expires_at) - Date.now() / 1000 : 0; }   /* both a bridge-packed and a supabase-js session carry expires_at (unix seconds) */
+  function isAnon(s) { return !!(s && s.user && s.user.is_anonymous === true); }
+  function signedIn() { return !!session && !isAnon(session); }
+  /* Adopt a bridge-handed session into this page's client. setSession() on a NON-expired token only does a
+     GET /user and stores it (no refresh). One that is about to expire is not adopted at all -- a refresh from
+     here is the one thing this page must never do; the bridge is asked again instead. */
+  function adoptLocal(s) {
+    if (!s || secondsLeft(s) < 120) return Promise.resolve(null);
+    if (session && session.access_token === s.access_token) return Promise.resolve(session);
+    return clientReady().then(function (c) {
+      if (!c) return null;
+      return c.auth.setSession({ access_token: s.access_token, refresh_token: s.refresh_token }).then(function (r) {
+        if (r.error || !r.data || !r.data.session) return null;
+        session = r.data.session;   /* onAuthStateChange(SIGNED_IN) sets it too; set here so callers can rely on it synchronously after the promise */
+        return session;
+      });
+    }).catch(function () { return null; });
+  }
+  function forgetLocal() { memStorage.removeItem(AUTH_KEY); session = null; render(); }
+
+  /* ---------- status line ---------- */
+  function setStatus(kind, text) {
+    if (!kind) { status.className = "pz-acct-status"; statusText.textContent = ""; statusSpin.hidden = true; cancelBtn.hidden = true; return; }
+    status.className = "pz-acct-status is-shown" + (kind === "error" ? " is-error" : kind === "info" ? " is-info" : "");
+    statusText.textContent = text;
+    statusSpin.hidden = kind !== "wait";
+    cancelBtn.hidden = kind !== "wait";
+  }
+
+  /* ---------- tiles (shared by the recent + most-played rows) ---------- */
+  var SVG_CLOCK = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
+  var slugOf = function (u) { return String(u).replace(/^(?:https?:\/\/[^/]+)?\/g\//, "").replace(/\/$/, ""); };
+  /* same rendition trick as the homepage's recently-played injector: the list stores full-size art
+     (/avifgames/<slug>.avif or /apnggames/<slug>.png), the tile is ~180px, so prefer the 204 rung and fall
+     back to the stored art if the rendition 404s (a game added since the last build-tile-renditions run). */
+  /* `art` is the artwork BASENAME, which is not always the slug: 49 of 280 games store their picture under
+     a different name (/g/tombofthemask -> /apnggames/tomb.png). game-meta.json carries it as the 3rd element
+     when it differs; passing the slug when it does not is correct. Guessing "/apnggames/<slug>.png" is what
+     made "Your most played" show broken thumbnails. */
+  function tileArt(slug, fallbackSrc, name, art) {
+    art = art || slug;
+    var img = document.createElement("img"); img.alt = name; img.decoding = "async"; img.loading = "lazy"; img.width = 204; img.height = 204;
+    var pic = document.createElement("picture");
+    [["image/avif", "avif"], ["image/webp", "webp"]].forEach(function (f) {
+      var s = document.createElement("source"); s.type = f[0]; s.srcset = "/tiles/204/" + art + "." + f[1]; pic.appendChild(s);
+    });
+    img.src = fallbackSrc || ("/apnggames/" + art + ".png");
+    img.addEventListener("error", function () {
+      while (pic.firstChild && pic.firstChild !== img) pic.removeChild(pic.firstChild);
+    }, { once: true });
+    pic.appendChild(img);
+    return pic;
+  }
+  function makeTile(slug, name, href, art) {
+    var a = document.createElement("a"); a.className = "pz-acct-tile"; a.href = href; a.setAttribute("aria-label", "Play " + name);
+    a.appendChild(art);
+    var n = document.createElement("span"); n.className = "pz-acct-tile-name"; n.textContent = name; a.appendChild(n);
+    return a;
+  }
+  function stickerBadge(inner, recent) {
+    var b = document.createElement("span"); b.className = "tile-badge" + (recent ? " is-recent" : ""); b.innerHTML = inner; return b;
+  }
+  /* "Played Today / This week / ..." -- ONLY when the stored entry carries a timestamp. The game pages'
+     add-to-recently-played script writes {name,image,url} with no time today, so this pill is absent until
+     that script also stores playedAt: Date.now() (a one-line follow-up there). Never invented here. */
+  function playedLabel(ts) {
+    ts = Number(ts); if (!ts || ts > Date.now() + 6e4) return null;
+    var now = new Date(), then = new Date(ts), d = now - then, day = 864e5;
+    if (now.toDateString() === then.toDateString()) return "Today";
+    if (d < 2 * day) return "Yesterday";
+    if (d < 7 * day) return "This week";
+    if (d < 31 * day) return "This month";
+    if (now.getFullYear() === then.getFullYear()) return "This year";
+    return "A while ago";
+  }
+  /* Row arrows. The scroll is a requestAnimationFrame tween on scrollLeft, deliberately NOT scrollBy({behavior:"smooth"}):
+     the owner saw the native smooth scroll "cut" short when the pointer left the arrow mid-animation (the arrow's hover
+     state changing while the compositor scroll + mandatory snap were still settling). A tween owns the whole motion from
+     click to landing, ignores hover entirely, disables snap while it runs and lands exactly on a tile's snap position, so
+     re-enabling snap afterwards never moves anything. It is still cancelled by real input (wheel / touch / drag) so the
+     visitor can always take over. Pages by "however many whole tiles fit" (3 in the drawer). */
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
+  function bindRowScroll(row) {
+    var wrap = row.parentNode, next = wrap.querySelector(".pz-acct-row-btn.is-next"), prev = wrap.querySelector(".pz-acct-row-btn.is-prev");
+    function maxScroll() { return Math.max(0, row.scrollWidth - row.clientWidth); }
+    function update() {
+      wrap.classList.toggle("has-more", maxScroll() - row.scrollLeft > 6);
+      wrap.classList.toggle("has-prev", row.scrollLeft > 6);
+    }
+    function geometry() {
+      var t = row.children, first = t[0]; if (!first) return null;
+      var tw = first.offsetWidth, gap = t[1] ? (t[1].offsetLeft - first.offsetLeft - tw) : 0, step = tw + gap;
+      var cs = getComputedStyle(row), content = row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return { step: step, per: Math.max(1, Math.floor((content + gap + 1) / step)), count: t.length };
+    }
+    function finish() { row.__raf = 0; row.style.scrollSnapType = ""; update(); }
+    function cancel() { if (row.__raf) { cancelAnimationFrame(row.__raf); finish(); } }
+    function tweenTo(target) {
+      target = Math.round(Math.max(0, Math.min(target, maxScroll())));
+      cancel();
+      var from = row.scrollLeft, dist = target - from;
+      if (Math.abs(dist) < 1) return;
+      if (REDUCED && REDUCED.matches) { row.scrollLeft = target; update(); return; }
+      row.style.scrollSnapType = "none";                       /* the snap engine must not fight the tween mid-flight */
+      var t0 = performance.now(), dur = 360 + Math.min(200, Math.abs(dist) / 3);
+      function frame(now) {
+        var p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);   /* ease-out cubic */
+        row.scrollLeft = from + dist * e;
+        if (p < 1) row.__raf = requestAnimationFrame(frame); else { row.scrollLeft = target; finish(); }
+      }
+      row.__raf = requestAnimationFrame(frame);
+    }
+    function page(dir) {
+      var g = geometry(); if (!g) return;
+      var cur = Math.round(row.scrollLeft / g.step), idx = Math.max(0, Math.min(g.count - 1, cur + dir * g.per));
+      tweenTo(idx * g.step);
+    }
+    if (!row.__bound) {
+      row.__bound = true;
+      row.addEventListener("scroll", function () { if (!row.__raf) update(); }, { passive: true });
+      ["wheel", "touchstart", "pointerdown"].forEach(function (ev) { row.addEventListener(ev, cancel, { passive: true }); });
+      window.addEventListener("resize", function () { cancel(); update(); });
+      if (next) next.addEventListener("click", function () { page(1); });
+      if (prev) prev.addEventListener("click", function () { page(-1); });
+    }
+    row.__update = update; update();
+  }
+
+  /* ---------- REAL: Ready for another round? (recentlyPlayedPerLocale, read fresh every time the drawer opens) ---------- */
+  function readRecent() {
+    var locale = (document.documentElement.lang || "en").toLowerCase(), stored = {};
+    try { stored = JSON.parse(localStorage.getItem("recentlyPlayedPerLocale") || "{}"); } catch (e) { stored = {}; }
+    var list = Array.isArray(stored[locale]) ? stored[locale] : Array.isArray(stored.en) ? stored.en : [];
+    return list.filter(function (g) { return g && g.url && g.image && g.name; }).slice(0, 12);
+  }
+  function renderRecent() {
+    var recent = readRecent();
+    recentRow.textContent = "";
+    recentEmpty.hidden = recent.length > 0;
+    recentRow.parentNode.hidden = recent.length === 0;
+    recentCount.hidden = recent.length === 0; recentCount.textContent = String(recent.length);
+    recent.forEach(function (g) {
+      var slug = slugOf(g.url), href = g.url;
+      var m = /^(?:https?:\/\/[^/]+)?\/(?:apnggames|avifgames)\/([A-Za-z0-9_.\-]+)\.(?:png|avif)$/.exec(String(g.image).split("?")[0]);
+      var art;
+      if (m) art = tileArt(m[1], g.image, g.name);
+      else { art = document.createElement("img"); art.src = g.image; art.alt = g.name; art.decoding = "async"; art.loading = "lazy"; }
+      var a = makeTile(slug, g.name, href, art);
+      a.setAttribute("aria-label", "Continue playing " + g.name);
+      var when = playedLabel(g.playedAt || g.ts || g.lastPlayed);
+      if (when) { var p = document.createElement("span"); p.className = "pz-acct-tile-pill"; p.innerHTML = SVG_CLOCK + "Played <b></b>"; p.querySelector("b").textContent = when; a.appendChild(p); }
+      else a.appendChild(stickerBadge(SVG_CLOCK, true));   /* the corner clock sticker (homepage style) only when there is no time pill saying the same thing */
+      recentRow.appendChild(a);
+    });
+    if (recentRow.__update) recentRow.__update(); else bindRowScroll(recentRow);
+  }
+
+  /* ---------- REAL: stat pills, games list, most played, top category ---------- */
+  /* compact Poki-style duration: "3h12m" / "42m" -- no spaces, no unit words (owner's example: "1h42m") */
+  function fmtMinutes(m) { var h = Math.floor(m / 60), r = m % 60; return h ? h + "h" + (r ? r + "m" : "") : r + "m"; }
+  function fmtSeconds(s) { return s < 60 ? (s > 0 ? "<1m" : "0m") : fmtMinutes(Math.floor(s / 60)); }
+  /* the category icons are the page's own inlined Poki set (nav-parts.js CATICON) -- clone rather than ship a second copy */
+  function catIcon(href) { var s = document.querySelector('.pz-mobile-cat[href="' + href + '"] .pz-cat-icon'); return s ? s.cloneNode(true) : null; }
+  var statGamesBtn = $(".pz-acct-stat-games-btn"), statTimeBtn = $(".pz-acct-stat-time-btn"), gamesPanel = $("#pzAcctGamesPanel");
+  var mostSec = $("#pzAcctMost"), catSec = $("#pzAcctCat");
+  /* games-count icon = the site's "2 player" category icon (owner: the controller glyph was ugly); same icon in the empty state */
+  [$(".pz-acct-stat-ic"), $(".pz-acct-empty-ic")].forEach(function (slot) {
+    var ic = catIcon("/g/2player"); slot.textContent = ""; if (ic) slot.appendChild(ic);
+  });
+  var metaP = null;
+  function loadMeta() {
+    if (metaP) return metaP;
+    metaP = fetch(GAME_META_URL, { credentials: "omit" }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+    return metaP;
+  }
+  /* A Supabase read needs a live token. The one adopted at load may be old: never refresh it here (see THE ONE RULE) --
+     ask the bridge for a fresh one instead, exactly as the sign-in click does. */
+  function freshClient() {
+    if (!signedIn()) return Promise.resolve(null);
+    var need = secondsLeft(session) < 120 ? bridge.current(BRIDGE_CLICK_MS, 600).then(function (s) { return (s && !s.is_anonymous) ? adoptLocal(s) : null; }, function () { return null; }) : Promise.resolve(session);
+    return need.then(function (s) { return s ? clientReady() : null; });
+  }
+  /* -> { games: [{slug, seconds, plays, last}], seconds: total } or null when the account is not readable right now */
+  function fetchStats() {
+    return freshClient().then(function (c) {
+      if (!c) return null;
+      return Promise.all([
+        c.from("game_play").select("game_slug,seconds,plays,last_played_at"),
+        c.from("game_saves").select("game_slug,updated_at")
+      ]).then(function (rs) {
+        var play = rs[0], saves = rs[1];
+        if (play.error && saves.error) throw play.error;
+        var by = {};
+        ((play.data) || []).forEach(function (r) { by[r.game_slug] = { slug: r.game_slug, seconds: Number(r.seconds) || 0, plays: Number(r.plays) || 0, last: Date.parse(r.last_played_at) || 0 }; });
+        ((saves.data) || []).forEach(function (r) { if (!by[r.game_slug]) by[r.game_slug] = { slug: r.game_slug, seconds: 0, plays: 0, last: Date.parse(r.updated_at) || 0 }; });
+        var games = Object.keys(by).map(function (k) { return by[k]; });
+        games.sort(function (a, b) { return (b.seconds - a.seconds) || (b.plays - a.plays) || (b.last - a.last); });
+        var total = 0; games.forEach(function (g) { total += g.seconds; });
+        return { games: games, seconds: total };
+      });
+    }).catch(function (e) { try { console.warn("[account] stats unavailable:", (e && e.message) || e); } catch (x) {} return null; });
+  }
+  var statsP = null;
+  function refreshStats() {
+    if (!signedIn()) return;
+    var mine = statsP = Promise.all([fetchStats(), loadMeta()]).then(function (rs) {
+      if (statsP !== mine) return;   /* a newer refresh superseded this one */
+      renderStats(rs[0], rs[1] || {});
+    });
+  }
+  function renderStats(stats, meta) {
+    var games = (stats && stats.games) || [];
+    var nameOf = function (slug) { var m = meta[slug]; return (m && m[0]) || slug; };
+    /* art basename (see tileArt) and "is this slug in the catalogue at all?". Rows written before
+       save-sync.js v12 carry this origin's FOLDER name ("tomb-of-the-mask") rather than the public slug
+       ("tombofthemask"), so they resolve to nothing: show them in the list without a dead link rather than
+       sending the visitor to a 404. proposals/supabase-fix-game-slugs.sql renames the stored rows. */
+    var artOf = function (slug) { var m = meta[slug]; return (m && m[2]) || slug; };
+    var known = function (slug) { return Object.prototype.hasOwnProperty.call(meta, slug); };
+    statGames.textContent = String(games.length);
+    statTime.textContent = fmtSeconds(stats ? stats.seconds : 0);
+    /* the games list behind the games pill: everything, most played first, time per game; "+N more" past 12 */
+    var list = gamesPanel.querySelector(".pz-acct-stat-list"), more = gamesPanel.querySelector(".pz-acct-stat-more");
+    list.textContent = "";
+    var shown = games.slice(0, 12);
+    shown.forEach(function (g) {
+      var li = document.createElement("li"), a = document.createElement("a");
+      if (known(g.slug)) a.href = "/g/" + g.slug;
+      a.appendChild(tileArt(g.slug, null, "", artOf(g.slug)));
+      var n = document.createElement("span"); n.className = "pz-acct-stat-list-name"; n.textContent = nameOf(g.slug); a.appendChild(n);
+      var s = document.createElement("small"); s.textContent = g.seconds > 0 ? fmtSeconds(g.seconds) : (g.plays > 0 ? g.plays + (g.plays === 1 ? " play" : " plays") : "saved"); a.appendChild(s);
+      li.appendChild(a); list.appendChild(li);
+    });
+    var rest = games.length - shown.length;
+    if (!games.length) { more.textContent = stats ? "Play any game while logged in and it shows up here." : "Your stats couldn't be loaded right now."; more.hidden = false; }
+    else { more.textContent = rest > 0 ? "+ " + rest + " more" : ""; more.hidden = rest <= 0; }
+    /* Your most played: exactly 3, no scrolling, no arrow; hidden until there is real play time */
+    mostRow.textContent = "";
+    /* a row whose slug the catalogue does not know would render as a broken tile pointing at a 404, so it
+       is skipped here (it still appears, link-less, in the full games list above) */
+    var ranked = games.filter(function (g) { return g.seconds > 0 && known(g.slug); }).slice(0, 3);
+    mostSec.hidden = ranked.length === 0;
+    ranked.forEach(function (g, i) {
+      var a = makeTile(g.slug, nameOf(g.slug), "/g/" + g.slug, tileArt(g.slug, null, nameOf(g.slug), artOf(g.slug)));
+      a.appendChild(stickerBadge("<b>" + (i + 1) + "</b>", false));
+      mostRow.appendChild(a);
+    });
+    /* Your top category: play time summed per category over the account's games (a game with no time yet counts 1 s so
+       a brand-new account still gets an answer); sub line = how many of the account's games are in it */
+    var weight = {}, count = {}, catGames = 0;
+    games.forEach(function (g) {
+      var cats = (meta[g.slug] && meta[g.slug][1]) || [];
+      if (!cats.length) return;
+      catGames++;
+      cats.forEach(function (c) { weight[c] = (weight[c] || 0) + Math.max(1, g.seconds); count[c] = (count[c] || 0) + 1; });
+    });
+    var top = null; Object.keys(weight).forEach(function (c) { if (!top || weight[c] > weight[top]) top = c; });
+    var ic = catCard.querySelector(".pz-acct-cat-ic"); ic.textContent = "";
+    if (top && CAT_NAMES[top]) {
+      catCard.href = "/g/" + top;
+      catCard.querySelector(".pz-acct-cat-name").textContent = CAT_NAMES[top] + " games";
+      catCard.querySelector(".pz-acct-cat-sub").textContent = count[top] + " of your " + catGames + (catGames === 1 ? " game" : " games");
+      var ci = catIcon("/g/" + top); if (ci) ic.appendChild(ci);
+      catSec.hidden = false;
+    } else {
+      catCard.href = "/g";
+      catCard.querySelector(".pz-acct-cat-name").textContent = "All games";
+      catCard.querySelector(".pz-acct-cat-sub").textContent = "Play a few games and your favourite kind shows up here.";
+      var ca = catIcon("/g/casual"); if (ca) ic.appendChild(ca);
+      catSec.hidden = false;
+    }
+  }
+  renderStats(null, {});
+  /* click-to-expand pills. Games: toggles the list panel below (slides open on grid rows). Hours: slides its value out inline. */
+  function setGamesOpen(open) {
+    statGamesBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    gamesPanel.classList.toggle("is-open", open);
+    if (open) gamesPanel.removeAttribute("inert"); else gamesPanel.setAttribute("inert", "");
+  }
+  statGamesBtn.addEventListener("click", function () { setGamesOpen(statGamesBtn.getAttribute("aria-expanded") !== "true"); });
+  statTimeBtn.addEventListener("click", function () { statTimeBtn.setAttribute("aria-expanded", statTimeBtn.getAttribute("aria-expanded") === "true" ? "false" : "true"); });
+
+  /* ---------- render nav icon + drawer from `session` ---------- */
+  var pendingT = null;
+  function render() {
+    if (!bootstrapped) return;
+    clearTimeout(pendingT);
+    var on = signedIn();   /* an ANONYMOUS session (adopted from the games origin) is not "signed in" -- the drawer stays on the register/login screen */
+    var was = btn.classList.contains("is-signed-in");
+    clearTimeout(badgeT);
+    eachBtn(function (b) {
+      b.classList.toggle("is-signed-in", on);
+      b.classList.toggle("is-nudge", !on);   /* red "sign up" dot on the nav icon while signed out -- only once the state is known */
+      if (!on) b.classList.remove("badge-in");
+      b.setAttribute("aria-label", on ? "Account" : "Sign up");
+      var t = b.querySelector(".pz-account-tip");
+      if (t) t.textContent = on ? "Account" : "Sign up";
+    });
+    if (on) { badgeT = setTimeout(function () { eachBtn(function (b) { b.classList.add("badge-in"); }); }, 20); }
+    drawer.setAttribute("data-state", on ? "in" : "out");
+    if (on) {
+      var u = session.user || {}, m = u.user_metadata || {};
+      var name = m.full_name || m.name || (u.email ? u.email.split("@")[0] : "Player");
+      nameEl.textContent = name;
+      emailEl.textContent = u.email || "";
+      /* always the initial letter: the Google profile photo (m.avatar_url / m.picture) is deliberately never loaded or shown (owner, 2026-09-17) */
+      avatar.textContent = name.charAt(0).toUpperCase();
+      renderRecent();
+      if (isOpen && was !== on) refreshStats();   /* signed in while the drawer was open (OAuth return) */
+    } else { closeMenu(); closeModal(false); deviceSec.hidden = true; if (was !== on) renderStats(null, {}); }
+    if (was !== on) setStatus(null);
+  }
+
+  /* ---------- ... menu ---------- */
+  function openMenu() {
+    if (menuOpen) return;
+    menuOpen = true; menu.classList.add("is-open"); menuBtn.setAttribute("aria-expanded", "true");
+    setTimeout(function () { var f = menu.querySelector(".pz-acct-menu-item"); if (f) f.focus(); }, 30);
+  }
+  function closeMenu(refocus) {
+    if (!menuOpen) return;
+    menuOpen = false; menu.classList.remove("is-open"); menuBtn.setAttribute("aria-expanded", "false");
+    if (refocus) menuBtn.focus();
+  }
+  menuBtn.addEventListener("click", function (e) { e.stopPropagation(); menuOpen ? closeMenu() : openMenu(); });
+  document.addEventListener("click", function (e) { if (menuOpen && !menu.contains(e.target) && !menuBtn.contains(e.target)) closeMenu(); });
+
+  /* ---------- full-screen confirm modal (Sign out / Delete account) ----------
+     One element, re-filled per use. The STAY button is the solid/prominent one and takes focus on open, so Enter = stay;
+     "Yes, ..." is the outlined secondary. Escape, the backdrop and "No, ..." all just close it -- no other effect. */
+  var SVG_EXIT = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg>';
+  var SVG_TRASH = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+  function openModal(o) {
+    clearTimeout(modalT);
+    modal.setAttribute("data-kind", o.kind);
+    modalIc.innerHTML = o.kind === "delete" ? SVG_TRASH : SVG_EXIT;
+    modalH.textContent = o.h;
+    modalP.textContent = o.p || ""; modalP.hidden = !o.p;
+    modalYes.textContent = o.yes; modalNo.textContent = o.no;
+    modalOnYes = o.onYes || null;
+    modalOpen = true;
+    modal.hidden = false;
+    /* two frames so the display:none -> flex switch is committed before the opacity/transform transition starts */
+    requestAnimationFrame(function () { requestAnimationFrame(function () { if (modalOpen) modal.classList.add("is-open"); }); });
+    setTimeout(function () { if (modalOpen) modalNo.focus(); }, 30);
+  }
+  function closeModal(refocus) {
+    if (!modalOpen) return;
+    modalOpen = false; modalOnYes = null;
+    modal.classList.remove("is-open");
+    modalT = setTimeout(function () { modal.hidden = true; }, 200);
+    if (refocus !== false) menuBtn.focus();
+  }
+  modalNo.addEventListener("click", function () { closeModal(); });
+  modalYes.addEventListener("click", function () { var fn = modalOnYes; closeModal(); if (fn) fn(); });
+  modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });   /* backdrop click = stay */
+  signOutBtn.addEventListener("click", function () {
+    closeMenu();
+    openModal({ kind: "leave", h: "Are you sure you want to log out?", p: "Only on this device. You stay signed in on your other devices.", yes: "Yes, leave", no: "No, stay", onYes: function () { doSignOut("local"); } });
+  });
+  if (signOutAllBtn) signOutAllBtn.addEventListener("click", function () {
+    closeMenu();
+    openModal({ kind: "leave", h: "Sign out on every device?", p: "You'll be signed out here and on every other computer, phone or Chromebook where you're signed in.", yes: "Yes, sign out everywhere", no: "No, stay", onYes: function () { doSignOut("global"); } });
+  });
+  /* Delete account (REAL since 2026-09-18): the Postgres RPC delete_own_account() (proposals/supabase-delete-account.sql)
+     deletes the caller's own auth.users row -- it takes no arguments, so no other account can be named -- and the FKs
+     cascade to game_saves + game_play. Then the normal sign-out path (through the bridge: the games origin owns the
+     session) and the signed-out drawer. If the owner has not applied the SQL yet, PostgREST answers 404 and the old
+     "not available yet" notice is shown; nothing is signed out. */
+  function doDeleteAccount() {
+    delBtn.disabled = true;
+    setStatus("wait", "Deleting your account…");
+    freshClient().then(function (c) {
+      if (!c) throw new Error(clientErr || "the sign-in library is unavailable");
+      return c.rpc("delete_own_account").then(function (r) {
+        if (r && r.error) {
+          var e = new Error(r.error.message || "delete failed"); e.code = r.error.code; throw e;
+        }
+      });
+    }).then(function () {
+      /* the row is gone; end the session everywhere (best effort -- every session of a deleted user is dead anyway) */
+      return bridge.signOut(BRIDGE_WRITE_MS, "global").then(null, function () { return directLogout("global"); }).then(null, function () {});
+    }).then(function () {
+      forgetLocal(); notifyGames(false);
+      try { sessionStorage.setItem(VERDICT_KEY, "1"); } catch (e) {}
+      setStatus("info", "Your account and its saved progress have been deleted.");
+    }, function (e) {
+      var notThere = e && (e.code === "PGRST202" || /could not find the function|not found/i.test(String(e.message || "")));
+      setStatus(notThere ? "info" : "error", notThere
+        ? "Account deletion isn't available yet — nothing was changed. Use Sign out to leave for now."
+        : "Could not delete your account: " + ((e && e.message) || e) + " — nothing was changed.");
+    }).then(function () { delBtn.disabled = false; });
+  }
+  delBtn.addEventListener("click", function () {
+    closeMenu();
+    openModal({ kind: "delete", h: "Are you sure you want to delete your account?", p: "This can't be undone. Your saved game progress on this account will be deleted too.", yes: "Yes, delete", no: "No, keep it", onYes: doDeleteAccount });
+  });
+
+  /* ---------- open / close ---------- */
+  function open() {
+    if (isOpen) return;
+    isOpen = true;
+    /* Opening the drawer is the strongest signal a Supabase call is coming, so start the library now rather
+       than on the click. It also forces a real session check even when this page load was served the cached
+       "signed out" verdict (see checkSession), so the drawer never shows a stale state. */
+    clientReady();
+    checkSession();
+    applyCaps();   /* show only the sign-in methods the project actually has enabled */
+    /* Last resort. The two chains above always settle, but the visitor is staring at this panel right now:
+       if the answer somehow has not arrived shortly after the bridge's own timeout, show the best-known
+       state (signed out) rather than spinning at them. Harmless if the check lands first -- render() is
+       idempotent and the real verdict overwrites this one. */
+    if (!bootstrapped) {
+      clearTimeout(pendingT);
+      pendingT = setTimeout(function () { if (!bootstrapped) { bootstrapped = true; render(); } }, BRIDGE_LOAD_MS + 1500);
+    }
+    try { if (window.PZ_track) window.PZ_track("nav_click", { nav_item: "account" }); } catch (e) {}
+    lastFocus = document.activeElement;
+    if (signedIn()) { renderRecent(); refreshStats(); refreshDevice(); }   /* re-read localStorage so a game played in another tab shows up; re-read the account's stats */
+    scrim.classList.add("is-open");
+    drawer.classList.add("is-open");
+    drawer.setAttribute("aria-hidden", "false");
+    eachBtn(function (b) { b.setAttribute("aria-expanded", "true"); });
+    document.documentElement.classList.add("pz-acct-lock");
+    setTimeout(function () { try { drawer.focus({ preventScroll: true }); } catch (e) { drawer.focus(); } if (recentRow.__update) recentRow.__update(); }, 40);
+  }
+  function close() {
+    if (!isOpen) return;
+    isOpen = false;
+    closeMenu(); closeModal(false);
+    scrim.classList.remove("is-open");
+    drawer.classList.remove("is-open");
+    drawer.setAttribute("aria-hidden", "true");
+    eachBtn(function (b) { b.setAttribute("aria-expanded", "false"); });
+    document.documentElement.classList.remove("pz-acct-lock");
+    if (lastFocus && typeof lastFocus.focus === "function") { try { lastFocus.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  eachBtn(function (b) { b.addEventListener("click", function (e) { e.preventDefault(); isOpen ? close() : open(); }); });
+  closeBtn.addEventListener("click", close);
+  scrim.addEventListener("click", close);
+  document.addEventListener("keydown", function (e) {
+    if (!isOpen) return;
+    if (modalOpen) { /* the modal owns the keyboard while it is up: Escape = stay, Tab just alternates between its two buttons */
+      if (e.key === "Escape") { e.preventDefault(); closeModal(); }
+      else if (e.key === "Tab") { e.preventDefault(); (document.activeElement === modalYes ? modalNo : modalYes).focus(); }
+      return;
+    }
+    if (e.key === "Escape") { e.preventDefault(); if (menuOpen) closeMenu(true); else close(); return; }
+    if (e.key === "Tab") { /* keep focus inside the drawer */
+      var f = drawer.querySelectorAll('button:not([hidden]):not([disabled]), a[href], [tabindex]:not([tabindex="-1"])');
+      var list = Array.prototype.filter.call(f, function (el) { return el.offsetParent !== null && (menuOpen || !menu.contains(el)); });
+      if (!list.length) return;
+      var first = list[0], last = list[list.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === drawer)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  /* ---------- Register / Login tabs (same Google button, different copy — Poki's pattern) ---------- */
+  function selectTab(which) {
+    currentTab = which;
+    tabs.forEach(function (t) {
+      var on = t.getAttribute("data-tab") === which;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      if (on) panel.setAttribute("aria-labelledby", t.id);
+    });
+    heading.textContent = COPY[which].h;
+    why.innerHTML = COPY[which].why;   /* trusted literal from COPY above, nothing user-supplied */
+    googleLabel.textContent = COPY[which].btn;
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () { selectTab(t.getAttribute("data-tab")); });
+    t.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      var i = tabs.indexOf(t), n = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+      e.preventDefault(); n.focus(); selectTab(n.getAttribute("data-tab"));
+    });
+  });
+
+  /* ---------- Google sign-in: plain redirect, same tab ----------
+     Register and Login are the same signInWithOAuth. Guests have no Supabase session any more (their saves live in
+     the self-hosted store on games.pizzaedition.com), so there is nothing to link: "sign up and your progress
+     carries over" is the bridge COPYING the guest's rows into the account on "adopt" after the return trip. */
+  var OAUTH_OPTS = { redirectTo: location.origin + location.pathname, queryParams: { prompt: "select_account" } };
+
+  /* ---------- which sign-in methods does the project ACTUALLY have enabled? ----------
+     GET /auth/v1/settings is public (anon key) and reports exactly what the dashboard has switched on:
+     external.<provider> booleans plus passkeys_enabled. The drawer renders a button only for what is
+     really available, which means:
+       * Microsoft is built and shipped NOW but stays hidden until the owner finishes the Azure setup,
+         at which point it appears on its own -- no code change, no redeploy, nothing to remember.
+       * nothing can ever offer a method that would just error on click.
+     One cheap cached request per page that opens the drawer; a failure simply leaves the extra
+     buttons hidden, i.e. today's behaviour. */
+  /* A WebAuthn ceremony the visitor dismissed (or that found no usable credential) surfaces as
+     DOMException NotAllowedError / AbortError. Test the name first and only fall back to the text. */
+  function isUserCancel(e) {
+    var n = (e && e.name) || "";
+    if (n === "NotAllowedError" || n === "AbortError") return true;
+    return /\bnot allowed\b|\btimed out\b|\babort|\bcancel/i.test((e && e.message) || String(e));
+  }
+
+  /* ---------- Touch ID / Face ID rather than the cross-device QR sheet (2026-09-24) ----------
+     The owner tried "Sign in with a passkey" on his MacBook and got a QR code to scan instead of the
+     Touch ID prompt, and it could not succeed. Both halves were real, and neither was our UI's fault
+     until now:
+
+       1. WHAT SUPABASE ASKS FOR. Read from supabase/auth's own source (internal/api/passkey_webauthn.go):
+          the server builds its options with ResidentKey=required and UserVerification=preferred and
+          sets NO AuthenticatorAttachment, no hints, attestation=none. Its authentication options
+          (verified live) are {challenge, timeout, rpId, userVerification} with NO allowCredentials.
+          With the attachment unset, a browser is entitled to offer the hybrid/cross-device transport
+          as prominently as the built-in sensor -- which on macOS Chrome is the QR sheet. supabase-js's
+          registerPasskey()/signInWithPasskey() pass the server's options straight to WebAuthn and
+          expose no hook to adjust them (registerPasskey reads only options.signal -- note the
+          friendlyName we used to pass was silently ignored).
+       2. WHY IT COULD NOT WORK. He had no passkey registered, and a sign-in ceremony cannot create
+          one. See the note on addPasskeyBtn for why he had no way to register one first.
+
+     Poki, which he compared against, gates its passkey UI on
+     isUserVerifyingPlatformAuthenticatorAvailable() AND isConditionalMediationAvailable() (read out of
+     their own bundle, client~main-d257d90c), and their identity provider (Ory) can register a passkey
+     during sign-up. We can copy the first half; the second is not available to us (see below).
+
+     So: ask for the platform authenticator explicitly. Since the library takes no options, the
+     injection is scoped to the single call by swapping navigator.credentials.<fn> for its duration and
+     restoring it in a finally -- the library still does all of the base64url/ArrayBuffer encoding and
+     builds the response the server expects, and we only widen the options on the way past. The server
+     verifies the challenge, rpId and origin against its stored session data; it does not re-check
+     authenticatorSelection (it cannot -- attachment is not attested), so narrowing to "platform" is
+     safe and simply removes the QR option from the picker. hints:["client-device"] is the WebAuthn L3
+     way to say the same thing and is ignored by browsers that do not know it. */
+  /* Only a TRUE answer is cached. A false one is re-probed on the next drawer open: the call can
+     answer false very early in a page's life (observed in the CDP harness, where a freshly attached
+     virtual authenticator is not yet visible to the document), and caching that would hide the button
+     for the rest of the page view with no way back. Whether a device has a sensor is a stable fact, so
+     a cached true can never go stale, and re-probing a false costs one fast async call per open. */
+  var platformP = null;
+  function platformAuthAvailable() {
+    if (platformP) return platformP;
+    var p = new Promise(function (resolve) {
+      var P = window.PublicKeyCredential;
+      if (!P || typeof P.isUserVerifyingPlatformAuthenticatorAvailable !== "function") return resolve(false);
+      try {
+        P.isUserVerifyingPlatformAuthenticatorAvailable()
+          .then(function (ok) { resolve(!!ok); }, function () { resolve(false); });
+      } catch (e) { resolve(false); }
+    });
+    var wrapped = p.then(function (ok) {
+      if (!ok && platformP === wrapped) platformP = null;   /* forget a negative, keep a positive */
+      return ok;
+    });
+    platformP = wrapped;
+    return wrapped;
+  }
+
+  /* Run fn() with the platform preference injected into whichever ceremony it starts. */
+  function preferPlatform(kind, fn) {
+    var cc = window.navigator && window.navigator.credentials;
+    if (!cc || typeof cc[kind] !== "function") return Promise.resolve().then(fn);
+    var real = cc[kind];
+    var patched = function (opts) {
+      try {
+        var pub = opts && opts.publicKey;
+        if (pub) {
+          if (kind === "create") {
+            var sel = pub.authenticatorSelection || (pub.authenticatorSelection = {});
+            if (!sel.authenticatorAttachment) sel.authenticatorAttachment = "platform";
+            /* residentKey is already "required" from the server; keep it that way so the credential
+               stays discoverable, which is what lets sign-in work without typing an email. */
+            if (!sel.residentKey) sel.residentKey = "required";
+          }
+          /* supabase-js's own option transform already puts an EMPTY hints array here, and [] is
+             truthy, so a plain `if (!pub.hints)` never fires. Test the length. (Caught by
+             tools/account-tests/passkey-platform-test.py, which asserts on the options that actually
+             reach WebAuthn rather than on what this function intended to send.) */
+          if (!pub.hints || !pub.hints.length) pub.hints = ["client-device"];
+        }
+      } catch (e) { /* never let option tweaking break the ceremony */ }
+      return real.call(cc, opts);
+    };
+    /* Restore exactly what was there. navigator.credentials.create/get normally live on
+       CredentialsContainer.prototype, so assigning creates an own property and deleting it uncovers
+       the native method again -- but if something else had already installed an own property (another
+       script, or a test harness), deleting would destroy it. So record which case this is. */
+    var hadOwn = Object.prototype.hasOwnProperty.call(cc, kind);
+    var prev = hadOwn ? cc[kind] : null;
+    var restore = function () {
+      try {
+        if (cc[kind] !== patched) return;      /* someone else took over; leave them alone */
+        if (hadOwn) cc[kind] = prev; else delete cc[kind];
+      } catch (e) {}
+    };
+    try { cc[kind] = patched; } catch (e) { return Promise.resolve().then(fn); }
+    var p;
+    try { p = Promise.resolve(fn()); } catch (e) { restore(); return Promise.reject(e); }
+    return p.then(function (v) { restore(); return v; }, function (e) { restore(); throw e; });
+  }
+
+  /* Did THIS browser ever successfully enrol a passkey for us? Used only to word the failure
+     message and to nudge -- the real list lives server-side and is per account, not per device. */
+  var PK_KEY = "pzacct:passkey";
+  function passkeyKnownHere() { try { return localStorage.getItem(PK_KEY) === "1"; } catch (e) { return false; } }
+  function rememberPasskeyHere() { try { localStorage.setItem(PK_KEY, "1"); } catch (e) {} }
+
+  var capsP = null;
+  function providerCaps() {
+    if (capsP) return capsP;
+    capsP = fetch(SUPA_URL + "/auth/v1/settings", { headers: { apikey: SUPA_KEY }, credentials: "omit" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+    return capsP;
+  }
+  function applyCaps() {
+    return Promise.all([providerCaps(), platformAuthAvailable()]).then(function (both) {
+      var c = both[0], hasPlatform = both[1];
+      var ext = (c && c.external) || {};
+      var pk = !!(c && c.passkeys_enabled), ms = !!ext.azure;
+      /* Show the passkey SIGN-IN button only where the device actually has a built-in sensor
+         (Touch ID / Face ID / Windows Hello) -- same gate Poki uses. Without this, a desktop with no
+         sensor gets a button whose only possible outcome is the cross-device QR sheet, which is not
+         what anybody means by "sign in with a passkey". Enrolling is gated the same way: there is no
+         point offering to add one on a device that cannot hold it. */
+      if (passkeyBtn) passkeyBtn.hidden = !(pk && hasPlatform);
+      if (msBtn) msBtn.hidden = !ms;
+      if (addPasskeyBtn) addPasskeyBtn.hidden = !(pk && hasPlatform);
+      var any = (pk && hasPlatform) || ms;
+      if (altWrap) altWrap.classList.toggle("is-on", any);
+      if (orRow) orRow.classList.toggle("is-on", any);
+      return c;
+    });
+  }
+  function plainSignIn(c) { return c.auth.signInWithOAuth({ provider: "google", options: OAUTH_OPTS }); }
+  googleBtn.addEventListener("click", function () {
+    googleBtn.disabled = true;
+    /* the library is normally already there (open() started it), so this resolves in the same tick; it only
+       waits on a first click that beat the download */
+    clientReady().then(function (c) {
+      if (!c) { googleBtn.disabled = false; setStatus("error", clientErr || "Sign-in is unavailable right now."); return null; }
+      return plainSignIn(c);
+    }).then(function (r) {
+      /* success case never resolves here -- the browser has already navigated away by the time this
+         would fire. Only a synchronous setup failure (bad client, network refused before redirect) lands. */
+      if (r && r.error) { googleBtn.disabled = false; setStatus("error", "Could not start Google sign-in: " + r.error.message); }
+    }).catch(function (e) {
+      googleBtn.disabled = false;
+      setStatus("error", "Could not start Google sign-in: " + ((e && e.message) || e));
+    });
+  });
+
+  /* ---------- Microsoft ----------
+     Supabase's provider key for Microsoft / Entra ID is "azure" (confirmed against this project's own
+     /auth/v1/settings, which lists `azure` among external.*). Same OAuth shape and the same redirectTo
+     as Google, so the existing ?code= return path in checkSession()/handleReturnTrip() handles it with
+     no changes at all. Hidden until external.azure is true. */
+  if (msBtn) msBtn.addEventListener("click", function () {
+    msBtn.disabled = true;
+    clientReady().then(function (c) {
+      if (!c) { msBtn.disabled = false; setStatus("error", clientErr || "Sign-in is unavailable right now."); return null; }
+      return c.auth.signInWithOAuth({ provider: "azure", options: { redirectTo: OAUTH_OPTS.redirectTo, scopes: "email" } });
+    }).then(function (r) {
+      if (r && r.error) { msBtn.disabled = false; setStatus("error", "Could not start Microsoft sign-in: " + r.error.message); }
+    }).catch(function (e) {
+      msBtn.disabled = false; setStatus("error", "Could not start Microsoft sign-in: " + ((e && e.message) || e));
+    });
+  });
+
+  /* ---------- Passkey: sign in ----------
+     auth.signInWithPasskey() does the whole WebAuthn ceremony against a DISCOVERABLE credential, so the
+     visitor picks the account from their own device prompt -- no email typed first. Unlike OAuth there is
+     no redirect: it resolves in place with a session, so the session has to be handed to the games origin
+     here, exactly as the ?code= return path does after Google. */
+  if (passkeyBtn) passkeyBtn.addEventListener("click", function () {
+    passkeyBtn.disabled = true;
+    setStatus("info", "Waiting for your device…");
+    clientReady().then(function (c) {
+      if (!c) throw new Error(clientErr || "Sign-in is unavailable right now.");
+      return preferPlatform("get", function () { return c.auth.signInWithPasskey(); });
+    }).then(function (r) {
+      if (r && r.error) throw r.error;
+      var sess = r && r.data && r.data.session;
+      if (!sess) throw new Error("No session came back from the passkey sign-in.");
+      session = sess;
+      /* hand it to games.pizzaedition.com -- that origin is the one session store (see session-bridge) */
+      return bridge.adopt(sess, BRIDGE_WRITE_MS).then(function () { return sess; }, function () { return sess; });
+    }).then(function (sess) {
+      if (!sess) return;
+      passkeyBtn.disabled = false;
+      bootstrapped = true; rememberVerdict(); render(); refreshStats();
+      setStatus("ok", "Signed in with your passkey.");
+      afterAdopt();
+    }).catch(function (e) {
+      passkeyBtn.disabled = false;
+      /* Dismissing your own device prompt is not an error worth shouting about. Match on the
+         DOMException NAME, not the message: Chrome's actual text is "The operation either timed out
+         or was not allowed..." -- "not allowed" with a SPACE -- so a naive /NotAllowed/ test misses
+         every real cancellation and toasts an error at someone who simply changed their mind.
+         (Caught with a CDP virtual authenticator, which reproduces the exact DOMException.) */
+      /* A dismissed prompt and "there is no passkey here" are the SAME DOMException
+         (NotAllowedError), so we cannot tell them apart from the error alone. If this browser has
+         never enrolled one for us, the overwhelmingly likely cause is that there is nothing to sign in
+         with -- and silently doing nothing (the right response to a cancel) reads as "the button is
+         broken", which is exactly the bounce the owner hit. Say what to do instead. */
+      if (isUserCancel(e)) {
+        if (!passkeyKnownHere()) {
+          setStatus("info", "No passkey on this device yet. Sign in with Google once, then choose "
+            + "“Add a passkey” — after that, Touch ID signs you in here.");
+        } else {
+          setStatus(null);
+        }
+        return;
+      }
+      setStatus("error", "Passkey sign-in failed: " + ((e && e.message) || e));
+    });
+  });
+
+  /* ---------- Passkey: register one for the account you are already signed into ----------
+     THE CONSTRAINT, stated plainly because it is the owner's actual complaint: with Supabase you
+     CANNOT create an account from a passkey. Touch ID cannot be your first sign-in method here. Both
+     ends enforce it -- supabase-js's _startPasskeyRegistration() calls _useSession() and returns
+     AuthSessionMissingError with no session, and the server answers POST /auth/v1/passkeys/registration/options
+     with 401 no_authorization ("This endpoint requires a valid Bearer token"), verified live against
+     the project. There is no signUpWithPasskey in supabase-js (2.116.0) and no unauthenticated
+     registration endpoint. So the only possible shape is: sign in with Google once -> add a passkey ->
+     use Touch ID from then on. Poki can offer passkey-first sign-up because Ory, its identity provider,
+     registers a passkey inside the sign-up flow; Supabase has no equivalent yet. If that changes, this
+     is the place to add it.
+     friendlyName is NOT passed any more: registerPasskey() reads only options.signal, so it was
+     silently discarded -- the device names the credential from the RP id instead. */
+  if (addPasskeyBtn) addPasskeyBtn.addEventListener("click", function () {
+    closeMenu(true);
+    if (!signedIn()) { setStatus("error", "Sign in first, then add a passkey."); return; }
+    setStatus("info", "Waiting for your device…");
+    /* freshClient(), never clientReady(): registerPasskey() calls getSession() first, and on a page open for an hour
+       that would mean a refresh from here (see guardedFetch / THE ONE RULE) */
+    freshClient().then(function (c) {
+      if (!c) throw new Error(clientErr || "That is unavailable right now.");
+      return preferPlatform("create", function () { return c.auth.registerPasskey(); });
+    }).then(function (r) {
+      if (r && r.error) throw r.error;
+      rememberPasskeyHere();
+      setStatus("ok", "Passkey added — Touch ID will sign you in here next time.");
+    }).catch(function (e) {
+      if (isUserCancel(e)) { setStatus(null); return; }
+      setStatus("error", "Could not add a passkey: " + ((e && e.message) || e));
+    });
+  });
+  cancelBtn.addEventListener("click", function () { setStatus(null); });
+
+  /* ---------- sign out (real; reached only via the modal) ----------
+     scope "local" (the default since 2026-10-05) ends only this device's session; "global" -- "Sign out everywhere"
+     -- every session of the account. Through the bridge: the games origin owns the session, so it is the one to
+     revoke it and to drop it from its storage (the games on this device then stop syncing at once -- they see the
+     storage change). Only if the bridge is unreachable is /logout called directly with this page's in-memory token. */
+  function directLogout(scope) {
+    /* never client.auth.signOut(): it runs getSession() first, which would REFRESH a near-expired token from here */
+    var tok = session && session.access_token;
+    if (!tok || secondsLeft(session) < 5) return Promise.resolve();
+    return fetch(SUPA_URL + "/auth/v1/logout?scope=" + (scope === "global" ? "global" : "local"), {
+      method: "POST", credentials: "omit", headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + tok }
+    }).then(function () {}, function () {});
+  }
+  function doSignOut(scope) {
+    scope = scope === "global" ? "global" : "local";
+    signOutBtn.disabled = true; if (signOutAllBtn) signOutAllBtn.disabled = true;
+    closeMenu();
+    bridge.signOut(BRIDGE_WRITE_MS, scope).then(function () {
+      forgetLocal(); notifyGames(false);
+    }, function (e) {
+      return directLogout(scope).then(function () {
+        forgetLocal(); notifyGames(false);
+        setStatus("error", "Signed out on this page, but the games on this device could not be reached (" + ((e && e.message) || e) + ") — they may stay signed in until you sign out again.");
+      });
+    }).then(function () { signOutBtn.disabled = false; if (signOutAllBtn) signOutAllBtn.disabled = false; });
+  }
+
+  /* ---------- tell the running game(s) the account changed ----------
+     The game iframe is a games-origin document two frames down (/g/<slug> -> /embed/<slug> -> the game). It also
+     notices on its own (the bridge's write to the shared session key fires a `storage` event there), so this is the
+     belt to that pair of braces -- and the only path for a game that asked with pz-account-query because it could
+     not use storage at all. Cross-origin frames are reachable through window.frames; postMessage to a frame of the
+     wrong origin is simply dropped by the browser, so no frame other than a games-origin one can read this. */
+  function notifyGames(isIn) {
+    var msg = { type: "pz-account-changed", signedIn: !!isIn };
+    (function walk(w, depth) {
+      var n = 0; try { n = w.length; } catch (e) { return; }
+      for (var i = 0; i < n; i++) {
+        var f = null; try { f = w[i]; } catch (e) { continue; }
+        if (!f) continue;
+        try { f.postMessage(msg, GAMES_ORIGIN); } catch (e) {}
+        if (depth < 3) walk(f, depth + 1);
+      }
+    })(window, 0);
+  }
+  window.addEventListener("message", function (ev) {
+    var d = ev.data;
+    if (ev.origin !== GAMES_ORIGIN || !ev.source || !d || typeof d !== "object" || d.type !== "pz-account-query") return;
+    var src = ev.source;
+    checkSession().then(function () { try { src.postMessage({ type: "pz-account-changed", signedIn: signedIn() }, GAMES_ORIGIN); } catch (e) {} });
+  });
+  /* after a sign-in on this page: the running game(s), and a browser that could not persist the session at all */
+  function afterAdopt() {
+    notifyGames(true);
+    if (bridge.persisted() === false) setStatus("info", "Signed in — but this browser is blocking saved site data, so your game progress can't be saved to your account on this device.");
+    refreshDevice();
+  }
+
+  /* ---------- "On this device" (session-bridge.html v6 pz-device-info) ---------- */
+  var NOSYNC_TEXT = {
+    "too-large": "its save is too big to store in your account, so it only stays on this device.",
+    "restore-failed": "your account's progress couldn't be loaded into this browser (its storage may be full).",
+    "unreadable": "this browser can't read the progress saved in your account."
+  };
+  function deviceItem(cls, html, btnLabel, onClick) {
+    var li = document.createElement("li"); if (cls) li.className = cls;
+    var sp = document.createElement("span"); html(sp); li.appendChild(sp);
+    if (btnLabel) { var b = document.createElement("button"); b.type = "button"; b.textContent = btnLabel; b.addEventListener("click", function () { onClick(b); }); li.appendChild(b); }
+    deviceList.appendChild(li);
+  }
+  function whenText(iso) {
+    var d = new Date(iso || NaN); if (!isFinite(d.getTime())) return "earlier";
+    try { return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); } catch (e) { return d.toISOString().slice(0, 10); }
+  }
+  var deviceP = null;
+  function refreshDevice() {
+    if (!signedIn()) { deviceSec.hidden = true; return; }
+    var mine = deviceP = Promise.all([bridge.deviceInfo(BRIDGE_CLICK_MS).then(null, function () { return null; }), loadMeta()]).then(function (rs) {
+      if (deviceP !== mine) return;
+      var info = rs[0], meta = rs[1] || {}, n = 0;
+      deviceList.textContent = "";
+      if (!info || !signedIn()) { deviceSec.hidden = true; return; }
+      var nameOf = function (slug) { var m = meta[slug]; return (m && m[0]) || slug; };
+      var bold = function (sp, name, rest) { var b = document.createElement("b"); b.textContent = name; sp.appendChild(b); sp.appendChild(document.createTextNode(rest)); };
+      if (info.storage === false || bridge.persisted() === false) {
+        n++; deviceItem("is-warn", function (sp) { sp.textContent = "This browser is blocking saved site data, so game progress can't sync to your account on this device."; });
+      }
+      (info.nosync || []).forEach(function (x) {
+        if (!x || !x.slug) return;
+        n++; deviceItem("is-warn", function (sp) { bold(sp, nameOf(x.slug), ": " + (NOSYNC_TEXT[x.reason] || "its progress can't sync on this device.")); });
+      });
+      (info.backups || []).forEach(function (x) {
+        if (!x || !x.slug) return;
+        var known = Object.prototype.hasOwnProperty.call(meta, x.slug);
+        n++; deviceItem("", function (sp) { bold(sp, nameOf(x.slug), ": this device's progress from " + whenText(x.at) + " was replaced by your account's save."); },
+          known ? "Use this device's" : null, function (b) {
+            b.disabled = true;
+            /* re-arm the game's own "Use this device's instead" banner, then open the game: the switch happens there,
+               where the save can be put back and uploaded (this page cannot reach the game's storage itself) */
+            bridge.armBackup(x.slug, BRIDGE_CLICK_MS).then(function (r) {
+              if (r && r.armed) location.href = "/g/" + x.slug;
+              else { b.disabled = false; setStatus("error", "That copy is no longer on this device."); }
+            }, function (e) { b.disabled = false; setStatus("error", "Couldn't reach the games right now: " + ((e && e.message) || e)); });
+          });
+      });
+      deviceSec.hidden = n === 0;
+    });
+  }
+
+  /* ---------- session: on load + on every change ----------
+     Order: 1) let the client finish its own init (this is where a ?code= return trip is exchanged for a session,
+     and where a link failure surfaces); 2) if we did just come back, hand the new session to the bridge so the
+     games origin persists and owns it; 3) ask the bridge for the current session and adopt it in memory;
+     4) only then render, so the nav icon shows the right state first time. Every step is bounded by a timeout
+     and every failure degrades to "signed out" -- this page never hangs on the bridge. */
+  function stripReturnParams() {
+    try {
+      var u = new URL(location.href), changed = false;
+      ["error", "error_code", "error_description", "code", "sb_flow_id"].forEach(function (k) { if (u.searchParams.has(k)) { u.searchParams.delete(k); changed = true; } });
+      if (changed || /(^|[&#])error(_code|_description)?=/.test(location.hash)) { u.hash = ""; history.replaceState(history.state, "", u.toString()); }
+    } catch (e) {}
+  }
+  function handleReturnTrip(c) {
+    return c.auth.initialize().then(function (r) {
+      var err = r && r.error, code = returnErrorCode || (err && err.details && err.details.code) || null;
+      if (err || code) {
+        stripReturnParams();
+        setStatus("error", "Google sign-in did not complete: " + (returnErrorText || (err && err.message) || code || "unknown error"));
+        return;
+      }
+      if (!cameBack) return;
+      return c.auth.getSession().then(function (g) {   /* memory-only storage: the only session that can be here is the one just exchanged */
+        var s = g && g.data && g.data.session;
+        if (!s) return;
+        session = s;
+        return bridge.adopt(s, BRIDGE_WRITE_MS).then(function () { afterAdopt(); }, function (e) {
+          setStatus("info", "Signed in. Your game progress could not be connected on this device right now (" + ((e && e.message) || e) + ") — it will connect the next time you open the site.");
+        });
+      });
+    }).catch(function (e) { try { console.warn("[account] return trip:", e); } catch (x) {} });
+  }
+  /* ONE bridge round trip per tab-session, not one per page view. The bridge iframe loads its own copy of
+     supabase-js on the games origin, so repeating it on every page of a browsing session is real weight on a
+     school network. Only the NEGATIVE verdict is cached: it carries no session data, it is the overwhelmingly
+     common case, and it is self-healing -- open() always forces a real check, an OAuth return never uses the
+     cache, and sign-out clears it. A signed-IN visitor is deliberately never served from the cache, because
+     the hero card needs the live session for their name and email. sessionStorage, not localStorage, so a new
+     tab re-checks and signing in elsewhere cannot leave a stale icon around for days. */
+  var VERDICT_KEY = "pzacct:signedout";
+  function cachedSignedOut() { try { return sessionStorage.getItem(VERDICT_KEY) === "1"; } catch (e) { return false; } }
+  function rememberVerdict() { try { if (signedIn()) sessionStorage.removeItem(VERDICT_KEY); else sessionStorage.setItem(VERDICT_KEY, "1"); } catch (e) {} }
+
+  var checkP = null;
+  function checkSession() {
+    if (checkP) return checkP;
+    checkP = bridge.initial(BRIDGE_LOAD_MS).then(function (s) {
+      /* prefer the freshly exchanged session over whatever the bridge held before adopting it */
+      if (signedIn() && cameBack) return null;
+      /* nothing there, or an ANONYMOUS games session -- either way this visitor is signed out as far as the
+         drawer is concerned, and no Supabase call (and so no library download) is needed to know that.
+         NOTE (2026-09-18): the `is_anonymous` half of this is a fast path, not a dependency. Anonymous
+         guest saves are being moved OFF Supabase's anonymous sign-ins onto a self-hosted service (Supabase
+         anonymous users are billed per user and do not scale for this site), so the bridge will simply stop
+         ever handing back an anonymous session. When that lands, `s` is null for a guest, the same branch is
+         taken, and nothing here needs changing. The same is true of the linkIdentity carry-over on the
+         Register tab: with no anonymous session to link, it falls through to a plain signInWithOAuth, which
+         is the documented strict fallback and already the path every Login-tab click takes. */
+      if (!s || s.is_anonymous) return null;
+      return adoptLocal(s);
+    }, function (e) { try { console.warn("[account] session bridge unavailable, treating as signed out:", (e && e.message) || e); } catch (x) {} return null; })
+      /* Both handlers, deliberately: since the drawer now starts in "pending" and only render() can leave
+         that state, an unhandled rejection anywhere above would strand a signed-in visitor on the loading
+         dots forever -- a worse failure than the signed-out flash this replaced. adoptLocal() already
+         catches internally, so this is belt-and-braces against a future edit. Rendering with whatever is
+         known is exactly what the old code did on a blocked bridge. */
+      .then(function () { bootstrapped = true; render(); rememberVerdict(); },
+            function (e) { try { console.warn("[account] session check failed:", (e && e.message) || e); } catch (x) {} bootstrapped = true; render(); });
+    return checkP;
+  }
+  /* the bridge iframe must never compete with the page the visitor actually came for */
+  function whenIdle(fn) {
+    var ran = false;
+    function go() { if (ran) return; ran = true; fn(); }
+    function arm() { if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 2000 }); else setTimeout(go, 800); }
+    if (document.readyState === "complete") arm();
+    else window.addEventListener("load", arm, { once: true });
+  }
+
+  selectTab("register");
+  if (cameBack || returnErrorCode || returnErrorText) {
+    /* a return trip from Google has to be exchanged on this page load, before anything renders */
+    clientReady().then(function (c) {
+      if (!c) { bootstrapped = true; render(); setStatus("error", clientErr); return null; }
+      return handleReturnTrip(c).then(checkSession);
+    }).then(null, function (e) {   /* never leave the drawer on the loading dots -- see checkSession */
+      try { console.warn("[account] return trip failed:", (e && e.message) || e); } catch (x) {}
+      bootstrapped = true; render();
+    });
+  } else if (cachedSignedOut()) {
+    bootstrapped = true; render();   /* icon is correct immediately; open() still forces a real check */
+  } else {
+    whenIdle(checkSession);
+  }
+})();

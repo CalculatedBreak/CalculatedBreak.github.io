@@ -1,86 +1,40 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <script src="/cloudsave.js"></script>
-  <meta charset="UTF-8">
-  <title>Hole.io</title>
-  <style>
-    body {
-      margin: 0;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
-      color: #fff;
-    }
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Hole.io</title>
+	<script>
+	window.config = {
+		loader: 'unity-2020',
+		debug: false,
+		maxRatio: 24 / 9,
+		minRatio: 9 / 24,
 
-    .frame-container {
-      backdrop-filter: blur(10px);
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 20px;
-      padding: 10px;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-      width: 90%;
-      height: 80%;
-    }
+		title: 'Hole.io',
+		thumbnail: 'thumbnail.png',
+		numScreenshots:  4 ,
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 15px;
-    }
+		unityVersion: '6000.2.10f1',
+		unityWebglBuildUrl: '',
 
-    .fullscreen-btn {
-      margin-top: 20px;
-      padding: 12px 24px;
-      font-size: 16px;
-      background: linear-gradient(90deg, #00f2fe, #4facfe);
-      border: none;
-      border-radius: 30px;
-      color: #000;
-      cursor: pointer;
-      box-shadow: 0 0 15px #00f2fe;
-      transition: transform 0.3s ease;
-    }
-
-    .fullscreen-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 25px #00f2fe;
-    }
-  </style>
-
-  <!-- Google Analytics Tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV0H0442XN"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-FV0H0442XN');
-  </script></head>
+		fileSize:  68 ,
+		cachedDecompressedFileSizes: {
+			'HoleIo.loader.js':  26693 ,
+			'HoleIo.framework.js':  379023 ,
+			'HoleIo.wasm':  51828861 ,
+			'HoleIo.data':  19486748 ,
+		},
+		"metadata": {"poki_template_version":1,"background_color":"#000000","code_filename":"HoleIo.wasm","company_name":"Voodoo","data_filename":"HoleIo.data","development_player":"false","framework_filename":"HoleIo.framework.js","height":"960","loader_filename":"HoleIo.loader.js","product_name":"Hole.io","product_version":"2.20.4","splash_screen_style":"Dark","unity_version":"6000.2.10f1","use_data_caching":"true","use_threads":"false","use_wasm":"true","use_webgl_1_0":"false","use_webgl_2_0":"true","width":"600","decompression_fallback":"Disabled"}
+	};
+	</script>
+<!-- will be copied to the resulting head //-->
+</head>
 <body>
-  <div class="frame-container">
-    <iframe id="gameFrame" src="https://classroomlesson.github.io/basic-ruffle-player/html/holeio/index.html" allowfullscreen></iframe>
-  </div>
-  <button class="fullscreen-btn" onclick="toggleFullscreen()">Enter Fullscreen</button>
-
-  <script>
-    function toggleFullscreen() {
-      const iframe = document.getElementById('gameFrame');
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
-      } else if (iframe.webkitRequestFullscreen) {
-        iframe.webkitRequestFullscreen();
-      } else if (iframe.msRequestFullscreen) {
-        iframe.msRequestFullscreen();
-      }
-    }
-  </script>
+	<script src="./scripts/ytgame-stub.js?v=1"></script>
+	<script src="./scripts/master-loader.js?v=sdk22"></script><script src="./scripts/save-migrate.js?v=1" data-mode="idbfs"></script><script src="/cloudsave"></script>
+<!-- will be copied to the resulting body //-->
+<!-- will also be copied to the resulting body //-->
 </body>
 </html>

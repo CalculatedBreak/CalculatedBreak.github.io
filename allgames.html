@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse all free browser games on Calculated Break. Find action, racing, puzzle, sports, and multiplayer favorites.">
+  <meta name="theme-color" content="#101216">
+  <title>All Games | Calculated Break</title>
+
+  <!-- Ad script 1 (unfoldedtrade) -->
+<!--  <script>
+(function(jehe){
+var d = document,
+    s = d.createElement('script'),
+    l = d.currentScript || d.scripts[d.scripts.length - 1];
+s.settings = jehe || {};
+s.src = "\/\/unfoldedtrade.com\/bNXDV.sxdiGclu0\/YbWkcz\/SeqmS9\/u\/Z\/UTlGksP\/T-cK1vNpT-kvyJNyj\/UwtFNtzaUz1wO\/TzIs2jO\/QQ";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({})
+</script> -->
+
+  <!-- Ad script 2 (periodic-teacher pop script)
+       >>> PASTE YOUR LONG <script>(function(options){ ... })({...})</script> BLOCK HERE <<< -->
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4353830713556880"
+     crossorigin="anonymous"></script>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV0H0442XN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FV0H0442XN');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #101216;
+      --bg-deep: #0b0d10;
+      --panel: #181c23;
+      --panel-hi: #202630;
+      --line: #303844;
+      --text: #f5f6f8;
+      --muted: #a7b0bd;
+      --pink: #ff795f;
+      --cyan: #f5cb5f;
+      --sun: #f5cb5f;
+      --radius: 18px;
+      --display: "Bungee", "Impact", sans-serif;
+      --body: "Space Grotesk", system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body.dashboard-page {
+      margin: 0; min-height: 100vh; font-family: var(--body); color: var(--text);
+      background:
+        radial-gradient(900px 500px at 85% -10%, rgba(245,203,95,.12), transparent 60%),
+        radial-gradient(700px 500px at -5% 105%, rgba(255,121,95,.1), transparent 60%),
+        var(--bg-deep);
+      background-attachment: fixed; line-height: 1.55;
+    }
+    a { color: var(--cyan); }
+    :focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+    .dashboard-layout { min-height: 100vh; }
+    .dashboard-main { padding: 36px clamp(20px,4vw,56px) 48px; max-width: 1500px; width: 100%; margin: 0 auto; }
+
+    .dashboard-sidebar {
+      position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 18px;
+      min-height: 68px; padding: 10px clamp(20px,4vw,56px);
+      background: rgba(16,18,22,.92); border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
+    .brand-mark {
+      display: grid; place-items: center; width: 44px; height: 44px; font-family: var(--display);
+      font-size: 1.1rem; color: var(--bg-deep); background: var(--sun); border-radius: 12px;
+      box-shadow: 4px 4px 0 var(--pink); transform: rotate(-6deg);
+    }
+    .brand-text { font-family: var(--display); font-size: 1rem; letter-spacing: .01em; }
+    .student-profile {
+      display: flex; align-items: center; gap: 12px; flex: 0 1 210px; padding: 6px 10px;
+      background: var(--panel-hi); border: 1px solid var(--line); border-radius: 999px;
+    }
+    .avatar {
+      display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; flex: none;
+      font-weight: 700; color: var(--bg-deep); background: linear-gradient(135deg,var(--cyan),var(--pink));
+    }
+    .student-profile > div:last-child { min-width: 0; }
+    .student-name,.student-id { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .student-name { font-weight: 600; }
+    .student-id { font-size: .8rem; color: var(--muted); }
+    .sidebar-nav { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 4px; flex: 1; }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 10px;
+      border: 2px solid transparent; color: var(--muted); text-decoration: none; font: inherit;
+      font-weight: 500; background: none; cursor: pointer; text-align: left; width: auto;
+      transition: background .15s,color .15s,transform .15s;
+    }
+    .sidebar-link:hover { background: var(--panel-hi); color: var(--text); transform: translateX(3px); }
+    .sidebar-link--active { color: var(--bg-deep); background: var(--sun); border-color: var(--sun); font-weight: 700; }
+    .sidebar-link--active:hover { background: var(--sun); color: var(--bg-deep); }
+    .sidebar-icon { font-size: 1.15rem; }
+    .sidebar-signout {
+      color: var(--muted); font-size: .9rem; text-decoration: none; padding: 8px 14px;
+      background: none; border: 0; font-family: inherit; cursor: pointer; text-align: left;
+      white-space: nowrap;
+    }
+    .sidebar-signout:hover { color: var(--pink); }
+
+    .dashboard-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+    .eyebrow { margin: 0 0 4px; color: var(--muted); font-size: .9rem; }
+    .dashboard-header h1 {
+      margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(2rem,5vw,3.35rem);
+      line-height: 1.08; letter-spacing: .01em; color: var(--text);
+    }
+    .header-meta { display: flex; align-items: center; gap: 12px; }
+    .status-badge {
+      padding: 5px 14px; border-radius: 999px; font-size: .85rem; font-weight: 700;
+      color: var(--bg-deep); background: var(--sun);
+    }
+    .header-date { color: var(--muted); font-size: .95rem; }
+    .dashboard-welcome {
+      margin-bottom: 40px; padding: 22px 26px; border-radius: var(--radius);
+      background: linear-gradient(120deg,rgba(245,203,95,.1),var(--panel));
+      border: 1px solid var(--line); border-left: 4px solid var(--pink);
+    }
+    .dashboard-welcome p { margin: 0; max-width: 60ch; color: var(--muted); }
+    .dashboard-welcome .welcome-title { color: var(--text); font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
+
+    /* HilltopAds banner section */
+    .ad-section { margin: 0 0 40px; text-align: center; }
+    .ad-label {
+      margin: 0 0 6px; color: var(--muted); font-size: .72rem;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    .ad-slot {
+      min-height: 90px; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; background: var(--panel); border: 2px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .ad-slot > * { max-width: 100%; }
+
+    .modules-header { margin-bottom: 20px; }
+    .modules-header h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.8rem; }
+    .section-lead { margin: 4px 0 0; color: var(--muted); }
+    .module-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(190px,1fr)); gap: 18px; }
+    .module-card {
+      --accent: var(--cyan); position: relative; display: flex; flex-direction: column; gap: 0;
+      padding: 0; overflow: hidden; cursor: pointer; background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: 0 10px 24px rgba(0,0,0,.2); transition: transform .18s,box-shadow .18s,border-color .18s;
+    }
+    .module-card:hover { transform: translateY(-4px); border-color: #667180; box-shadow: 0 18px 34px rgba(0,0,0,.3); }
+    .module-card:active { transform: translateY(-1px); }
+    .module-card[hidden] { display: none; }
+    .module-card:nth-child(4n+1) { --accent: var(--cyan); }
+    .module-card:nth-child(4n+2) { --accent: var(--pink); }
+    .module-card:nth-child(4n+3) { --accent: var(--sun); }
+    .module-card:nth-child(4n+4) { --accent: #7ee0a4; }
+    .module-card-icon { border-bottom: 2px solid var(--line); background: var(--panel-hi) !important; }
+    .module-card-body { display: flex; flex-direction: column; gap: 8px; padding: 14px; flex: 1; }
+    .module-card h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.05rem; line-height: 1.2; flex: 1; }
+    .module-card p { margin: 0; color: var(--muted); font-size: .95rem; }
+    .module-tag { align-self: flex-start; padding: 2px 10px; border-radius: 999px; font-size: .78rem; font-weight: 700; color: var(--bg-deep); background: var(--accent); text-transform: capitalize; }
+    .btn-play,.module-play,.btn {
+      display: inline-block; padding: 12px 22px; border: 0; border-radius: 12px; cursor: pointer;
+      font: 700 1rem var(--body); text-align: center; text-decoration: none; color: var(--bg-deep);
+      background: var(--sun); box-shadow: 0 5px 0 #c99a00; transition: transform .1s,box-shadow .1s;
+    }
+    .btn { padding: 10px 16px; font-size: .95rem; box-shadow: 0 4px 0 #c99a00; }
+    .btn-play:hover,.module-play:hover,.btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #c99a00; }
+    .btn-play:active,.module-play:active,.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #c99a00; }
+    .dashboard-footer { margin-top: 56px; padding-top: 20px; border-top: 2px dashed var(--line); color: var(--muted); font-size: .9rem; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 22px; }
+    .game-search-wrap { position: relative; flex: 1 1 280px; max-width: 440px; }
+    .game-search { width: 100%; padding: 12px 16px; font: 500 1rem var(--body); color: var(--text); background: var(--panel); border: 2px solid var(--line); border-radius: 12px; }
+    .game-search::placeholder { color: var(--muted); }
+    .search-suggestions { position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; width: min(520px, calc(100vw - 32px)); max-height: min(70vh, 520px); overflow: auto; padding: 8px; background: #202124; border: 1px solid #45474b; border-radius: 16px; box-shadow: 0 18px 48px rgba(0,0,0,.5); }
+    .search-result-list { display: grid; gap: 4px; }
+    .search-result { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 8px 10px; color: var(--text); text-align: left; background: transparent; border: 1px solid transparent; border-radius: 12px; cursor: pointer; }
+    .search-result:hover, .search-result[aria-selected="true"] { background: #303136; border-color: #45474b; }
+    .search-result img { flex: 0 0 48px; width: 48px; height: 48px; object-fit: cover; border-radius: 10px; background: var(--panel-hi); }
+    .search-result-copy { min-width: 0; }
+    .search-result-title { display: block; overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .search-result-title mark { color: var(--sun); background: transparent; }
+    .search-result-category { display: block; color: var(--muted); font-size: .82rem; font-weight: 600; text-transform: capitalize; }
+    .search-empty { margin: 0; padding: 18px 12px; color: var(--muted); }
+    .search-suggestions-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px -8px -8px; padding: 10px 12px; border-top: 1px solid #3b3d42; }
+    .search-suggestions-count { color: var(--muted); font-size: .82rem; font-weight: 700; }
+    .search-more { padding: 5px 8px; color: var(--sun); background: transparent; border: 0; border-radius: 8px; font: 700 .88rem var(--body); cursor: pointer; }
+    .search-more:hover { background: rgba(245,203,95,.1); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; flex: 1 1 100%; }
+    .chip { padding: 6px 14px; border: 2px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); font: 600 .88rem var(--body); text-transform: capitalize; cursor: pointer; }
+    .chip:hover { color: var(--text); border-color: var(--cyan); }
+    .chip[aria-pressed="true"] { background: var(--sun); border-color: var(--sun); color: var(--bg-deep); }
+    .result-count { margin: 0; color: var(--muted); font-size: .9rem; }
+    .no-results,.module-grid--empty { color: var(--muted); padding: 24px; border: 2px dashed var(--line); border-radius: var(--radius); }
+    .module-grid--empty { display: block; }
+
+    /* Daily message and authentication popups */
+    .daily-overlay {
+      position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px;
+      background: rgba(10,5,30,.8); backdrop-filter: blur(6px); animation: fade .25s ease-out;
+    }
+    .daily-overlay[hidden] { display: none; }
+    .daily-modal {
+      position: relative; width: min(460px,100%); padding: 40px 32px 32px; text-align: center;
+      background: linear-gradient(160deg,var(--panel-hi),var(--panel)); border: 3px solid var(--sun);
+      border-radius: 24px; box-shadow: 8px 8px 0 var(--pink),0 30px 80px rgba(0,0,0,.6);
+      animation: pop .4s cubic-bezier(.2,1.4,.4,1);
+    }
+    .daily-burst {
+      position: absolute; top: -32px; left: 50%; transform: translateX(-50%); display: grid;
+      place-items: center; width: 64px; height: 64px; font-size: 2rem; background: var(--cyan);
+      border: 3px solid var(--sun); border-radius: 50%;
+    }
+    .daily-date { margin: 0 0 4px; color: var(--muted); font-size: .9rem; }
+    .daily-modal h2 { margin: 0 0 14px; font-family: var(--display); font-weight: 400; font-size: 1.7rem; color: var(--sun); }
+    .daily-img { display: block; max-width: 100%; max-height: 260px; margin: 0 auto 18px; object-fit: contain; border: 3px solid var(--line); border-radius: 14px; background: var(--bg-deep); }
+    .daily-img[hidden],.daily-text[hidden] { display: none; }
+    .daily-text { margin: 0 0 26px; font-size: 1.15rem; line-height: 1.5; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pop { from { opacity: 0; transform: scale(.8) translateY(20px); } to { opacity: 1; transform: none; } }
+
+    .auth-modal { text-align: left; }
+    .auth-modal h2 { text-align: center; }
+    .auth-modal .daily-burst { background: var(--pink); }
+    .auth-field { display: block; margin-bottom: 14px; }
+    .auth-field[hidden] { display: none; }
+    .auth-field span { display: block; margin-bottom: 4px; color: var(--muted); font-size: .9rem; font-weight: 600; }
+    .auth-field input { width: 100%; padding: 12px 14px; font: 500 1rem var(--body); color: var(--text); background: var(--bg-deep); border: 2px solid var(--line); border-radius: 12px; }
+    .auth-status { min-height: 1.4em; margin: 0 0 14px; font-size: .92rem; color: var(--muted); }
+    .auth-status.is-error { color: #ff8fb8; }
+    .auth-status.is-ok { color: #5dffa6; }
+    .auth-submit { width: 100%; }
+    .auth-submit:disabled { opacity: .6; cursor: wait; }
+    .auth-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 14px; margin-top: 18px; }
+    .auth-link { padding: 0; border: 0; background: none; color: var(--cyan); font: 600 .9rem var(--body); cursor: pointer; text-decoration: underline; }
+    .auth-link[hidden] { display: none; }
+    .auth-close { position: absolute; top: 12px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 1.4rem; line-height: 1; cursor: pointer; }
+    .auth-close:hover { color: var(--text); }
+
+    /* Password show/hide */
+    .auth-pass { position: relative; }
+    .auth-pass input { padding-right: 76px; }
+    .auth-eye {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 6px 10px;
+      border: 0; border-radius: 8px; cursor: pointer; background: var(--panel-hi);
+      color: var(--cyan); font: 700 .8rem var(--body);
+    }
+    .auth-eye:hover { color: var(--text); }
+
+    /* Noticeable sign-in button (only while signed out) */
+    .sidebar-signout.is-cta {
+      text-align: center; padding: 13px 14px; font-size: 1.05rem; font-weight: 700;
+      color: var(--bg-deep); background: var(--sun); border-radius: 12px;
+      box-shadow: 0 4px 0 #b28a30;
+      transition: transform .1s,box-shadow .1s;
+    }
+    .sidebar-signout.is-cta:hover { color: var(--bg-deep); transform: translateY(-1px); box-shadow: 0 5px 0 #b28a30; }
+    .sidebar-signout.is-cta:active { transform: translateY(2px); box-shadow: 0 1px 0 #b28a30; }
+
+    @media (max-width: 1180px) {
+      .dashboard-sidebar { position: static; flex-wrap: wrap; gap: 10px; }
+      .sidebar-signout { order: 2; }
+      .student-profile { order: 3; margin-left: 0; }
+      .sidebar-nav { order: 4; flex-basis: 100%; justify-content: flex-start; flex-wrap: wrap; }
+      .sidebar-link { width: auto; }
+    }
+    @media (max-width: 600px) {
+      .dashboard-sidebar { padding: 10px 14px; }
+      .brand-text { font-size: .9rem; }
+      .student-profile { display: none; }
+      .sidebar-nav { min-width: 0; max-width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+      .sidebar-link { flex: 0 0 auto; padding: 8px 10px; font-size: .88rem; }
+      .dashboard-main { padding: 28px 14px 40px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *,*::before,*::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+  <div class="dashboard-layout">
+    <aside class="dashboard-sidebar" aria-label="Main navigation">
+      <a href="index.html" class="brand">
+        <span class="brand-mark" aria-hidden="true">CB</span>
+        <span class="brand-text">Calculated Break</span>
+      </a>
+
+      <div class="student-profile">
+        <div class="avatar" id="user-avatar" aria-hidden="true">?</div>
+        <div>
+          <p class="student-name" id="user-name">Guest</p>
+          <p class="student-id" id="user-sub">Sign in to save your progress</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="index.html" class="sidebar-link"><span class="sidebar-icon" aria-hidden="true">⌂</span>Home</a>
+        <a href="#modules" class="sidebar-link sidebar-link--active"><span class="sidebar-icon" aria-hidden="true">🎮</span>All games</a>
+        <a href="#chips" class="sidebar-link"><span class="sidebar-icon" aria-hidden="true">⌕</span>Categories</a>
+        <button type="button" class="sidebar-link sidebar-button" id="open-daily"><span class="sidebar-icon" aria-hidden="true">✨</span>Today's message</button>
+      </nav>
+
+      <button type="button" class="sidebar-signout" id="auth-toggle">Sign in</button>
+    </aside>
+
+    <div class="dashboard-main">
+      <header class="dashboard-header">
+        <div>
+          <p class="eyebrow">Your game room</p>
+          <h1>Calculated Break</h1>
+        </div>
+        <div class="header-meta">
+          <span class="status-badge">Ready to play</span>
+          <span class="header-date" id="header-date">Wednesday, May 27, 2026</span>
+        </div>
+      </header>
+
+      <section class="dashboard-welcome">
+        <p class="welcome-title" id="welcome-title">Ready to play?</p>
+        <p id="welcome-text">Find a favorite, try something new, and jump straight into the game. No downloads needed.</p>
+      </section>
+
+      <!-- HilltopAds banner section (just for the banner ad) -->
+    <!--  <section class="ad-section" id="banner-ad" aria-label="Advertisement">
+        <p class="ad-label">Advertisement</p>
+        <div class="ad-slot" id="hilltop-banner">
+          <script>
+(function(cw){
+var d = document,
+    s = d.createElement('script'),
+    l = d.currentScript || d.scripts[d.scripts.length - 1];
+s.settings = cw || {};
+s.src = "\/\/unfoldedtrade.com\/b.XrV-sUdcGhla0lYJWPcz\/qeSmL9ju\/ZlUrlmkJPwTyc\/1\/NaTqk_wmNwjDkEtmNBzhU_1\/OnTLAt3lMOwB";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({})
+</script>
+        </div>
+      </section> -->
+
+      <section id="modules" class="modules-section">
+        <header class="modules-header">
+          <h2>Find your next game</h2>
+          <p class="section-lead">Search the collection or choose a category. Free to play in your browser.</p>
+        </header>
+        <div class="toolbar">
+          <div class="game-search-wrap">
+            <input type="search" id="game-search" class="game-search" placeholder="Search games..." aria-label="Search games" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
+            <div class="search-suggestions" id="search-suggestions" hidden>
+              <div class="search-result-list" id="search-results" role="listbox" aria-label="Game suggestions"></div>
+              <p class="search-empty" id="search-empty" role="status" hidden>No games match your search.</p>
+              <div class="search-suggestions-footer" id="search-suggestions-footer" hidden>
+                <span class="search-suggestions-count" id="search-suggestions-count"></span>
+                <button class="search-more" id="search-more" type="button"></button>
+              </div>
+            </div>
+          </div>
+          <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+          <p class="result-count" id="result-count" aria-live="polite"></p>
+        </div>
+        <p class="no-results" id="no-results" hidden>No games match. Try another search or category.</p>
+        <div id="module-grid" class="module-grid" role="list" aria-label="Games and simulations"></div>
+      </section>
+
+      <footer class="dashboard-footer">
+        <p><a href="index.html">Back to Calculated Break home</a></p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Daily message popup -->
+  <div class="daily-overlay" id="daily-overlay" hidden>
+    <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="daily-title" aria-describedby="daily-text">
+      <div class="daily-burst" aria-hidden="true">✨</div>
+      <p class="daily-date" id="daily-date"></p>
+      <h2 id="daily-title">Message of the day</h2>
+      <img class="daily-img" id="daily-img" alt="" hidden>
+      <p class="daily-text" id="daily-text"></p>
+      <button type="button" class="btn-play" id="daily-close">Let's play</button>
+    </div>
+  </div>
+
+  <!-- Authentication popup -->
+  <div class="daily-overlay" id="auth-overlay" hidden>
+    <div class="daily-modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div class="daily-burst" aria-hidden="true">🔐</div>
+      <button type="button" class="auth-close" id="auth-close" aria-label="Close">&times;</button>
+      <h2 id="auth-title">Sign in</h2>
+      <form id="auth-form" novalidate>
+        <label class="auth-field" id="auth-email-wrap">
+          <span>Email</span>
+          <input type="email" id="auth-email" autocomplete="email" required>
+        </label>
+        <label class="auth-field" id="auth-password-wrap">
+          <span id="auth-password-label">Password</span>
+          <div class="auth-pass">
+            <input type="password" id="auth-password" autocomplete="current-password" minlength="6" required>
+            <button type="button" class="auth-eye" id="auth-eye" aria-label="Show password" aria-pressed="false">Show</button>
+          </div>
+        </label>
+        <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+        <button type="submit" class="btn-play auth-submit" id="auth-submit">Sign in</button>
+      </form>
+      <div class="auth-links">
+        <button type="button" class="auth-link" id="auth-switch"></button>
+        <button type="button" class="auth-link" id="auth-forgot">Forgot password?</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Your games live in script.js (GAME_MODULES). Edit that file to add games. -->
+  <script src="script.js"></script>
+
+  <script>
+    const DAILY_MESSAGES = [
+      { text: "Fresh games are waiting. Pick a category and find your next favorite.", img: "", alt: "" }
+      // Example text-only message:
+      // "Welcome back!",
+    ];
+
+    function dayNumber() {
+      const d = new Date();
+      return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+    }
+
+    function setupDailyMessage() {
+      const overlay = document.getElementById("daily-overlay");
+      const closeBtn = document.getElementById("daily-close");
+      const openBtn = document.getElementById("open-daily");
+      let lastFocus = null;
+
+      const dateText = new Date().toLocaleDateString(undefined, {
+        weekday: "long", month: "long", day: "numeric", year: "numeric"
+      });
+      document.getElementById("daily-date").textContent = dateText;
+      document.getElementById("header-date").textContent = dateText;
+
+      const entry = DAILY_MESSAGES[dayNumber() % DAILY_MESSAGES.length];
+      const msg = typeof entry === "string" ? { text: entry } : (entry || { text: "" });
+      const textEl = document.getElementById("daily-text");
+      const imgEl = document.getElementById("daily-img");
+
+      textEl.textContent = msg.text || "";
+      textEl.hidden = !msg.text;
+      if (msg.img) {
+        imgEl.alt = msg.alt || "";
+        imgEl.onerror = () => { imgEl.hidden = true; };
+        imgEl.src = msg.img;
+        imgEl.hidden = false;
+      }
+
+      function open() {
+        lastFocus = document.activeElement;
+        overlay.hidden = false;
+        closeBtn.focus();
+      }
+
+      function close() {
+        overlay.hidden = true;
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      closeBtn.addEventListener("click", close);
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !overlay.hidden) close();
+      });
+      openBtn.addEventListener("click", open);
+
+    }
+
+    // Category filters and search suggestions for cards rendered by script.js.
+    function setupFilters() {
+      const grid = document.getElementById("module-grid");
+      const search = document.getElementById("game-search");
+      const chipsBox = document.getElementById("chips");
+      const count = document.getElementById("result-count");
+      const none = document.getElementById("no-results");
+      const suggestions = document.getElementById("search-suggestions");
+      const results = document.getElementById("search-results");
+      const empty = document.getElementById("search-empty");
+      const footer = document.getElementById("search-suggestions-footer");
+      const suggestionCount = document.getElementById("search-suggestions-count");
+      const more = document.getElementById("search-more");
+      const cards = Array.from(grid.querySelectorAll(".module-card"));
+
+      if (!cards.length) {
+        document.querySelector(".toolbar").hidden = true;
+        return;
+      }
+
+      const info = cards.map((c) => ({
+        el: c,
+        title: (c.querySelector("h3")?.textContent || ""),
+        cat: (c.querySelector(".module-tag")?.textContent || "other").toLowerCase(),
+        href: c.dataset.href,
+        img: c.querySelector(".module-card-icon img")?.getAttribute("src") || ""
+      }));
+
+      const tally = {};
+      info.forEach((i) => { tally[i.cat] = (tally[i.cat] || 0) + 1; });
+      let activeCat = "all";
+      let activeOption = -1;
+      let expanded = false;
+      const suggestionLimit = 6;
+      const names = ["all"].concat(Object.keys(tally).sort());
+
+      names.forEach((name) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "chip";
+        b.dataset.cat = name;
+        b.textContent = name + " (" + (name === "all" ? cards.length : tally[name]) + ")";
+        b.setAttribute("aria-pressed", name === "all" ? "true" : "false");
+        b.addEventListener("click", () => {
+          activeCat = name;
+          chipsBox.querySelectorAll(".chip").forEach((c) => {
+            c.setAttribute("aria-pressed", String(c === b));
+          });
+          apply();
+          updateSuggestions();
+        });
+        chipsBox.appendChild(b);
+      });
+
+      function apply() {
+        let shown = 0;
+        info.forEach((i) => {
+          const ok = activeCat === "all" || i.cat === activeCat;
+          i.el.hidden = !ok;
+          if (ok) shown++;
+        });
+        count.textContent = "Showing " + shown + " of " + cards.length + " games";
+        none.hidden = shown !== 0;
+      }
+
+      function closeSuggestions() {
+        suggestions.hidden = true;
+        search.setAttribute("aria-expanded", "false");
+        search.removeAttribute("aria-activedescendant");
+        activeOption = -1;
+      }
+
+      function setActiveOption(index) {
+        const options = Array.from(results.children);
+        if (!options.length) return;
+        activeOption = (index + options.length) % options.length;
+        options.forEach((option, optionIndex) => {
+          option.setAttribute("aria-selected", String(optionIndex === activeOption));
+        });
+        search.setAttribute("aria-activedescendant", options[activeOption].id);
+        options[activeOption].scrollIntoView({ block: "nearest" });
+      }
+
+      function appendHighlightedTitle(container, title, query) {
+        const matchAt = title.toLowerCase().indexOf(query.toLowerCase());
+        if (matchAt < 0 || !query) {
+          container.textContent = title;
+          return;
+        }
+        container.append(document.createTextNode(title.slice(0, matchAt)));
+        const highlight = document.createElement("mark");
+        highlight.textContent = title.slice(matchAt, matchAt + query.length);
+        container.append(highlight, document.createTextNode(title.slice(matchAt + query.length)));
+      }
+
+      function updateSuggestions() {
+        const query = search.value.trim();
+        if (!query) {
+          closeSuggestions();
+          return;
+        }
+
+        const matches = info.filter((item) =>
+          (activeCat === "all" || item.cat === activeCat) &&
+          item.title.toLowerCase().includes(query.toLowerCase())
+        );
+        const visibleMatches = expanded ? matches : matches.slice(0, suggestionLimit);
+        results.replaceChildren();
+        activeOption = -1;
+        search.removeAttribute("aria-activedescendant");
+
+        visibleMatches.forEach((item, index) => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.className = "search-result";
+          option.id = "search-result-" + index;
+          option.setAttribute("role", "option");
+          option.setAttribute("aria-selected", "false");
+          option.tabIndex = -1;
+
+          const image = document.createElement("img");
+          image.src = item.img;
+          image.alt = "";
+          image.loading = "lazy";
+          const copy = document.createElement("span");
+          copy.className = "search-result-copy";
+          const title = document.createElement("span");
+          title.className = "search-result-title";
+          appendHighlightedTitle(title, item.title, query);
+          const category = document.createElement("span");
+          category.className = "search-result-category";
+          category.textContent = item.cat;
+          copy.append(title, category);
+          option.append(image, copy);
+          option.addEventListener("click", () => {
+            closeSuggestions();
+            launchSimulation(item.href, item.title);
+          });
+          results.appendChild(option);
+        });
+
+        empty.hidden = matches.length > 0;
+        footer.hidden = matches.length === 0;
+        suggestionCount.textContent = matches.length + (matches.length === 1 ? " result" : " results");
+        more.hidden = matches.length <= suggestionLimit;
+        more.textContent = expanded ? "Show fewer ↑" : "Show all " + matches.length + " results →";
+        suggestions.hidden = false;
+        search.setAttribute("aria-expanded", "true");
+      }
+
+      search.addEventListener("input", () => {
+        expanded = false;
+        updateSuggestions();
+      });
+      search.addEventListener("keydown", (event) => {
+        if (suggestions.hidden) return;
+        const optionCount = results.children.length;
+        if (event.key === "ArrowDown" && optionCount) {
+          event.preventDefault();
+          setActiveOption(activeOption + 1);
+        } else if (event.key === "ArrowUp" && optionCount) {
+          event.preventDefault();
+          setActiveOption(activeOption < 0 ? optionCount - 1 : activeOption - 1);
+        } else if (event.key === "Enter" && optionCount) {
+          event.preventDefault();
+          setActiveOption(activeOption < 0 ? 0 : activeOption);
+          results.children[activeOption].click();
+        } else if (event.key === "Escape") {
+          closeSuggestions();
+        }
+      });
+      more.addEventListener("click", () => {
+        expanded = !expanded;
+        updateSuggestions();
+        search.focus();
+      });
+      document.addEventListener("pointerdown", (event) => {
+        if (!event.target.closest(".game-search-wrap")) closeSuggestions();
+      });
+      search.addEventListener("blur", () => {
+        window.setTimeout(() => {
+          if (!suggestions.contains(document.activeElement)) closeSuggestions();
+        }, 0);
+      });
+      apply();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupDailyMessage();
+      setupFilters();
+    });
+  </script>
+
+  <!-- Supabase email/password authentication -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script>
+    // Supabase dashboard > Project Settings > API.
+    // The anon/publishable key is intended for browser use; protect data with RLS.
+    const SUPA_URL = "https://yerxoikcfeulgnrdjkyc.supabase.co";
+    const SUPA_KEY = "sb_publishable_QX-XZw_wiRj_u0NXHGRkOA_Pq7rGK-p";
+
+    function setupAuth() {
+      const $ = (id) => document.getElementById(id);
+      const overlay = $("auth-overlay");
+      const form = $("auth-form");
+      const statusEl = $("auth-status");
+      const emailEl = $("auth-email");
+      const passEl = $("auth-password");
+      const submitBtn = $("auth-submit");
+      const switchBtn = $("auth-switch");
+      const forgotBtn = $("auth-forgot");
+      const toggleBtn = $("auth-toggle");
+      const eyeBtn = $("auth-eye");
+
+      const configured = SUPA_URL.indexOf("YOUR_") !== 0 && SUPA_KEY.indexOf("YOUR_") !== 0;
+      const lib = window.supabase && window.supabase.createClient;
+      const sb = (configured && lib) ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
+
+      let mode = "signin";
+      let user = null;
+      let lastFocus = null;
+
+      function say(text, kind) {
+        statusEl.textContent = text || "";
+        statusEl.className = "auth-status" + (kind ? " is-" + kind : "");
+      }
+
+      function setMode(m) {
+        mode = m;
+        const titles = {
+          signin: "Sign in",
+          signup: "Create account",
+          reset: "Reset password",
+          newpass: "Choose a new password"
+        };
+        const buttons = {
+          signin: "Sign in",
+          signup: "Create account",
+          reset: "Send reset link",
+          newpass: "Save password"
+        };
+
+        $("auth-title").textContent = titles[m];
+        submitBtn.textContent = buttons[m];
+        $("auth-email-wrap").hidden = (m === "newpass");
+        $("auth-password-wrap").hidden = (m === "reset");
+        $("auth-password-label").textContent = (m === "newpass") ? "New password" : "Password";
+        passEl.autocomplete = (m === "signin") ? "current-password" : "new-password";
+        emailEl.required = (m !== "newpass");
+        passEl.required = (m !== "reset");
+        passEl.minLength = (m === "reset") ? 0 : 6;
+        switchBtn.textContent = (m === "signin") ? "Create an account" : "Back to sign in";
+        forgotBtn.hidden = (m !== "signin");
+        switchBtn.hidden = (m === "newpass");
+        say("");
+      }
+
+      function setPassVisible(show) {
+        passEl.type = show ? "text" : "password";
+        eyeBtn.textContent = show ? "Hide" : "Show";
+        eyeBtn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+        eyeBtn.setAttribute("aria-pressed", String(show));
+      }
+
+      eyeBtn.addEventListener("click", () => {
+        setPassVisible(passEl.type === "password");
+      });
+
+      function open(m) {
+        lastFocus = document.activeElement;
+        setMode(m || "signin");
+        overlay.hidden = false;
+
+        if (!sb) {
+          say(
+            configured
+              ? "Login could not load. Check your connection and reload."
+              : "Login is not set up yet: add your Supabase URL and key in this file.",
+            "error"
+          );
+        }
+
+        (m === "newpass" ? passEl : emailEl).focus();
+      }
+
+      function close() {
+        overlay.hidden = true;
+        form.reset();
+        setPassVisible(false);
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      function renderUser(u) {
+        user = u || null;
+        const email = user && user.email;
+        const name = email ? email.split("@")[0] : "Guest";
+
+        $("user-avatar").textContent = email ? email.slice(0, 2).toUpperCase() : "?";
+        $("user-name").textContent = name;
+        $("user-sub").textContent = email || "Sign in to save your progress";
+        $("welcome-title").textContent = user ? "Ready to play, " + name + "?" : "Ready to play?";
+        $("welcome-text").textContent = user
+          ? "Your progress is saved to your account. Pick a game below and jump right in."
+          : "Pick a game below and jump right in. Sign in if you'd like to save your progress.";
+
+        toggleBtn.textContent = user ? "Sign out" : "Sign in";
+        toggleBtn.classList.toggle("is-cta", !user);
+      }
+
+      toggleBtn.addEventListener("click", async () => {
+        if (!user) return open("signin");
+        if (sb) {
+          const { error } = await sb.auth.signOut();
+          if (error) say(error.message, "error");
+        }
+        renderUser(null);
+      });
+
+      switchBtn.addEventListener("click", () => {
+        setMode(mode === "signin" ? "signup" : "signin");
+      });
+      forgotBtn.addEventListener("click", () => setMode("reset"));
+      $("auth-close").addEventListener("click", close);
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) close();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !overlay.hidden) close();
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!sb) return;
+
+        const email = emailEl.value.trim();
+        const password = passEl.value;
+
+        if (mode !== "newpass" && !email) return say("Enter your email address.", "error");
+        if (mode !== "reset" && password.length < 6) {
+          return say("Use a password with at least 6 characters.", "error");
+        }
+
+        submitBtn.disabled = true;
+        say("Working...");
+
+        try {
+          if (mode === "signin") {
+            const { error } = await sb.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            close();
+          } else if (mode === "signup") {
+            const { data, error } = await sb.auth.signUp({ email, password });
+            if (error) throw error;
+
+            if (data.session) {
+              close();
+            } else {
+              setMode("signin");
+              say("Account created. Check your email to confirm it, then sign in.", "ok");
+            }
+          } else if (mode === "reset") {
+            const { error } = await sb.auth.resetPasswordForEmail(email, {
+              redirectTo: location.origin + location.pathname
+            });
+            if (error) throw error;
+            say("If that email has an account, a reset link is on its way.", "ok");
+          } else if (mode === "newpass") {
+            const { error } = await sb.auth.updateUser({ password });
+            if (error) throw error;
+            close();
+          }
+        } catch (err) {
+          say(err && err.message ? err.message : "Something went wrong. Try again.", "error");
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      renderUser(null);
+
+      if (sb) {
+        // Respond to restored sessions, sign-in/out, and password recovery.
+        sb.auth.onAuthStateChange((event, session) => {
+          renderUser(session && session.user);
+          if (event === "PASSWORD_RECOVERY") open("newpass");
+        });
+      }
+
+    }
+
+    document.addEventListener("DOMContentLoaded", setupAuth);
+  </script>
+</body>
+</html>

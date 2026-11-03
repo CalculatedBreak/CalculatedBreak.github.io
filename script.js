@@ -1,5 +1,5 @@
 /**
- * EduSphere Academy — Dashboard Module System
+ * Calculated Break — Game Hub Module System
  *
  * This file:
  *  1. Reads game metadata from GAME_MODULES (populated from the games catalogue)

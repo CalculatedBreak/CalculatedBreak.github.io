@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Play browser games on EduSphere Game Hub.">
-  <title>Loading game... | EduSphere</title>
+  <meta name="description" content="Play a free browser game on Calculated Break.">
+  <meta name="theme-color" content="#101216">
+  <title>Loading game... | Calculated Break</title>
   <!-- Ad script 2 (periodic-teacher pop script)
        >>> PASTE YOUR LONG <script>(function(options){ ... })({...})</script> BLOCK HERE <<<
        Copy it exactly as it is in your current player.html. -->
@@ -45,18 +46,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ---- Theme tokens (identical to the Game Hub) ---- */
+    /* ---- Theme tokens (shared with the game hub) ---- */
     :root {
-      --bg: #170f35;
-      --bg-deep: #0f0925;
-      --panel: #241a4d;
-      --panel-hi: #2f2266;
-      --line: #4636a0;
-      --text: #f4f0ff;
-      --muted: #b3a8e6;
-      --pink: #ff4f9a;
-      --cyan: #3de0ff;
-      --sun: #ffd23f;
+      --bg: #101216;
+      --bg-deep: #0b0d10;
+      --panel: #181c23;
+      --panel-hi: #202630;
+      --line: #303844;
+      --text: #f5f6f8;
+      --muted: #a7b0bd;
+      --pink: #ff795f;
+      --cyan: #f5cb5f;
+      --sun: #f5cb5f;
       --radius: 18px;
       --display: "Bungee", "Impact", sans-serif;
       --body: "Space Grotesk", system-ui, sans-serif;
@@ -71,8 +72,8 @@
       font-family: var(--body);
       color: var(--text);
       background:
-        radial-gradient(900px 500px at 85% -10%, rgba(255,79,154,.25), transparent 60%),
-        radial-gradient(700px 500px at -5% 105%, rgba(61,224,255,.18), transparent 60%),
+        radial-gradient(900px 500px at 85% -10%, rgba(245,203,95,.12), transparent 60%),
+        radial-gradient(700px 500px at -5% 105%, rgba(255,121,95,.1), transparent 60%),
         var(--bg-deep);
       background-attachment: fixed;
       line-height: 1.55;
@@ -404,15 +405,15 @@
     <!-- Top bar -->
     <div class="topbar">
       <a href="index.html" class="brand">
-        <span class="brand-mark" aria-hidden="true">ES</span>
-        <span class="brand-text">EduSphere</span>
+        <span class="brand-mark" aria-hidden="true">CB</span>
+        <span class="brand-text">Calculated Break</span>
       </a>
       <div class="topbar-actions">
         <div class="user-chip" id="user-chip" hidden>
           <span class="avatar" id="user-avatar" aria-hidden="true">?</span>
           <span class="user-chip-name" id="user-name"></span>
         </div>
-        <a href="menu.html" class="btn btn--alt">&larr; All games</a>
+        <a href="allgames.html" class="btn btn--alt">&larr; All games</a>
         <a class="btn btn--alt" id="direct-play-btn" hidden>Direct Play</a>
         <button type="button" class="btn" id="fs-btn">Fullscreen</button>
         <button type="button" class="btn btn--pink is-cta" id="auth-toggle">Sign in</button>
@@ -452,7 +453,7 @@
     </div>
 
     <p class="error-msg" id="error-msg" hidden>
-      No game selected. <a href="menu.html">Pick one from the hub</a>.
+      No game selected. <a href="allgames.html">Pick one from the hub</a>.
     </p>
 
     <!-- Recommendations -->
@@ -463,7 +464,7 @@
     </section>
 
     <footer class="footer">
-      <p>Need help? Email <a href="mailto:labsupport@edusphere.edu">labsupport@edusphere.edu</a></p>
+      <p>Need another game? <a href="allgames.html">Browse all games</a></p>
     </footer>
 
   </div>
@@ -562,7 +563,7 @@
         container.hidden = true;
         titleBlock.hidden = true;
         errorMsg.hidden = false;
-        document.title = "Game not found | EduSphere";
+        document.title = "Game not found | Calculated Break";
         return;
       }
 
@@ -570,7 +571,7 @@
 
       // textContent (not innerHTML) so the title param can't inject markup
       heading.textContent = gameTitle;
-      document.title = gameTitle + " | EduSphere";
+      document.title = gameTitle + " | Calculated Break";
 
       // Point the iframe at /games/[game-id]/index.html
       frame.src = gameUrl;
@@ -623,7 +624,7 @@
         img.alt = game.title;
         img.loading = "lazy";
         img.onerror = function () {
-          thumbWrap.style.background = "linear-gradient(135deg, #2f2266, #241a4d)";
+          thumbWrap.style.background = "linear-gradient(135deg, #202630, #181c23)";
           img.remove();
         };
         thumbWrap.appendChild(img);
@@ -679,7 +680,7 @@
 
     // Where the "reset password" email link sends people (the hub handles the
     // new-password step). Add this URL to Supabase > Authentication > URL Configuration.
-    const RESET_REDIRECT = new URL("menu.html", location.href).href;
+    const RESET_REDIRECT = new URL("allgames.html", location.href).href;
 
     // Remembers that the player closed the reminder banner for this browser session.
     const BANNER_KEY = "player-signin-banner-dismissed";

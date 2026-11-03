@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="EduSphere Academy — Empowering lifelong learning through accredited courses and interactive virtual labs.">
-  <title>EduSphere Academy | Empowering Lifelong Learning</title>
+  <meta name="description" content="Take a Calculated Break. Play free browser games, from quick puzzles to all-out action.">
+  <meta name="theme-color" content="#101216">
+  <title>Calculated Break | Free Online Games</title>
 
-  <!-- Google Analytics Tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV0H0442XN"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag(){window.dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-FV0H0442XN');
   </script>
 
@@ -21,154 +20,259 @@
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #170f35; --bg-deep: #0f0925; --panel: #241a4d; --panel-hi: #2f2266; --line: #4636a0;
-      --text: #f4f0ff; --muted: #b3a8e6;
-      --pink: #ff4f9a; --cyan: #3de0ff; --sun: #ffd23f; --mint: #5dffa6;
-      --radius: 18px;
-      --display: "Bungee", "Impact", sans-serif;
+      color-scheme: dark;
+      --bg: #101216;
+      --surface: #181c23;
+      --surface-raised: #202630;
+      --line: #303844;
+      --text: #f5f6f8;
+      --muted: #a7b0bd;
+      --accent: #f5cb5f;
+      --accent-strong: #ff795f;
       --body: "Space Grotesk", system-ui, sans-serif;
+      --display: "Bungee", Impact, sans-serif;
     }
+
     *, *::before, *::after { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body.landing-page {
-      margin: 0; font-family: var(--body); color: var(--text); line-height: 1.6;
+    html { scroll-behavior: smooth; background: var(--bg); }
+    body {
+      margin: 0;
+      color: var(--text);
       background:
-        radial-gradient(900px 500px at 85% -10%, rgba(255,79,154,.25), transparent 60%),
-        radial-gradient(700px 500px at -5% 60%, rgba(61,224,255,.16), transparent 60%),
-        var(--bg-deep);
-      background-attachment: fixed;
+        radial-gradient(800px 450px at 85% 0%, rgba(245,203,95,.1), transparent 70%),
+        radial-gradient(700px 500px at 0% 40%, rgba(255,121,95,.08), transparent 68%),
+        var(--bg);
+      font: 400 1rem/1.6 var(--body);
+      -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--cyan); }
-    :focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
-    .container { width: min(1140px, 100% - 40px); margin-inline: auto; }
+    a { color: inherit; }
+    a:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+    img { display: block; max-width: 100%; }
+    .container { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
 
-    /* Header */
-    .site-header { position: sticky; top: 0; z-index: 50; background: rgba(15,9,37,.88); backdrop-filter: blur(10px); border-bottom: 2px solid var(--line); }
-    .header-inner { display: flex; align-items: center; gap: 24px; padding: 14px 0; }
-    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
-    .brand-mark { display: grid; place-items: center; width: 44px; height: 44px; font-family: var(--display); color: var(--bg-deep); background: var(--sun); border-radius: 12px; box-shadow: 4px 4px 0 var(--pink); transform: rotate(-6deg); }
-    .brand-text { font-family: var(--display); font-size: 1.25rem; }
-    .brand-accent { color: var(--pink); margin-left: 6px; }
-    .main-nav { display: flex; gap: 6px; margin-left: auto; }
-    .main-nav a { padding: 8px 14px; border-radius: 10px; color: var(--muted); text-decoration: none; font-weight: 600; }
-    .main-nav a:hover { color: var(--text); background: var(--panel-hi); }
-    .header-actions { display: flex; gap: 10px; }
-
-    /* Buttons */
-    .btn { display: inline-block; padding: 10px 18px; border: 2px solid transparent; border-radius: 12px; font: 700 .95rem var(--body); text-decoration: none; text-align: center; cursor: pointer; transition: transform .1s, box-shadow .1s; }
-    .btn-primary { color: var(--bg-deep); background: var(--sun); box-shadow: 0 5px 0 #c99a00; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #c99a00; }
-    .btn-primary:active { transform: translateY(4px); box-shadow: 0 1px 0 #c99a00; }
-    .btn-ghost { color: var(--text); border-color: var(--line); background: var(--panel); }
-    .btn-ghost:hover { border-color: var(--cyan); }
-    .btn-outline { color: var(--cyan); border-color: var(--cyan); background: transparent; }
-    .btn-outline:hover { background: var(--cyan); color: var(--bg-deep); }
-    .btn-lg { padding: 14px 28px; font-size: 1.05rem; }
-
-    .nav-toggle { display: none; margin-left: auto; width: 44px; height: 44px; padding: 10px; border: 2px solid var(--line); border-radius: 12px; background: var(--panel); cursor: pointer; flex-direction: column; justify-content: space-between; }
-    .nav-toggle span { display: block; height: 3px; border-radius: 2px; background: var(--text); }
-
-    /* Hero */
-    .hero { padding: 72px 0 88px; }
-    .hero-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 56px; align-items: center; }
-    .eyebrow { margin: 0 0 8px; color: var(--cyan); font-weight: 600; }
-    .hero h1 { margin: 0 0 20px; font: 400 clamp(2.6rem, 6.5vw, 4.8rem)/1 var(--display); color: var(--sun); text-shadow: 4px 4px 0 var(--pink), 8px 8px 0 rgba(61,224,255,.35); }
-    .hero-lead { max-width: 52ch; margin: 0 0 30px; font-size: 1.15rem; color: var(--muted); }
-    .hero-cta { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 36px; }
-    .hero-stats { display: flex; flex-wrap: wrap; gap: 14px; margin: 0; padding: 0; list-style: none; }
-    .hero-stats li { padding: 12px 20px; background: var(--panel); border: 2px solid var(--line); border-radius: 14px; }
-    .hero-stats strong { display: block; font: 400 1.7rem var(--display); color: var(--mint); }
-    .hero-stats span { color: var(--muted); font-size: .9rem; }
-
-    .hero-card-stack { position: relative; height: 340px; }
-    .hero-card { position: absolute; width: 78%; padding: 20px 24px; background: var(--panel); border: 2px solid var(--line); border-radius: var(--radius); }
-    .hero-card p { margin: 6px 0 0; font: 400 1.25rem var(--display); }
-    .hero-card-label { display: inline-block; padding: 2px 12px; border-radius: 999px; font-size: .8rem; font-weight: 700; color: var(--bg-deep); }
-    .hero-card--1 { top: 0; left: 0; transform: rotate(-4deg); box-shadow: 7px 7px 0 var(--cyan); }
-    .hero-card--1 .hero-card-label { background: var(--cyan); }
-    .hero-card--2 { top: 105px; right: 0; transform: rotate(3deg); box-shadow: 7px 7px 0 var(--pink); background: var(--panel-hi); }
-    .hero-card--2 .hero-card-label { background: var(--pink); }
-    .hero-card--3 { bottom: 0; left: 6%; transform: rotate(-2deg); box-shadow: 7px 7px 0 var(--sun); }
-    .hero-card--3 .hero-card-label { background: var(--sun); }
-
-    /* Sections */
-    .section { padding: 80px 0; }
-    .section-header { max-width: 680px; margin-bottom: 40px; }
-    .section h2 { margin: 0 0 12px; font: 400 clamp(1.8rem, 4vw, 2.6rem)/1.1 var(--display); }
-    .section-lead { margin: 0; color: var(--muted); font-size: 1.05rem; }
-
-    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 22px; }
-    .feature-card { padding: 24px; background: var(--panel); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 6px 6px 0 var(--cyan); transition: transform .15s, box-shadow .15s; }
-    .feature-card:nth-child(2) { box-shadow: 6px 6px 0 var(--pink); }
-    .feature-card:nth-child(3) { box-shadow: 6px 6px 0 var(--sun); }
-    .feature-card:nth-child(4) { box-shadow: 6px 6px 0 var(--mint); }
-    .feature-card:hover { transform: translate(-3px, -3px); }
-    .feature-icon { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 14px; font-size: 1.8rem; background: var(--panel-hi); border-radius: 14px; transform: rotate(-4deg); }
-    .feature-card h3 { margin: 0 0 8px; font: 400 1.2rem var(--display); }
-    .feature-card p { margin: 0; color: var(--muted); }
-
-    .curriculum { background: linear-gradient(180deg, var(--panel), var(--bg)); border-block: 2px solid var(--line); }
-    .curriculum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-    .curriculum-item { padding: 20px 22px; background: var(--bg-deep); border: 2px solid var(--line); border-left: 8px solid var(--pink); border-radius: 14px; }
-    .curriculum-item:nth-child(3n+2) { border-left-color: var(--cyan); }
-    .curriculum-item:nth-child(3n+3) { border-left-color: var(--sun); }
-    .curriculum-code { display: inline-block; padding: 2px 12px; border-radius: 999px; font-size: .8rem; font-weight: 700; color: var(--bg-deep); background: var(--mint); }
-    .curriculum-item h4 { margin: 10px 0 4px; font-size: 1.1rem; }
-    .curriculum-item p { margin: 0; color: var(--muted); font-size: .92rem; }
-    .curriculum-cta { margin-top: 36px; text-align: center; }
-
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
-    .about p { color: var(--muted); max-width: 56ch; }
-    .testimonial { margin: 0; padding: 28px; background: var(--panel-hi); border: 3px solid var(--sun); border-radius: 22px; box-shadow: 8px 8px 0 var(--pink); }
-    .testimonial p { margin: 0 0 14px; color: var(--text); font-size: 1.15rem; }
-    .testimonial footer { color: var(--cyan); font-weight: 600; }
-
-    /* Footer */
-    .site-footer { padding: 56px 0 24px; background: var(--bg-deep); border-top: 2px solid var(--line); }
-    .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
-    .footer-brand p, .footer-contact p { color: var(--muted); }
-    .site-footer h4 { margin: 0 0 12px; font: 400 1rem var(--display); color: var(--sun); }
-    .site-footer ul { margin: 0; padding: 0; list-style: none; }
-    .site-footer li { margin-bottom: 8px; }
-    .site-footer a:not(.brand) { color: var(--muted); text-decoration: none; }
-    .site-footer a:not(.brand):hover { color: var(--cyan); }
-    .footer-bottom { margin-top: 36px; padding-top: 18px; border-top: 2px dashed var(--line); color: var(--muted); font-size: .9rem; }
-    .footer-bottom p { margin: 0; }
-
-    /* Responsive */
-    @media (max-width: 900px) {
-      .hero-grid, .about-grid { grid-template-columns: 1fr; }
-      .hero-card-stack { height: 320px; max-width: 460px; }
-      .footer-grid { grid-template-columns: 1fr 1fr; }
-      .header-actions { display: none; }
-      .nav-toggle { display: flex; }
-      .main-nav { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; margin: 0; padding: 12px 20px 20px; background: var(--bg-deep); border-bottom: 2px solid var(--line); }
-      .main-nav.is-open { display: flex; }
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(16,18,22,.86);
+      backdrop-filter: blur(16px);
     }
-    @media (max-width: 520px) { .footer-grid { grid-template-columns: 1fr; } .hero { padding-top: 48px; } }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+    .header-inner { min-height: 76px; display: flex; align-items: center; gap: 30px; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; flex: 0 0 auto; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      color: #141414;
+      background: var(--accent);
+      font: 400 .95rem/1 var(--display);
+      transform: rotate(-5deg);
+      box-shadow: 4px 4px 0 var(--accent-strong);
+    }
+    .brand-name { font: 400 1rem/1.2 var(--display); letter-spacing: -.03em; }
+    .brand-name span { color: var(--accent); }
+    .main-nav { display: flex; align-items: center; gap: 26px; margin-left: auto; }
+    .main-nav a { color: var(--muted); font-weight: 600; text-decoration: none; transition: color .18s ease; }
+    .main-nav a:hover { color: var(--text); }
+    .header-cta, .button {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 19px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      color: #151515;
+      background: var(--accent);
+      font: 700 .95rem var(--body);
+      text-decoration: none;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .header-cta:hover, .button:hover { transform: translateY(-2px); background: #ffda7c; }
+    .header-cta { min-height: 42px; }
+
+    .hero { padding: clamp(54px, 8vw, 100px) 0 76px; }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1.02fr; align-items: center; gap: clamp(38px, 7vw, 92px); }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 18px;
+      color: var(--accent);
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 22px; height: 2px; background: currentColor; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 660px;
+      margin-bottom: 20px;
+      font: 400 clamp(2.6rem, 6vw, 5rem)/1.08 var(--display);
+      letter-spacing: -.055em;
+    }
+    h1 span { color: var(--accent); }
+    .hero-copy { max-width: 510px; margin-bottom: 29px; color: var(--muted); font-size: 1.1rem; }
+    .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 13px; }
+    .button--quiet { color: var(--text); background: transparent; border-color: var(--line); }
+    .button--quiet:hover { background: var(--surface-raised); border-color: #697586; }
+    .hero-note { display: flex; align-items: center; gap: 10px; margin: 27px 0 0; color: var(--muted); font-size: .88rem; }
+    .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #7ee0a4; box-shadow: 0 0 14px rgba(126,224,164,.7); }
+
+    .hero-showcase { position: relative; min-height: 390px; }
+    .showcase-main {
+      position: absolute;
+      inset: 12px 54px 25px 0;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 22px;
+      background: var(--surface);
+      box-shadow: 0 28px 80px rgba(0,0,0,.4);
+    }
+    .showcase-main::after { content: ""; position: absolute; inset: 30% 0 0; background: linear-gradient(transparent, rgba(0,0,0,.82)); }
+    .showcase-main img { width: 100%; height: 100%; object-fit: cover; }
+    .showcase-caption { position: absolute; z-index: 1; left: 25px; right: 25px; bottom: 21px; display: flex; align-items: end; justify-content: space-between; gap: 18px; }
+    .showcase-caption p { margin: 0 0 2px; color: rgba(255,255,255,.72); font-size: .82rem; }
+    .showcase-caption h2 { margin: 0; font: 400 clamp(1.15rem, 2.4vw, 1.7rem) var(--display); }
+    .play-round { display: grid; place-items: center; flex: 0 0 48px; width: 48px; height: 48px; border-radius: 50%; color: #171717; background: var(--accent); text-decoration: none; }
+    .play-round svg { width: 17px; height: 17px; margin-left: 3px; }
+    .showcase-small {
+      position: absolute;
+      right: 0;
+      width: 148px;
+      height: 148px;
+      overflow: hidden;
+      border: 5px solid var(--bg);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: 0 15px 40px rgba(0,0,0,.35);
+    }
+    .showcase-small img { width: 100%; height: 100%; object-fit: cover; }
+    .showcase-small--top { top: 0; }
+    .showcase-small--bottom { bottom: 0; right: 15px; }
+    .showcase-tag { position: absolute; top: 13px; left: 13px; padding: 5px 10px; border-radius: 999px; color: #171717; background: var(--accent); font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+
+    .featured { padding: 26px 0 90px; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 22px; margin-bottom: 24px; }
+    .section-heading .eyebrow { margin-bottom: 10px; }
+    .section-heading h2 { margin: 0; font: 400 clamp(1.5rem, 3vw, 2.15rem)/1.2 var(--display); }
+    .text-link { color: var(--accent); font-weight: 700; text-decoration: none; white-space: nowrap; }
+    .text-link:hover { color: #ffda7c; }
+    .carousel-shell { position: relative; }
+    .carousel-window { overflow: hidden; padding: 5px 2px 24px; }
+    .game-grid { display: flex; gap: 18px; transition: transform .65s cubic-bezier(.22,.75,.25,1); }
+    .game-card { flex: 0 0 calc((100% - 54px) / 4); min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+    .game-card:hover { transform: translateY(-5px); border-color: #667180; box-shadow: 0 18px 34px rgba(0,0,0,.25); }
+    .game-card-image { position: relative; aspect-ratio: 1.28; overflow: hidden; background: var(--surface-raised); }
+    .game-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+    .game-card:hover img { transform: scale(1.045); }
+    .game-card-image span { position: absolute; left: 12px; top: 12px; padding: 4px 9px; border-radius: 999px; color: #171717; background: var(--accent); font-size: .7rem; font-weight: 700; text-transform: uppercase; }
+    .game-card-body { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 15px; }
+    .game-card h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+    .game-arrow { color: var(--accent); font-size: 1.2rem; transition: transform .18s ease; }
+    .game-card:hover .game-arrow { transform: translateX(3px); }
+    .carousel-controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .carousel-dots { display: flex; align-items: center; gap: 8px; }
+    .carousel-dot { width: 9px; height: 9px; padding: 0; border: 0; border-radius: 99px; background: #56606d; cursor: pointer; transition: width .25s ease, background .25s ease; }
+    .carousel-dot[aria-current="true"] { width: 28px; background: var(--accent); }
+    .carousel-arrows { display: flex; gap: 9px; }
+    .carousel-arrow { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 50%; color: var(--text); background: var(--surface); font: 700 1.2rem var(--body); cursor: pointer; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+    .carousel-arrow:hover { transform: translateY(-2px); border-color: var(--accent); background: var(--surface-raised); }
+    .carousel-arrow:disabled { opacity: .45; cursor: default; }
+    .random-picker { display: flex; align-items: center; gap: 12px; margin-top: 21px; padding: 13px 15px; border: 1px solid var(--line); border-radius: 14px; background: rgba(24,28,35,.72); }
+    .random-picker-copy { flex: 1; min-width: 0; }
+    .random-picker-label { display: block; color: var(--muted); font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .random-picker-result { display: block; overflow: hidden; color: var(--text); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .random-picker-result.is-shuffling { color: var(--accent); animation: shuffle-flash .18s ease-in-out infinite alternate; }
+    .random-button, .random-play { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 14px; border: 1px solid rgba(245,203,95,.45); border-radius: 10px; color: var(--accent); background: rgba(245,203,95,.08); font: 700 .88rem var(--body); text-decoration: none; cursor: pointer; transition: background .2s ease, transform .2s ease; }
+    .random-button:hover, .random-play:hover { transform: translateY(-2px); background: rgba(245,203,95,.16); }
+    .random-button:disabled { opacity: .6; cursor: wait; }
+    .faq-section { padding: 35px 0 88px; }
+    .faq-layout { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(32px,8vw,100px); align-items: start; }
+    .faq-intro h2 { margin: 0 0 12px; font: 400 clamp(1.7rem,3.8vw,2.6rem)/1.18 var(--display); }
+    .faq-intro p:last-child { max-width: 34ch; color: var(--muted); }
+    .faq-list { border-top: 1px solid var(--line); }
+    .faq-item { border-bottom: 1px solid var(--line); }
+    .faq-item summary { position: relative; padding: 19px 42px 19px 0; color: var(--text); font-size: 1.02rem; font-weight: 700; cursor: pointer; list-style: none; }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after { content: "+"; position: absolute; right: 4px; top: 50%; color: var(--accent); font-size: 1.4rem; transform: translateY(-50%); transition: transform .2s ease; }
+    .faq-item[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+    .faq-answer { max-width: 62ch; padding: 0 28px 18px 0; color: var(--muted); animation: faq-reveal .25s ease both; }
+    .faq-answer p { margin: 0; }
+    @keyframes faq-reveal { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+    @keyframes shuffle-flash { from { opacity: .5; transform: translateY(2px); } to { opacity: 1; transform: translateY(-2px); } }
+    body.reveal-ready [data-reveal]:not(.is-visible) { opacity: 0; transform: translateY(18px); }
+    [data-reveal] { transition: opacity .65s ease, transform .65s ease; }
+    [data-reveal].is-visible { opacity: 1; transform: none; }
+
+    .browse-banner { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 28px; overflow: hidden; padding: clamp(26px, 5vw, 46px); border: 1px solid rgba(245,203,95,.3); border-radius: 22px; background: linear-gradient(115deg, rgba(245,203,95,.12), rgba(255,121,95,.07) 58%, var(--surface)); }
+    .browse-banner::after { content: "CB"; position: absolute; right: 23%; top: -60px; color: rgba(255,255,255,.035); font: 400 14rem/.9 var(--display); pointer-events: none; }
+    .browse-banner > div, .browse-banner a { position: relative; z-index: 1; }
+    .browse-banner h2 { margin: 0 0 7px; font: 400 clamp(1.3rem, 3vw, 2rem) var(--display); }
+    .browse-banner p { margin: 0; color: var(--muted); }
+    .site-footer { margin-top: 84px; border-top: 1px solid rgba(255,255,255,.08); }
+    .footer-inner { min-height: 86px; display: flex; align-items: center; justify-content: space-between; gap: 18px; color: var(--muted); font-size: .86rem; }
+    .footer-inner p { margin: 0; }
+
+    @media (max-width: 850px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+      .hero-content { max-width: 700px; }
+      .hero-showcase { width: min(100%, 600px); margin-inline: auto; }
+      .game-card { flex-basis: calc((100% - 36px) / 3); }
+      .faq-layout { grid-template-columns: 1fr; gap: 20px; }
+    }
+    @media (max-width: 600px) {
+      .container { width: min(100% - 28px, 1180px); }
+      .header-inner { min-height: 68px; gap: 10px; }
+      .brand { gap: 8px; }
+      .brand-mark { width: 34px; height: 34px; font-size: .72rem; }
+      .brand-name { font-size: .72rem; }
+      .main-nav { display: none; }
+      .header-cta { min-height: 38px; padding-inline: 10px; font-size: .78rem; }
+      .hero { padding-top: 48px; }
+      .hero-showcase { min-height: 300px; }
+      .showcase-main { inset: 10px 43px 20px 0; border-radius: 17px; }
+      .showcase-small { width: 112px; height: 112px; border-width: 4px; border-radius: 16px; }
+      .showcase-caption { left: 16px; right: 15px; bottom: 15px; }
+      .play-round { flex-basis: 40px; width: 40px; height: 40px; }
+      .section-heading { align-items: start; flex-direction: column; gap: 10px; }
+      .section-heading .text-link { margin-top: 2px; }
+      .game-card { flex-basis: calc((100% - 18px) / 2); }
+      .random-picker { align-items: flex-start; flex-wrap: wrap; }
+      .random-picker-copy { flex-basis: calc(100% - 130px); }
+      .carousel-controls { margin-top: -4px; }
+      .browse-banner { align-items: start; flex-direction: column; }
+      .footer-inner { align-items: start; justify-content: center; flex-direction: column; padding-block: 20px; }
+    }
+    @media (max-width: 380px) {
+      .game-grid { gap: 12px; }
+      .game-card { flex-basis: 100%; }
+      .game-card-body { padding: 11px; }
+      .game-card h3 { font-size: .9rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
   </style>
 </head>
-<body class="landing-page">
+<body>
   <header class="site-header">
     <div class="container header-inner">
-      <a href="index.html" class="brand">
-        <span class="brand-mark" aria-hidden="true">ES</span>
-        <span class="brand-text">EduSphere<span class="brand-accent">Academy</span></span>
+      <a class="brand" href="index.html" aria-label="Calculated Break home">
+        <span class="brand-mark" aria-hidden="true">CB</span>
+        <span class="brand-name">Calculated <span>Break</span></span>
       </a>
-      <nav class="main-nav" aria-label="Primary">
-        <a href="#programs">Programs</a>
-        <a href="#curriculum">Curriculum</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#featured">Featured</a>
+        <a href="allgames.html#modules">All games</a>
+        <a href="allgames.html#chips">Categories</a>
       </nav>
-      <div class="header-actions">
-        <a href="menu.html" class="btn btn-ghost">Student Login</a>
-        <a href="menu.html" class="btn btn-primary">Access Portal</a>
-      </div>
-      <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
+      <a class="header-cta" href="allgames.html#modules">Browse games <span aria-hidden="true">↗</span></a>
     </div>
   </header>
 
@@ -176,183 +280,250 @@
     <section class="hero">
       <div class="container hero-grid">
         <div class="hero-content">
-          <p class="eyebrow">Accredited Online Learning · Est. 2018</p>
-          <h1>Empowering Lifelong Learning</h1>
-          <p class="hero-lead">
-            Join over 48,000 learners worldwide. EduSphere Academy delivers rigorous academics,
-            industry-aligned credentials, and immersive virtual lab experiences designed for the modern student.
-          </p>
-          <div class="hero-cta">
-            <a href="menu.html" class="btn btn-primary btn-lg">Get Started</a>
-            <a href="menu.html" class="btn btn-outline btn-lg">Explore Programs</a>
+          <p class="eyebrow">Good games. No downloads.</p>
+          <h1>Take a <span>Calculated</span> Break.</h1>
+          <p class="hero-copy">Jump into a quick match, chase a high score, or find your next favorite. Your next game is just one click away.</p>
+          <div class="hero-actions">
+            <a class="button" href="allgames.html#modules">Explore the games <span aria-hidden="true">→</span></a>
+            <a class="button button--quiet" href="#featured">See what's popular</a>
           </div>
-          <ul class="hero-stats" aria-label="Platform highlights">
-            <li><strong>120+</strong><span>Courses</span></li>
-            <li><strong>35</strong><span>Degree Paths</span></li>
-            <li><strong>98%</strong><span>Satisfaction</span></li>
-          </ul>
+          <p class="hero-note"><span class="online-dot" aria-hidden="true"></span>Free to play right in your browser</p>
         </div>
-        <div class="hero-visual" aria-hidden="true">
-          <div class="hero-card-stack">
-            <div class="hero-card hero-card--1">
-              <span class="hero-card-label">Live Session</span>
-              <p>Advanced Calculus II</p>
-            </div>
-            <div class="hero-card hero-card--2">
-              <span class="hero-card-label">Virtual Lab</span>
-              <p>Interactive Physics Simulation</p>
-            </div>
-            <div class="hero-card hero-card--3">
-              <span class="hero-card-label">Certificate</span>
-              <p>Data Science Professional</p>
-            </div>
-          </div>
+
+        <div class="hero-showcase" aria-label="Featured game: Drive Mad">
+          <a class="showcase-main" href="player.html?game=drive-mad&amp;title=Drive%20Mad" aria-label="Play Drive Mad">
+            <img src="images/drive-mad.jpg" alt="Drive Mad gameplay" fetchpriority="high">
+            <span class="showcase-tag">Featured game</span>
+            <span class="showcase-caption">
+              <span><p>One more level?</p><h2>Drive Mad</h2></span>
+              <span class="play-round" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.2v9.6L13 8z"/></svg>
+              </span>
+            </span>
+          </a>
+          <a class="showcase-small showcase-small--top" href="player.html?game=slope&amp;title=Slope" aria-label="Play Slope">
+            <img src="images/slope.jpg" alt="" loading="lazy">
+          </a>
+          <a class="showcase-small showcase-small--bottom" href="player.html?game=retro-bowl&amp;title=Retro%20Bowl" aria-label="Play Retro Bowl">
+            <img src="images/retro-bowl.jpg" alt="" loading="lazy">
+          </a>
         </div>
       </div>
     </section>
 
-    <section id="programs" class="section programs">
+    <section class="featured" id="featured">
       <div class="container">
-        <header class="section-header">
-          <p class="eyebrow">Academic Excellence</p>
-          <h2>Programs Built for Real-World Impact</h2>
-          <p class="section-lead">
-            From foundational sciences to graduate-level research tracks, our catalog is developed
-            in partnership with leading universities and industry advisory boards.
-          </p>
-        </header>
-        <div class="feature-grid">
-          <article class="feature-card">
-            <div class="feature-icon" aria-hidden="true">📚</div>
-            <h3>Undergraduate Degrees</h3>
-            <p>Flexible bachelor&apos;s pathways with transfer credit evaluation and dedicated academic advisors.</p>
-          </article>
-          <article class="feature-card">
-            <div class="feature-icon" aria-hidden="true">🔬</div>
-            <h3>STEM Virtual Labs</h3>
-            <p>Browser-based simulations for physics, chemistry, and engineering—no downloads required.</p>
-          </article>
-          <article class="feature-card">
-            <div class="feature-icon" aria-hidden="true">💼</div>
-            <h3>Professional Certificates</h3>
-            <p>Stackable micro-credentials aligned with in-demand skills in technology and business.</p>
-          </article>
-          <article class="feature-card">
-            <div class="feature-icon" aria-hidden="true">🌍</div>
-            <h3>Global Community</h3>
-            <p>Peer study groups, faculty office hours, and multilingual learner support across time zones.</p>
-          </article>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Pick your next game</p>
+            <h2>Good breaks start here.</h2>
+          </div>
+          <a class="text-link" href="allgames.html#modules">See all games <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="carousel-shell" data-reveal>
+          <div class="carousel-window" id="featured-carousel" role="region" aria-roledescription="carousel" aria-label="Featured games">
+            <div class="game-grid" id="featured-track">
+          <a class="game-card" href="player.html?game=slope&amp;title=Slope" role="group" aria-roledescription="slide" aria-label="1 of 8">
+            <div class="game-card-image"><img src="images/slope.jpg" alt="Slope game" loading="lazy"><span>Action</span></div>
+            <div class="game-card-body"><h3>Slope</h3><span class="game-arrow" aria-hidden="true">↗</span></div>
+          </a>
+          <a class="game-card" href="player.html?game=moto-x3m&amp;title=Moto%20X3M" role="group" aria-roledescription="slide" aria-label="2 of 8">
+            <div class="game-card-image"><img src="images/moto-x3m.jpg" alt="Moto X3M game" loading="lazy"><span>Racing</span></div>
+            <div class="game-card-body"><h3>Moto X3M</h3><span class="game-arrow" aria-hidden="true">↗</span></div>
+          </a>
+          <a class="game-card" href="player.html?game=retro-bowl&amp;title=Retro%20Bowl" role="group" aria-roledescription="slide" aria-label="3 of 8">
+            <div class="game-card-image"><img src="images/retro-bowl.jpg" alt="Retro Bowl game" loading="lazy"><span>Sports</span></div>
+            <div class="game-card-body"><h3>Retro Bowl</h3><span class="game-arrow" aria-hidden="true">↗</span></div>
+          </a>
+          <a class="game-card" href="player.html?game=drive-mad&amp;title=Drive%20Mad" role="group" aria-roledescription="slide" aria-label="4 of 8">
+            <div class="game-card-image"><img src="images/drive-mad.jpg" alt="Drive Mad game" loading="lazy"><span>Racing</span></div>
+            <div class="game-card-body"><h3>Drive Mad</h3><span class="game-arrow" aria-hidden="true">↗</span></div>
+          </a>
+          <a class="game-card" href="player.html?game=vex7&amp;title=Vex%207" role="group" aria-roledescription="slide" aria-label="5 of 8">
+            <div class="game-card-image"><img src="images/vex7.jpeg" alt="Vex 7 game" loading="lazy"><span>Action</span></div>
+            <div class="game-card-body"><h3>Vex 7</h3><span class="game-arrow" aria-hidden="true">↗</span></div>
+          </a>
+          <a class="game-card" href="player.html?game=cookie-clicker&amp;title=Cookie%20Clicker" role="group" aria-roledescription="slide" aria-label="6 of 8">
+            <div class="game-card-image"><img src="games/cookie-clicker/cookie1.jpeg" alt="Cookie Clicker game" loading="lazy"><span>Idle</span></div>
+            <div class="game-card-body"><h3>Cookie Clicker</h3><span class="game-arrow" aria-hidden="true">↗</span></div>
+          </a>
+          <a class="game-card" href="player.html?game=subway-surfers-ny&amp;title=Subway%20Surfers%20NY" role="group" aria-roledescription="slide" aria-label="7 of 8">
+            <div class="game-card-image"><img src="images/subway-surfers-ny.webp" alt="Subway Surfers game" loading="lazy"><span>Action</span></div>
+            <div class="game-card-body"><h3>Subway Surfers</h3><span class="game-arrow" aria-hidden="true">↗</span></div>
+          </a>
+          <a class="game-card" href="player.html?game=8-ball-pool&amp;title=8-Ball%20Pool" role="group" aria-roledescription="slide" aria-label="8 of 8">
+            <div class="game-card-image"><img src="images/8-ball-pool.jpg" alt="8 Ball Pool game" loading="lazy"><span>Sports</span></div>
+            <div class="game-card-body"><h3>8 Ball Pool</h3><span class="game-arrow" aria-hidden="true">↗</span></div>
+          </a>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <div class="carousel-dots" id="carousel-dots" role="group" aria-label="Choose featured games page"></div>
+            <div class="carousel-arrows">
+              <button class="carousel-arrow" id="carousel-prev" type="button" aria-label="Previous featured games">←</button>
+              <button class="carousel-arrow" id="carousel-next" type="button" aria-label="Next featured games">→</button>
+            </div>
+          </div>
+        </div>
+        <div class="random-picker" data-reveal>
+          <div class="random-picker-copy" aria-live="polite">
+            <span class="random-picker-label">Can't decide? Let us pick.</span>
+            <span class="random-picker-result" id="random-result">Your next game is one spin away.</span>
+          </div>
+          <button class="random-button" id="random-button" type="button"><span aria-hidden="true">⤨</span> Random game</button>
+          <a class="random-play" id="random-play" href="allgames.html" hidden>Play game <span aria-hidden="true">→</span></a>
         </div>
       </div>
     </section>
 
-    <section id="curriculum" class="section curriculum">
-      <div class="container">
-        <header class="section-header section-header--light">
-          <p class="eyebrow">Sample Curriculum</p>
-          <h2>Spring 2026 Course Offerings</h2>
-        </header>
-        <div class="curriculum-grid">
-          <div class="curriculum-item">
-            <span class="curriculum-code">MATH 301</span>
-            <h4>Linear Algebra &amp; Applications</h4>
-            <p>4 credits · Dr. Elena Vasquez</p>
-          </div>
-          <div class="curriculum-item">
-            <span class="curriculum-code">PHYS 210</span>
-            <h4>Classical Mechanics &amp; Labs</h4>
-            <p>4 credits · Dr. James Okonkwo</p>
-          </div>
-          <div class="curriculum-item">
-            <span class="curriculum-code">CS 415</span>
-            <h4>Machine Learning Fundamentals</h4>
-            <p>3 credits · Prof. Sarah Chen</p>
-          </div>
-          <div class="curriculum-item">
-            <span class="curriculum-code">CHEM 180</span>
-            <h4>Organic Chemistry I</h4>
-            <p>4 credits · Dr. Maria Santos</p>
-          </div>
-          <div class="curriculum-item">
-            <span class="curriculum-code">BIO 240</span>
-            <h4>Cellular &amp; Molecular Biology</h4>
-            <p>4 credits · Dr. Robert Kim</p>
-          </div>
-          <div class="curriculum-item">
-            <span class="curriculum-code">ENG 120</span>
-            <h4>Technical Communication</h4>
-            <p>3 credits · Prof. Anita Patel</p>
-          </div>
-        </div>
-        <div class="curriculum-cta">
-          <a href="menu.html" class="btn btn-primary">Access Portal</a>
-        </div>
+    <section class="container">
+      <div class="browse-banner">
+        <div><h2>Found your kind of fun?</h2><p>Browse the full collection and find a game for every kind of break.</p></div>
+        <a class="button" href="allgames.html#modules">Browse all games <span aria-hidden="true">→</span></a>
       </div>
     </section>
 
-    <section id="about" class="section about">
-      <div class="container about-grid">
-        <div>
-          <p class="eyebrow">Our Mission</p>
-          <h2>Education Without Boundaries</h2>
-          <p>
-            EduSphere Academy was founded on the belief that high-quality education should be accessible,
-            engaging, and measurable. Our learning management system integrates synchronous instruction
-            with self-paced modules and accredited assessment protocols.
-          </p>
+    <section class="faq-section" id="faq">
+      <div class="container faq-layout">
+        <div class="faq-intro" data-reveal>
+          <p class="eyebrow">Good to know</p>
+          <h2>Quick questions, easy answers.</h2>
+          <p>Everything you need to know before your next Calculated Break.</p>
         </div>
-        <blockquote class="testimonial">
-          <p>&ldquo;The virtual lab simulations transformed how my students engage with complex physics concepts. It feels like a real campus experience—online.&rdquo;</p>
-          <footer>— Dr. James Okonkwo, Department Chair, Physics</footer>
-        </blockquote>
+        <div class="faq-list" data-reveal>
+          <details class="faq-item">
+            <summary>What is Calculated Break?</summary>
+            <div class="faq-answer"><p>Calculated Break is a collection of free browser games for quick breaks and longer play sessions. Choose a game and play right in your browser.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Who made Calculated Break?</summary>
+            <div class="faq-answer"><p>Calculated Break is made by Sivasarana.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Are the games free to play?</summary>
+            <div class="faq-answer"><p>Yes. The games are free to play in your browser, with no download needed.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>How do I find a game?</summary>
+            <div class="faq-answer"><p>Browse the featured carousel, use the random game picker, or search and filter the full collection on the All Games page.</p></div>
+          </details>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer id="contact" class="site-footer">
-    <div class="container footer-grid">
-      <div class="footer-brand">
-        <a href="index.html" class="brand">
-          <span class="brand-mark" aria-hidden="true">ES</span>
-          <span class="brand-text">EduSphere<span class="brand-accent">Academy</span></span>
-        </a>
-        <p>1200 University Drive, Suite 400<br>Cambridge, MA 02139</p>
-      </div>
-      <div class="footer-links">
-        <h4>Resources</h4>
-        <ul>
-          <li><a href="#">Academic Calendar</a></li>
-          <li><a href="#">Tuition &amp; Financial Aid</a></li>
-          <li><a href="#">Library Services</a></li>
-          <li><a href="menu.html">Student Portal</a></li>
-        </ul>
-      </div>
-      <div class="footer-links">
-        <h4>Legal</h4>
-        <ul>
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Terms of Use</a></li>
-          <li><a href="#">Accessibility</a></li>
-          <li><a href="#">FERPA Compliance</a></li>
-        </ul>
-      </div>
-      <div class="footer-contact">
-        <h4>Contact</h4>
-        <p>admissions@edusphere.edu<br>+1 (800) 555-0198</p>
-      </div>
-    </div>
-    <div class="container footer-bottom">
-      <p>&copy; 2026 EduSphere Academy. All rights reserved.</p>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">CB</span>
+        <span class="brand-name">Calculated <span>Break</span></span>
+      </a>
+      <p>© 2026 Calculated Break. Your break, your game.</p>
     </div>
   </footer>
-
+  <script src="script.js"></script>
   <script>
-    document.querySelector('.nav-toggle')?.addEventListener('click', function () {
-      const nav = document.querySelector('.main-nav');
-      const expanded = this.getAttribute('aria-expanded') === 'true';
-      this.setAttribute('aria-expanded', String(!expanded));
-      nav?.classList.toggle('is-open');
-    });
+    (() => {
+      const carousel = document.getElementById("featured-carousel");
+      const track = document.getElementById("featured-track");
+      const dots = document.getElementById("carousel-dots");
+      const previous = document.getElementById("carousel-prev");
+      const next = document.getElementById("carousel-next");
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const slides = Array.from(track.children);
+      let pageStarts = [];
+      let activePage = 0;
+
+      function updatePages() {
+        const slideWidth = slides[0].getBoundingClientRect().width;
+        if (!slideWidth || !carousel.clientWidth) return;
+        const gap = parseFloat(getComputedStyle(track).gap) || 0;
+        const visibleCount = Math.max(1, Math.floor((carousel.clientWidth + gap) / (slideWidth + gap)));
+        const lastStart = Math.max(0, slides.length - visibleCount);
+        pageStarts = [];
+        for (let start = 0; start < lastStart; start += visibleCount) pageStarts.push(start);
+        if (pageStarts[pageStarts.length - 1] !== lastStart) pageStarts.push(lastStart);
+        dots.replaceChildren();
+        pageStarts.forEach((start, index) => {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "carousel-dot";
+          dot.setAttribute("aria-label", "Show featured games " + (index + 1));
+          dot.addEventListener("click", () => showPage(index));
+          dots.appendChild(dot);
+        });
+        showPage(Math.min(activePage, pageStarts.length - 1), false);
+      }
+
+      function showPage(index, animate) {
+        if (!pageStarts.length) return;
+        activePage = (index + pageStarts.length) % pageStarts.length;
+        const target = slides[pageStarts[activePage]];
+        track.style.transition = animate === false ? "none" : "";
+        track.style.transform = "translateX(-" + (target.offsetLeft - slides[0].offsetLeft) + "px)";
+        if (animate === false) requestAnimationFrame(() => { track.style.transition = ""; });
+        Array.from(dots.children).forEach((dot, dotIndex) => {
+          dot.setAttribute("aria-current", String(dotIndex === activePage));
+        });
+      }
+
+      previous.addEventListener("click", () => showPage(activePage - 1));
+      next.addEventListener("click", () => showPage(activePage + 1));
+      window.addEventListener("resize", updatePages);
+      window.addEventListener("load", updatePages, { once: true });
+      if ("ResizeObserver" in window) {
+        const carouselResizeObserver = new ResizeObserver(updatePages);
+        carouselResizeObserver.observe(carousel);
+      }
+      requestAnimationFrame(() => requestAnimationFrame(updatePages));
+
+      if (!reducedMotion) {
+        window.setInterval(() => {
+          const carouselIsActive = carousel.matches(":hover") || carousel.contains(document.activeElement);
+          if (pageStarts.length > 1 && !carouselIsActive && !document.hidden) showPage(activePage + 1);
+        }, 5200);
+      }
+
+      const randomButton = document.getElementById("random-button");
+      const randomResult = document.getElementById("random-result");
+      const randomPlay = document.getElementById("random-play");
+      const games = GAME_MODULES
+        .map((game) => ({ game, id: getGameId(game.href) }))
+        .filter((entry) => entry.id);
+      let lastRandomId = "";
+
+      randomButton.addEventListener("click", () => {
+        if (!games.length) return;
+        const choices = games.filter((entry) => entry.id !== lastRandomId);
+        const pool = choices.length ? choices : games;
+        const selected = pool[Math.floor(Math.random() * pool.length)];
+        randomResult.classList.remove("is-shuffling");
+        void randomResult.offsetWidth;
+        randomResult.classList.add("is-shuffling");
+        lastRandomId = selected.id;
+        randomResult.textContent = selected.game.title + " — " + selected.game.cat;
+        randomPlay.href = "player.html?" + new URLSearchParams({ game: selected.id, title: selected.game.title });
+        randomPlay.hidden = false;
+        window.setTimeout(() => {
+          randomResult.classList.remove("is-shuffling");
+        }, reducedMotion ? 0 : 650);
+      });
+
+      if ("IntersectionObserver" in window) {
+        document.body.classList.add("reveal-ready");
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12 });
+        document.querySelectorAll("[data-reveal]").forEach((element) => revealObserver.observe(element));
+      }
+
+      window.addEventListener("pagehide", () => window.clearInterval(autoAdvance), { once: true });
+    })();
   </script>
 </body>
 </html>

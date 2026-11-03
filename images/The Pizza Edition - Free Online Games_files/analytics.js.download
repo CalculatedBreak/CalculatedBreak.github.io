@@ -1,0 +1,199 @@
+/* analytics.js - GA4 for pizzaedition.com.
+ * Events: page_view (gtag config), game_start (game page loaded),
+ * game_click (a link to a game page was clicked; from_page_type says where),
+ * game_engaged (30 s of visible time on a game page),
+ * game_time (real visible seconds spent on a game page, param play_seconds; sent when the
+ *   tab is hidden or the page is left, so it can fire more than once per visit -- each second
+ *   is reported exactly once, so SUM play_seconds for play time and count game_start for visits).
+ * Every event carries experiment_variant from the `exp` cookie (set by experiment.js).
+ *
+ * v9 (2026-09-23): play_seconds is measured on the MONOTONIC clock and is bounded.
+ *   v8 measured a visible stretch as Date.now() - since. Date.now() is wall-clock and jumps
+ *   whenever the OS corrects it (NTP on a machine with a wrong clock, a VM resuming from a
+ *   snapshot, a hand-set clock), so a single flush could report an arbitrary amount of time.
+ *   It really happened: on 2026-09-22 one report claimed ~91.6 million seconds (2.9 years) of
+ *   visible time from a script that had existed for 5 days, and ~23% of the week's total
+ *   play-time sat in (game, hour) buckets averaging over 2 h per report. See
+ *   proposals/analytics-v9-clockfix.md. Three layers now:
+ *     1. performance.now() - monotonic by specification, immune to clock changes (root cause).
+ *     2. MAX_STEP_MS - the clock is observed at least every 10 s, so a larger gap means the
+ *        device slept or the tab froze; at most a minute is banked for it. (v8 counted sleep
+ *        as play, which was wrong independently of the clock bug.)
+ *     3. MAX_REPORT_S - no single game_time may claim more than 2 h; the excess is discarded,
+ *        not carried, so it cannot be re-reported on the next flush.
+ *   game_engaged is UNCHANGED: still once, at 30 s of visible time, with seconds: 30.
+ */
+(function () {
+  var h = location.hostname;
+  if (!h) return;
+  if (h === "localhost" || h === "127.0.0.1") return;
+  if (h === "pizzaedition.com" || h.slice(-17) === ".pizzaedition.com") return;
+  location.replace("https://pizzaedition.com" + location.pathname + location.search + location.hash);
+})();
+
+(function (w, d) {
+  var GA_ID = "G-ZL2MS6ZDBK";
+  var ENGAGED_MS = 30000;
+  var MAX_STEP_MS = 60000;     // one observation gap longer than this is sleep/freeze, not play
+  var MAX_REPORT_S = 7200;     // hard ceiling on a single game_time report (2 h)
+  var HEARTBEAT_MS = 10000;    // how often the clock is observed once game_engaged has fired
+  var CATEGORIES = { action: 1, racing: 1, sports: 1, puzzle: 1, platformer: 1,
+                     shooter: 1, "2player": 1, clicker: 1, horror: 1, casual: 1 };
+
+  // Monotonic time. performance.now() cannot move backwards and is not affected by the system
+  // clock being corrected; Date.now() is only a fallback for browsers without it.
+  var mono = (w.performance && typeof w.performance.now === "function")
+    ? function () { return w.performance.now(); }
+    : function () { return Date.now(); };
+
+  w.dataLayer = w.dataLayer || [];
+  function gtag() { w.dataLayer.push(arguments); }
+
+  function readCookie(name) {
+    try {
+      var m = d.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+      return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) { return null; }
+  }
+  function variant() {
+    if (w.PZ_EXP && w.PZ_EXP.variant) return w.PZ_EXP.variant;
+    var v = readCookie("exp");
+    return (v === "A" || v === "B") ? v : "none";
+  }
+  function experimentId() {
+    return (w.PZ_EXP && w.PZ_EXP.tests && w.PZ_EXP.tests.length) ? w.PZ_EXP.tests.join(",") : "none";
+  }
+
+  // /g/<slug> is a game page unless <slug> is a category. Returns the slug or null.
+  function gameSlug(path) {
+    var m = /^\/g\/([a-z0-9-]+)\/?$/i.exec(path || "");
+    if (!m) return null;
+    var s = m[1].toLowerCase();
+    return CATEGORIES[s] ? null : s;
+  }
+  function pageType(path) {
+    if (path === "/" || path === "/index.html") return "home";
+    if (gameSlug(path)) return "game";
+    if (/^\/g\/?$/.test(path)) return "all_games";
+    var m = /^\/g\/([a-z0-9]+)\/?$/i.exec(path);
+    if (m && CATEGORIES[m[1].toLowerCase()]) return "category";
+    if (path.indexOf("/popular") === 0) return "popular";
+    if (path.indexOf("/search") === 0) return "search";
+    return "other";
+  }
+
+  var path = location.pathname;
+  var thisPageType = pageType(path);
+  var thisGame = gameSlug(path);
+
+  function track(name, params) {
+    var p = params || {};
+    p.experiment_variant = variant();
+    p.experiment_id = experimentId();
+    p.page_type = p.page_type || thisPageType;
+    gtag("event", name, p);
+  }
+  w.PZ_track = track; // for one-off events from page scripts: PZ_track("name", {...})
+
+  d.addEventListener("DOMContentLoaded", function () {
+    var v = variant();
+
+    // Google tag (gtag.js)
+    var gaScript = d.createElement("script");
+    gaScript.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+    gaScript.async = true;
+    d.head.appendChild(gaScript);
+    gtag("js", new Date());
+    gtag("set", { experiment_variant: v, experiment_id: experimentId() }); // on every event, page_view included
+    gtag("config", GA_ID, { experiment_variant: v, experiment_id: experimentId(), page_type: thisPageType });
+
+    // game_start + game_engaged on game pages
+    var isGame = !!thisGame || !!d.querySelector("[data-embed-src]");
+    if (isGame) {
+      var game = thisGame || path;
+      track("game_start", { game: game, page_type: "game" });
+
+      // Count only time while the tab is visible. acc = visible ms banked so far;
+      // last = the monotonic reading at the previous observation (0 while hidden).
+      var acc = 0, last = d.hidden ? 0 : mono(), fired = false, timer = null;
+      var sentMs = 0; // visible ms already reported by game_time
+
+      // Bank the time since the previous observation. A step larger than MAX_STEP_MS means
+      // nobody was watching (device asleep, tab frozen, main thread wedged), so it is clamped
+      // rather than counted as play. A non-positive step (no time passed, or a fallback
+      // Date.now() that moved backwards) banks nothing.
+      function bank() {
+        if (!last) return;
+        var t = mono(), step = t - last;
+        last = t;
+        if (!(step > 0)) return;
+        acc += step > MAX_STEP_MS ? MAX_STEP_MS : step;
+      }
+
+      // game_engaged: fires once at 30 s of visible time (a milestone, not a duration).
+      // Polled every second until it fires so the 30 s mark is not delayed, then the same
+      // timer keeps observing the clock every 10 s purely to keep sleep gaps bounded.
+      function tick() {
+        bank();
+        if (fired) return;
+        if (acc >= ENGAGED_MS) {
+          fired = true;
+          track("game_engaged", { game: game, page_type: "game", seconds: ENGAGED_MS / 1000 });
+          if (timer) clearInterval(timer);
+          timer = setInterval(bank, HEARTBEAT_MS);
+        }
+      }
+
+      // game_time: the real visible seconds, sent whenever the visitor may not come back --
+      // tab hidden (the last moment a phone/Chromebook is guaranteed to run script before the
+      // tab is discarded) and pagehide (navigation, close, bfcache). Only the not-yet-reported
+      // remainder goes out, so the two firing back to back can never double count, and a
+      // visitor who tabs away and returns gets the rest reported on the next hide/leave.
+      // No transport_type here on purpose: GA4's gtag.js already sends with keepalive
+      // fetch / sendBeacon during unload (verified), and the UA-era flag would only be
+      // forwarded to GA4 as a stray custom parameter.
+      function flush() {
+        bank();
+        last = 0;                       // the current visible stretch ends here
+        var unsent = acc - sentMs;
+        if (unsent < 1000) return;
+        var secs = Math.round(unsent / 1000);
+        if (secs > MAX_REPORT_S) {
+          secs = MAX_REPORT_S;
+          sentMs = acc;                 // discard the implausible excess; never re-report it
+        } else {
+          sentMs += secs * 1000;        // sub-second remainder stays banked for the next flush
+        }
+        track("game_time", { game: game, page_type: "game", play_seconds: secs });
+      }
+      d.addEventListener("visibilitychange", function () {
+        if (d.hidden) { flush(); }
+        else if (!last) { last = mono(); }
+        tick();
+      });
+      w.addEventListener("pagehide", flush);
+      w.addEventListener("pageshow", function () { if (!d.hidden && !last) last = mono(); });
+      timer = setInterval(tick, 1000);
+    }
+
+    // game_click: any click on a link that leads to a game page.
+    // from_page_type "home" is the homepage -> game click-through metric.
+    d.addEventListener("click", function (e) {
+      var el = e.target;
+      while (el && el !== d && !(el.tagName === "A" && el.getAttribute("href"))) el = el.parentNode;
+      if (!el || el === d) return;
+      var href = el.getAttribute("href");
+      var target;
+      try { target = new URL(href, location.href); } catch (err) { return; }
+      if (target.hostname !== location.hostname) return;
+      var to = gameSlug(target.pathname);
+      if (!to) return;
+      track("game_click", {
+        game: to,
+        from_page_type: thisPageType,
+        from_game: thisGame || "",
+        link_text: (el.textContent || el.getAttribute("aria-label") || el.getAttribute("title") || "").replace(/\s+/g, " ").trim().slice(0, 60)
+      });
+    }, true);
+  });
+})(window, document);
