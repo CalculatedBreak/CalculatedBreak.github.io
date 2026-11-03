@@ -131,7 +131,7 @@ const GAME_MODULES = [
   { href: "/minecraft-mods/index.html", img: "/images/movie.jpg", title: "movies", cat: "movie" },
   { href: "games/8-ball-pool", img: "/images/8-ball-pool.jpg", title: "8 Ball Pool", cat: "sports" },
   { href: "games/speedstars", img: "/images/speed-stars.jpg", title: "Speedstars", cat: "racing" },
-  { href: "/monkey-mart/index.htm", img: "/games/m-m/m-m.webp", title: "Monkey Mart", cat: "idle" },
+  { href: "games/m-m/index.html", img: "/games/m-m/m-m.webp", title: "Monkey Mart", cat: "idle" },
   { href: "games/rodha-2/", img: "/images/rodha-2.webp", title: "Rodha 2", cat: "action" },
   { href: "games/shortcut-race/", img: "/images/shortcut-race.png", title: "Shortcut Race", cat: "racing" },
   { href: "games/power-badminton/", img: "/images/power-badminton.jpg", title: "Power Badminton", cat: "sports" },
