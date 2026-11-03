@@ -139,6 +139,7 @@ const GAME_MODULES = [
   { href: "games/sling-star-kick/", img: "/images/sling-star-kick.jpg", title: "Sling Star Kick Soccer Game", cat: "sports" },
   { href: "games/unicycle-legend/", img: "/images/unicycle-legend.avif", title: "Unicycle Legend", cat: "sports" },
   { href: "games/idle-startup-tycoon/", img: "/images/idle-startup-tycoon.png", title: "Idle Startup Tycoon", cat: "idle" },
+  { href: "games/tomb-of-the-mask/", img: "/images/tomb-of-the-mask.png", title: "Tomb of the Mask", cat: "action" },
 ];
 
 /* =============================================================================
