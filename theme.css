@@ -1,0 +1,82 @@
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1b211d;
+  --bg-deep: #1b211d;
+  --surface: #242d27;
+  --surface-raised: #303b33;
+  --panel: #242d27;
+  --panel-hi: #303b33;
+  --line: #435247;
+  --text: #edf2eb;
+  --muted: #bac6bb;
+  --accent: #8db99a;
+  --accent-strong: #3a5542;
+  --pink: #8db99a;
+  --cyan: #8db99a;
+  --sun: #8db99a;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--text);
+  background: var(--surface);
+  font: 600 .9rem/1.2 var(--body, "Source Sans 3", "Segoe UI", sans-serif);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  background: var(--surface-raised, var(--panel-hi));
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+:root[data-theme="dark"] .site-header,
+:root[data-theme="dark"] .dashboard-sidebar {
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .header-cta,
+:root[data-theme="dark"] .button,
+:root[data-theme="dark"] .btn,
+:root[data-theme="dark"] .btn-play,
+:root[data-theme="dark"] .module-play,
+:root[data-theme="dark"] .module-tag,
+:root[data-theme="dark"] .game-card-tag,
+:root[data-theme="dark"] .sidebar-link--active,
+:root[data-theme="dark"] .status-badge,
+:root[data-theme="dark"] .account-avatar {
+  color: #17211a;
+}
+
+:root[data-theme="dark"] .browse-banner {
+  border-color: var(--line);
+  background: var(--surface-raised);
+}
+
+:root[data-theme="dark"] .browse-banner::after {
+  color: rgba(237, 242, 235, .035);
+}
+
+:root[data-theme="dark"] .showcase-small {
+  border-color: var(--bg);
+}
+
+:root[data-theme="dark"] .daily-overlay,
+:root[data-theme="dark"] .auth-overlay {
+  background: rgba(10, 15, 11, .72);
+}
+
+:root[data-theme="dark"] .account-overlay {
+  background: rgba(10, 15, 11, .84);
+}

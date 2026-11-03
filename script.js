@@ -144,6 +144,7 @@ const GAME_MODULES = [
   { href: "games/raft-wars-2/", img: "/images/raft-wars-2.png", title: "Raft Wars 2", cat: "shooter" },
   { href: "games/zombie-derby/", img: "/games/zombie-derby/zombie-derby.png", title: "Zombie Derby", cat: "action" },
   { href: "games/basketball-superstars/", img: "/images/basketball-superstars.png", title: "Basketball Superstars", cat: "sports" },
+  { href: "games/aquapark/", img: "/games/aquapark/thumbnail.png", title: "Aquapark", cat: "racing" },
 ];
 
 
