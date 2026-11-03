@@ -218,7 +218,7 @@ var EngineLoader = {
     wasm_sha1: "",
     wasm_size: 2498710,
     wasmjs_sha1: "",
-    wasmjs_size: 287332,
+    wasmjs_size: 287267,
     wasm_pthread_sha1: "",
     wasm_pthread_size: 2000000,
     wasmjs_pthread_sha1: "",
