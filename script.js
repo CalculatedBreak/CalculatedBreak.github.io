@@ -140,6 +140,7 @@ const GAME_MODULES = [
   { href: "games/unicycle-legend/", img: "/images/unicycle-legend.avif", title: "Unicycle Legend", cat: "sports" },
   { href: "games/idle-startup-tycoon/", img: "/images/idle-startup-tycoon.png", title: "Idle Startup Tycoon", cat: "idle" },
   { href: "games/tomb-of-the-mask/", img: "/images/tomb-of-the-mask.png", title: "Tomb of the Mask", cat: "action" },
+  { href: "games/raft-wars/", img: "/images/raft-wars.png", title: "Raft Wars", cat: "action" },
 ];
 
 /* =============================================================================
