@@ -142,6 +142,7 @@ const GAME_MODULES = [
   { href: "games/tomb-of-the-mask/", img: "/images/tomb-of-the-mask.png", title: "Tomb of the Mask", cat: "action" },
   { href: "games/raft-wars/", img: "/images/raft-wars.png", title: "Raft Wars", cat: "shooter" },
   { href: "games/raft-wars-2/", img: "/images/raft-wars-2.png", title: "Raft Wars 2", cat: "shooter" },
+  { href: "games/zombie-derby/", img: "/games/zombie-derby/zombie-derby.png", title: "Zombie Derby", cat: "action" },
 ];
 
 
