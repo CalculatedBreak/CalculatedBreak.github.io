@@ -1,35 +1,49 @@
 // patch.js - Poki Sitelock Bypass & Bot Detection Evasion
-
 (function() {
-    // 1. SPOOF LOCATION
-    // Change 'poki.com' to 'localhost' if you are testing locally without a server
+    // 1. SPOOF LOCATION USING PROXY (Avoids "Cannot redefine" errors)
     const spoofedHost = "poki.com"; 
 
+    // Create a proxy for the location object
+    const locationProxy = new Proxy(window.location, {
+        get: function(target, property, receiver) {
+            const targetObj = target[property];
+            
+            // If it's a function, bind it to the original location
+            if (typeof targetObj === "function") {
+                return (...args) => target[property].apply(target, args);
+            }
+
+            // Override specific properties
+            if (property === "host" || property === "hostname") {
+                return spoofedHost;
+            }
+            if (property === "href") {
+                return `https://${spoofedHost}/`;
+            }
+            if (property === "origin") {
+                return `https://${spoofedHost}`;
+            }
+            if (property === "assign" || property === "reload" || property === "replace") {
+                return () => {}; 
+            }
+            
+            return targetObj;
+        },
+        set: function(target, property, value) {
+            // Allow setting but don't actually change anything important
+            return true;
+        }
+    });
+
+    // Replace window.location with our proxy
     Object.defineProperty(window, 'location', {
         get: function() {
-            return new Proxy({}, {
-                get: function(target, property, receiver) {
-                    const targetObj = location[property];
-                    if (typeof targetObj === "function") {
-                        return (...args) => target[property].apply(location, args);
-                    }
-                    if (property === "host" || property === "hostname") {
-                        return spoofedHost;
-                    }
-                    if (property === "href") {
-                        return `https://${spoofedHost}/`;
-                    }
-                    if (property === "origin") {
-                        return `https://${spoofedHost}`;
-                    }
-                    if (property === "assign" || property === "reload" || property === "replace") {
-                        return () => {}; 
-                    }
-                    return targetObj;
-                }
-            });
+            return locationProxy;
         },
-        set: function() {}
+        set: function(value) {
+            // Ignore external changes
+        },
+        configurable: true // This helps avoid some definition errors
     });
 
     // 2. HIDE WEBDRIVER FLAG
@@ -51,10 +65,9 @@
     }
 
     // 4. PATCH CANVAS FINGERPRINTING
-    // Forces canvas output to be consistent so bot detection can't flag you
     const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
     HTMLCanvasElement.prototype.toDataURL = function(...args) {
-        // Returns a tiny, consistent PNG base64 string
+        // Return a consistent small PNG to avoid fingerprint differences
         return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
     };
 
@@ -72,14 +85,14 @@
 
     // 6. MOCK TELEMETRY
     window.navigator.sendBeacon = function(url, data) {
-        return true; // Pretend telemetry sent successfully
+        return true; 
     };
 
-    // Mock WebSocket to prevent connection errors if the game tries to sync
+    // Mock WebSocket
     window.WebSocket = class {
         constructor(url) {
             this.url = url;
-            this.readyState = 3; // CLOSED
+            this.readyState = 3; 
         }
         send() {}
         close() {}
