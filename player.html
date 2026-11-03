@@ -136,7 +136,11 @@
       border: 2px solid var(--line);
       border-radius: 999px;
       max-width: 200px;
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
     }
+    .user-chip:hover { border-color: var(--sun); }
     .avatar {
       display: grid;
       place-items: center;
@@ -384,6 +388,129 @@
       color: var(--cyan); font: 700 .8rem var(--body);
     }
     .auth-eye:hover { color: var(--text); }
+    .account-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 110;
+      overflow-y: auto;
+      padding: clamp(16px, 4vw, 48px);
+      background: rgba(10,12,16,.94);
+      backdrop-filter: blur(12px);
+    }
+    .account-dialog {
+      width: min(900px, 100%);
+      margin: 0 auto;
+    }
+    .account-card {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(22px, 5vw, 42px);
+      border: 1px solid rgba(245,203,95,.24);
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 1px 1px, rgba(255,255,255,.055) 1px, transparent 0) 0 0 / 16px 16px,
+        linear-gradient(135deg, #24251f, #191b20 68%, #29201f);
+      box-shadow: 0 28px 80px rgba(0,0,0,.45);
+    }
+    .account-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: var(--text);
+      background: rgba(0,0,0,.24);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .account-heading {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding-right: 38px;
+    }
+    .account-avatar {
+      display: grid;
+      place-items: center;
+      flex: 0 0 92px;
+      width: 92px;
+      height: 92px;
+      border-radius: 24px;
+      color: var(--bg-deep);
+      background: linear-gradient(135deg, var(--sun), #f5a928);
+      box-shadow: 0 8px 0 #b88d1d;
+      font: 400 1.7rem var(--display);
+      transform: rotate(-5deg);
+    }
+    .account-heading h2 {
+      margin: 0 0 4px;
+      font: 400 clamp(1.35rem, 4vw, 2rem) var(--display);
+      color: var(--text);
+    }
+    .account-heading h2 span { color: var(--sun); }
+    .account-subtitle, .account-email { margin: 0; color: var(--muted); }
+    .account-subtitle strong { color: var(--text); }
+    .account-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .account-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 7px 14px;
+      border: 1px solid rgba(245,203,95,.55);
+      border-radius: 999px;
+      color: var(--sun);
+      background: rgba(245,203,95,.1);
+      font-weight: 700;
+    }
+    .account-games-panel {
+      margin-top: 26px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 18px;
+      background: rgba(10,12,16,.38);
+    }
+    .account-games-panel h3 { margin: 0 0 14px; color: var(--text); font-size: 1rem; }
+    .account-games {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 24px;
+    }
+    .account-game {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 10px;
+    }
+    .account-game img, .account-game-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 38px;
+      width: 38px;
+      height: 38px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      background: var(--panel-hi);
+      object-fit: cover;
+    }
+    .account-game-info { min-width: 0; flex: 1; }
+    .account-game-name { display: block; overflow: hidden; color: var(--text); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .account-game-time { color: var(--muted); font-size: .82rem; white-space: nowrap; }
+    .account-empty { grid-column: 1 / -1; margin: 0; color: var(--muted); }
+    .account-more { margin: 12px 0 0; color: var(--muted); font-size: .9rem; }
+    .account-device {
+      margin: 24px 0 0;
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      background: rgba(255,255,255,.045);
+    }
+    .account-device strong { color: var(--text); }
+    .account-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
     @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
     @keyframes pop { from { opacity: 0; transform: scale(.8) translateY(20px); } to { opacity: 1; transform: none; } }
 
@@ -392,6 +519,9 @@
       .user-chip-name { display: none; }
       .user-chip { padding: 4px; }
       .game-container { border-radius: 16px; box-shadow: 5px 5px 0 var(--pink); }
+      .account-heading { align-items: flex-start; flex-direction: column; gap: 15px; }
+      .account-games { grid-template-columns: 1fr; }
+      .account-games-panel { padding: 15px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
@@ -409,10 +539,10 @@
         <span class="brand-text">Calculated Break</span>
       </a>
       <div class="topbar-actions">
-        <div class="user-chip" id="user-chip" hidden>
+        <button type="button" class="user-chip" id="user-chip" aria-label="Open account details" hidden>
           <span class="avatar" id="user-avatar" aria-hidden="true">?</span>
           <span class="user-chip-name" id="user-name"></span>
-        </div>
+        </button>
         <a href="allgames.html" class="btn btn--alt">&larr; All games</a>
         <a class="btn btn--alt" id="direct-play-btn" hidden>Direct Play</a>
         <button type="button" class="btn" id="fs-btn">Fullscreen</button>
@@ -467,6 +597,36 @@
       <p>Need another game? <a href="allgames.html">Browse all games</a></p>
     </footer>
 
+  </div>
+
+  <!-- Signed-in account details -->
+  <div class="account-overlay" id="account-overlay" hidden>
+    <section class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="account-title">
+      <div class="account-card">
+        <button type="button" class="account-close" id="account-close" aria-label="Close account details">&times;</button>
+        <div class="account-heading">
+          <div class="account-avatar" id="account-avatar" aria-hidden="true">CB</div>
+          <div>
+            <h2 id="account-title">Your <span>account</span></h2>
+            <p class="account-subtitle" id="account-name"></p>
+            <p class="account-email" id="account-email"></p>
+            <div class="account-stats">
+              <span class="account-stat"><span aria-hidden="true">🎮</span><span id="account-game-count">0 games</span></span>
+              <span class="account-stat"><span aria-hidden="true">◷</span><span id="account-play-time">0m played</span></span>
+            </div>
+          </div>
+        </div>
+        <section class="account-games-panel" aria-labelledby="account-games-title">
+          <h3 id="account-games-title">Games you've played</h3>
+          <div class="account-games" id="account-games"></div>
+          <p class="account-more" id="account-more" hidden></p>
+        </section>
+        <p class="account-device"><strong>On this device:</strong> your play history is stored in this browser. Game progress syncs to your account when supported by the game.</p>
+        <div class="account-actions">
+          <button type="button" class="btn btn--pink" id="account-signout">Sign out</button>
+        </div>
+      </div>
+    </section>
   </div>
 
   <!-- Authentication popup -->
@@ -547,7 +707,77 @@
       gameTitle = match ? match.title : gameId;
     }
 
-    /* ==========================================================================
+    const PLAY_HISTORY_KEY = "cloudsave:play-history";
+
+    function getPlayHistory() {
+      try {
+        const history = JSON.parse(localStorage.getItem(PLAY_HISTORY_KEY) || "[]");
+        if (!Array.isArray(history)) throw new TypeError("Play history is not a list.");
+        return history.filter((game) =>
+          game && typeof game.id === "string" &&
+          typeof game.title === "string" &&
+          Number.isFinite(game.seconds) &&
+          typeof game.lastPlayed === "number"
+        );
+      } catch (error) {
+        console.warn("Could not read play history:", error);
+        return [];
+      }
+    }
+
+    function savePlayHistory(history) {
+      try {
+        localStorage.setItem(PLAY_HISTORY_KEY, JSON.stringify(history));
+      } catch (error) {
+        console.error("Could not save play history:", error);
+      }
+    }
+
+    function trackCurrentGame() {
+      if (!isValidId) return;
+
+      const history = getPlayHistory();
+      let entry = history.find((game) => game.id === gameId);
+      if (!entry) {
+        entry = { id: gameId, title: gameTitle, seconds: 0, lastPlayed: Date.now() };
+        history.push(entry);
+      } else {
+        entry.title = gameTitle;
+        entry.lastPlayed = Date.now();
+      }
+      savePlayHistory(history.slice(-100));
+
+      let lastTick = Date.now();
+      let wasVisible = !document.hidden;
+      const updateTime = () => {
+        const now = Date.now();
+        if (wasVisible) {
+          const currentHistory = getPlayHistory();
+          let currentEntry = currentHistory.find((game) => game.id === gameId);
+          if (!currentEntry) {
+            currentEntry = { id: gameId, title: gameTitle, seconds: 0, lastPlayed: now };
+            currentHistory.push(currentEntry);
+          }
+          currentEntry.seconds += Math.max(0, Math.floor((now - lastTick) / 1000));
+          currentEntry.lastPlayed = now;
+          savePlayHistory(currentHistory.slice(-100));
+        }
+        lastTick = now;
+        wasVisible = !document.hidden;
+      };
+      window.setInterval(updateTime, 15000);
+      document.addEventListener("visibilitychange", updateTime);
+      window.addEventListener("pagehide", updateTime, { once: true });
+    }
+
+    function formatPlayTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 1) return "<1m";
+      if (minutes < 60) return minutes + "m";
+      return Math.floor(minutes / 60) + "h " + (minutes % 60) + "m";
+    }
+
+    /* ========================================================================== 
        LOAD THE GAME + UPDATE TITLES
        Validates the id, sets the titles, and loads the game straight away.
        ========================================================================== */
@@ -578,6 +808,7 @@
       frame.title = gameTitle;
       directPlayButton.href = gameUrl;
       directPlayButton.hidden = false;
+      trackCurrentGame();
     }
 
     /* ==========================================================================
@@ -699,6 +930,8 @@
       const eyeBtn = $("auth-eye");
       const banner = $("signin-banner");
       const chip = $("user-chip");
+      const accountOverlay = $("account-overlay");
+      const accountClose = $("account-close");
 
       const lib = window.supabase && window.supabase.createClient;
       const sb = lib ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
@@ -707,6 +940,7 @@
       let user = null;
       let authKnown = false;   // true once we know whether someone is signed in
       let lastFocus = null;
+      let accountLastFocus = null;
 
       function bannerDismissed() {
         try { return sessionStorage.getItem(BANNER_KEY) === "1"; } catch (e) { return false; }
@@ -773,15 +1007,93 @@
         if (lastFocus && lastFocus.focus) lastFocus.focus();
       }
 
+      function renderAccount() {
+        const email = user && user.email ? user.email : "";
+        const metadata = user && user.user_metadata ? user.user_metadata : {};
+        const name = metadata.full_name || metadata.name || (email ? email.split("@")[0] : "Player");
+        const initials = name.trim().split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join("").toUpperCase();
+        const history = getPlayHistory().sort((a, b) => b.lastPlayed - a.lastPlayed);
+        const totalSeconds = history.reduce((total, game) => total + game.seconds, 0);
+
+        $("account-avatar").textContent = initials || "CB";
+        const accountName = document.createElement("strong");
+        accountName.textContent = name;
+        $("account-name").replaceChildren("Signed in as ", accountName);
+        $("account-email").textContent = email;
+        $("account-game-count").textContent = history.length + (history.length === 1 ? " game" : " games");
+        $("account-play-time").textContent = formatPlayTime(totalSeconds) + " played";
+
+        const gameList = $("account-games");
+        gameList.replaceChildren();
+        history.slice(0, 10).forEach((played) => {
+          const item = document.createElement("div");
+          item.className = "account-game";
+          const game = GAME_CATALOG.find((entry) => entry.id === played.id);
+          if (game) {
+            const image = document.createElement("img");
+            image.src = game.thumb;
+            image.alt = "";
+            image.loading = "lazy";
+            image.onerror = () => {
+              const fallback = document.createElement("span");
+              fallback.className = "account-game-icon";
+              fallback.textContent = played.title.charAt(0).toUpperCase();
+              image.replaceWith(fallback);
+            };
+            item.appendChild(image);
+          } else {
+            const fallback = document.createElement("span");
+            fallback.className = "account-game-icon";
+            fallback.textContent = played.title.charAt(0).toUpperCase();
+            item.appendChild(fallback);
+          }
+
+          const info = document.createElement("span");
+          info.className = "account-game-info";
+          const title = document.createElement("span");
+          title.className = "account-game-name";
+          title.textContent = played.title;
+          const time = document.createElement("span");
+          time.className = "account-game-time";
+          time.textContent = formatPlayTime(played.seconds);
+          info.append(title, time);
+          item.appendChild(info);
+          gameList.appendChild(item);
+        });
+
+        const empty = document.createElement("p");
+        empty.className = "account-empty";
+        empty.textContent = history.length ? "" : "Games you play here will show up in this list.";
+        if (!history.length) gameList.appendChild(empty);
+        $("account-more").hidden = history.length <= 10;
+        $("account-more").textContent = history.length > 10 ? "+ " + (history.length - 10) + " more" : "";
+      }
+
+      function openAccount() {
+        if (!user) return;
+        accountLastFocus = document.activeElement;
+        renderAccount();
+        accountOverlay.hidden = false;
+        accountClose.focus();
+      }
+
+      function closeAccount() {
+        accountOverlay.hidden = true;
+        if (accountLastFocus && accountLastFocus.focus) accountLastFocus.focus();
+      }
+
       // Updates the button, avatar chip and reminder banner for the current user.
       function renderUser(u) {
         user = u || null;
         const email = user && user.email;
-        const name = email ? email.split("@")[0] : "";
+        const metadata = user && user.user_metadata ? user.user_metadata : {};
+        const name = metadata.full_name || metadata.name || (email ? email.split("@")[0] : "");
 
         chip.hidden = !user;
         $("user-avatar").textContent = email ? email.slice(0, 2).toUpperCase() : "?";
         $("user-name").textContent = name;
+        chip.setAttribute("aria-label", user ? "Open account details for " + name : "Open account details");
+        if (!user) accountOverlay.hidden = true;
 
         toggleBtn.textContent = user ? "Sign out" : "Sign in";
         toggleBtn.classList.toggle("is-cta", !user);
@@ -801,9 +1113,21 @@
         if (!user) return open("signin");
         if (sb) {
           const { error } = await sb.auth.signOut();
-          if (error) console.error("Sign out failed:", error);
+          if (error) {
+            console.error("Sign out failed:", error);
+            return;
+          }
         }
         renderUser(null);
+      });
+      chip.addEventListener("click", openAccount);
+      accountClose.addEventListener("click", closeAccount);
+      accountOverlay.addEventListener("click", (event) => {
+        if (event.target === accountOverlay) closeAccount();
+      });
+      $("account-signout").addEventListener("click", () => {
+        closeAccount();
+        toggleBtn.click();
       });
 
       $("banner-signin").addEventListener("click", () => open("signin"));
@@ -818,7 +1142,9 @@
       $("auth-close").addEventListener("click", close);
       overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !overlay.hidden) close();
+        if (e.key !== "Escape") return;
+        if (!accountOverlay.hidden) closeAccount();
+        else if (!overlay.hidden) close();
       });
 
       /* ---- Form submit ---- */

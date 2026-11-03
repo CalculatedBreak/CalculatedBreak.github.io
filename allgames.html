@@ -88,13 +88,15 @@ l.parentNode.insertBefore(s, l);
     .student-profile {
       display: flex; align-items: center; gap: 12px; flex: 0 1 210px; padding: 6px 10px;
       background: var(--panel-hi); border: 1px solid var(--line); border-radius: 999px;
+      color: var(--text); font: inherit; text-align: left; cursor: pointer;
     }
+    .student-profile:hover { border-color: var(--sun); }
     .avatar {
       display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; flex: none;
       font-weight: 700; color: var(--bg-deep); background: linear-gradient(135deg,var(--cyan),var(--pink));
     }
-    .student-profile > div:last-child { min-width: 0; }
-    .student-name,.student-id { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .student-profile > span:last-child { min-width: 0; }
+    .student-name,.student-id { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .student-name { font-weight: 600; }
     .student-id { font-size: .8rem; color: var(--muted); }
     .sidebar-nav { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 4px; flex: 1; }
@@ -257,6 +259,63 @@ l.parentNode.insertBefore(s, l);
     }
     .auth-eye:hover { color: var(--text); }
 
+    .account-overlay {
+      position: fixed; inset: 0; z-index: 110; overflow-y: auto; padding: clamp(16px,4vw,48px);
+      background: rgba(10,12,16,.94); backdrop-filter: blur(12px);
+    }
+    .account-overlay[hidden] { display: none; }
+    .account-dialog { width: min(900px,100%); margin: 0 auto; }
+    .account-card {
+      position: relative; overflow: hidden; padding: clamp(22px,5vw,42px);
+      border: 1px solid rgba(245,203,95,.24); border-radius: 26px;
+      background:
+        radial-gradient(circle at 1px 1px,rgba(255,255,255,.055) 1px,transparent 0) 0 0 / 16px 16px,
+        linear-gradient(135deg,#24251f,#191b20 68%,#29201f);
+      box-shadow: 0 28px 80px rgba(0,0,0,.45);
+    }
+    .account-close {
+      position: absolute; top: 16px; right: 16px; width: 40px; height: 40px;
+      border: 1px solid var(--line); border-radius: 50%; color: var(--text);
+      background: rgba(0,0,0,.24); font-size: 1.5rem; cursor: pointer;
+    }
+    .account-heading { display: flex; align-items: center; gap: 22px; padding-right: 38px; }
+    .account-avatar {
+      display: grid; place-items: center; flex: 0 0 92px; width: 92px; height: 92px;
+      border-radius: 24px; color: var(--bg-deep); background: linear-gradient(135deg,var(--sun),#f5a928);
+      box-shadow: 0 8px 0 #b88d1d; font: 400 1.7rem var(--display); transform: rotate(-5deg);
+    }
+    .account-heading h2 { margin: 0 0 4px; font: 400 clamp(1.35rem,4vw,2rem) var(--display); color: var(--text); }
+    .account-heading h2 span { color: var(--sun); }
+    .account-subtitle,.account-email { margin: 0; color: var(--muted); }
+    .account-subtitle strong { color: var(--text); }
+    .account-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .account-stat {
+      display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 7px 14px;
+      border: 1px solid rgba(245,203,95,.55); border-radius: 999px; color: var(--sun);
+      background: rgba(245,203,95,.1); font-weight: 700;
+    }
+    .account-games-panel { margin-top: 26px; padding: 20px; border: 1px solid rgba(255,255,255,.1); border-radius: 18px; background: rgba(10,12,16,.38); }
+    .account-games-panel h3 { margin: 0 0 14px; color: var(--text); font-size: 1rem; }
+    .account-games { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 24px; }
+    .account-game { display: flex; min-width: 0; align-items: center; gap: 10px; }
+    .account-game img,.account-game-icon {
+      display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12); border-radius: 10px; background: var(--panel-hi); object-fit: cover;
+    }
+    .account-game-info { min-width: 0; flex: 1; }
+    .account-game-name { display: block; overflow: hidden; color: var(--text); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .account-game-time { color: var(--muted); font-size: .82rem; white-space: nowrap; }
+    .account-empty { grid-column: 1 / -1; margin: 0; color: var(--muted); }
+    .account-more { margin: 12px 0 0; color: var(--muted); font-size: .9rem; }
+    .account-device { margin: 24px 0 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); background: rgba(255,255,255,.045); }
+    .account-device strong { color: var(--text); }
+    .account-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+    .account-signout {
+      padding: 10px 16px; border: 0; border-radius: 12px; color: var(--bg-deep);
+      background: var(--pink); box-shadow: 0 4px 0 #b3306a; font: 700 .95rem var(--body); cursor: pointer;
+    }
+    .account-signout:hover { transform: translateY(-2px); }
+
     /* Noticeable sign-in button (only while signed out) */
     .sidebar-signout.is-cta {
       text-align: center; padding: 13px 14px; font-size: 1.05rem; font-weight: 700;
@@ -277,7 +336,11 @@ l.parentNode.insertBefore(s, l);
     @media (max-width: 600px) {
       .dashboard-sidebar { padding: 10px 14px; }
       .brand-text { font-size: .9rem; }
-      .student-profile { display: none; }
+      .student-profile { flex: 0 0 auto; margin-left: auto; padding: 4px; }
+      .student-profile > span:last-child { display: none; }
+      .account-heading { align-items: flex-start; flex-direction: column; gap: 15px; }
+      .account-games { grid-template-columns: 1fr; }
+      .account-games-panel { padding: 15px; }
       .sidebar-nav { min-width: 0; max-width: 100%; overflow-x: auto; flex-wrap: nowrap; }
       .sidebar-link { flex: 0 0 auto; padding: 8px 10px; font-size: .88rem; }
       .dashboard-main { padding: 28px 14px 40px; }
@@ -296,13 +359,13 @@ l.parentNode.insertBefore(s, l);
         <span class="brand-text">Calculated Break</span>
       </a>
 
-      <div class="student-profile">
-        <div class="avatar" id="user-avatar" aria-hidden="true">?</div>
-        <div>
-          <p class="student-name" id="user-name">Guest</p>
-          <p class="student-id" id="user-sub">Sign in to save your progress</p>
-        </div>
-      </div>
+      <button type="button" class="student-profile" id="user-profile" aria-label="Open account details">
+        <span class="avatar" id="user-avatar" aria-hidden="true">?</span>
+        <span>
+          <span class="student-name" id="user-name">Guest</span>
+          <span class="student-id" id="user-sub">Sign in to save your progress</span>
+        </span>
+      </button>
 
       <nav class="sidebar-nav">
         <a href="index.html" class="sidebar-link"><span class="sidebar-icon" aria-hidden="true">⌂</span>Home</a>
@@ -418,6 +481,34 @@ l.parentNode.insertBefore(s, l);
         <button type="button" class="auth-link" id="auth-forgot">Forgot password?</button>
       </div>
     </div>
+  </div>
+
+  <!-- Signed-in account details -->
+  <div class="account-overlay" id="account-overlay" hidden>
+    <section class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="account-title">
+      <div class="account-card">
+        <button type="button" class="account-close" id="account-close" aria-label="Close account details">&times;</button>
+        <div class="account-heading">
+          <div class="account-avatar" id="account-avatar" aria-hidden="true">CB</div>
+          <div>
+            <h2 id="account-title">Your <span>account</span></h2>
+            <p class="account-subtitle" id="account-name"></p>
+            <p class="account-email" id="account-email"></p>
+            <div class="account-stats">
+              <span class="account-stat"><span aria-hidden="true">🎮</span><span id="account-game-count">0 games</span></span>
+              <span class="account-stat"><span aria-hidden="true">◷</span><span id="account-play-time">0m played</span></span>
+            </div>
+          </div>
+        </div>
+        <section class="account-games-panel" aria-labelledby="account-games-title">
+          <h3 id="account-games-title">Games you've played</h3>
+          <div class="account-games" id="account-games"></div>
+          <p class="account-more" id="account-more" hidden></p>
+        </section>
+        <p class="account-device"><strong>On this device:</strong> your play history is stored in this browser. Game progress syncs to your account when supported by the game.</p>
+        <div class="account-actions"><button type="button" class="account-signout" id="account-signout">Sign out</button></div>
+      </div>
+    </section>
   </div>
 
   <!-- Your games live in script.js (GAME_MODULES). Edit that file to add games. -->
@@ -702,6 +793,33 @@ l.parentNode.insertBefore(s, l);
       let mode = "signin";
       let user = null;
       let lastFocus = null;
+      let accountLastFocus = null;
+      const accountOverlay = $("account-overlay");
+      const accountClose = $("account-close");
+      const playHistoryKey = "cloudsave:play-history";
+
+      function getPlayHistory() {
+        try {
+          const history = JSON.parse(localStorage.getItem(playHistoryKey) || "[]");
+          if (!Array.isArray(history)) throw new TypeError("Play history is not a list.");
+          return history.filter((game) =>
+            game && typeof game.id === "string" &&
+            typeof game.title === "string" &&
+            Number.isFinite(game.seconds) &&
+            typeof game.lastPlayed === "number"
+          );
+        } catch (error) {
+          console.warn("Could not read play history:", error);
+          return [];
+        }
+      }
+
+      function formatPlayTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 1) return "<1m";
+        if (minutes < 60) return minutes + "m";
+        return Math.floor(minutes / 60) + "h " + (minutes % 60) + "m";
+      }
 
       function say(text, kind) {
         statusEl.textContent = text || "";
@@ -773,14 +891,96 @@ l.parentNode.insertBefore(s, l);
         if (lastFocus && lastFocus.focus) lastFocus.focus();
       }
 
+      function renderAccount() {
+        const email = user && user.email ? user.email : "";
+        const metadata = user && user.user_metadata ? user.user_metadata : {};
+        const name = metadata.full_name || metadata.name || (email ? email.split("@")[0] : "Player");
+        const initials = name.trim().split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join("").toUpperCase();
+        const history = getPlayHistory().sort((a, b) => b.lastPlayed - a.lastPlayed);
+        const totalSeconds = history.reduce((total, game) => total + game.seconds, 0);
+
+        $("account-avatar").textContent = initials || "CB";
+        const accountName = document.createElement("strong");
+        accountName.textContent = name;
+        $("account-name").replaceChildren("Signed in as ", accountName);
+        $("account-email").textContent = email;
+        $("account-game-count").textContent = history.length + (history.length === 1 ? " game" : " games");
+        $("account-play-time").textContent = formatPlayTime(totalSeconds) + " played";
+
+        const gameList = $("account-games");
+        gameList.replaceChildren();
+        history.slice(0, 10).forEach((played) => {
+          const item = document.createElement("div");
+          item.className = "account-game";
+          const game = GAME_MODULES.find((entry) => getGameId(entry.href) === played.id);
+          if (game) {
+            const image = document.createElement("img");
+            image.src = /^(https?:)?\/\//.test(game.img) || game.img.startsWith("/")
+              ? game.img
+              : "/" + game.img;
+            image.alt = "";
+            image.loading = "lazy";
+            image.onerror = () => {
+              const fallback = document.createElement("span");
+              fallback.className = "account-game-icon";
+              fallback.textContent = played.title.charAt(0).toUpperCase();
+              image.replaceWith(fallback);
+            };
+            item.appendChild(image);
+          } else {
+            const fallback = document.createElement("span");
+            fallback.className = "account-game-icon";
+            fallback.textContent = played.title.charAt(0).toUpperCase();
+            item.appendChild(fallback);
+          }
+
+          const info = document.createElement("span");
+          info.className = "account-game-info";
+          const title = document.createElement("span");
+          title.className = "account-game-name";
+          title.textContent = played.title;
+          const time = document.createElement("span");
+          time.className = "account-game-time";
+          time.textContent = formatPlayTime(played.seconds);
+          info.append(title, time);
+          item.appendChild(info);
+          gameList.appendChild(item);
+        });
+
+        if (!history.length) {
+          const empty = document.createElement("p");
+          empty.className = "account-empty";
+          empty.textContent = "Games you play here will show up in this list.";
+          gameList.appendChild(empty);
+        }
+        $("account-more").hidden = history.length <= 10;
+        $("account-more").textContent = history.length > 10 ? "+ " + (history.length - 10) + " more" : "";
+      }
+
+      function openAccount() {
+        if (!user) return open("signin");
+        accountLastFocus = document.activeElement;
+        renderAccount();
+        accountOverlay.hidden = false;
+        accountClose.focus();
+      }
+
+      function closeAccount() {
+        accountOverlay.hidden = true;
+        if (accountLastFocus && accountLastFocus.focus) accountLastFocus.focus();
+      }
+
       function renderUser(u) {
         user = u || null;
         const email = user && user.email;
-        const name = email ? email.split("@")[0] : "Guest";
+        const metadata = user && user.user_metadata ? user.user_metadata : {};
+        const name = metadata.full_name || metadata.name || (email ? email.split("@")[0] : "Guest");
 
         $("user-avatar").textContent = email ? email.slice(0, 2).toUpperCase() : "?";
         $("user-name").textContent = name;
         $("user-sub").textContent = email || "Sign in to save your progress";
+        $("user-profile").setAttribute("aria-label", user ? "Open account details for " + name : "Sign in to view account details");
+        if (!user) accountOverlay.hidden = true;
         $("welcome-title").textContent = user ? "Ready to play, " + name + "?" : "Ready to play?";
         $("welcome-text").textContent = user
           ? "Your progress is saved to your account. Pick a game below and jump right in."
@@ -794,11 +994,23 @@ l.parentNode.insertBefore(s, l);
         if (!user) return open("signin");
         if (sb) {
           const { error } = await sb.auth.signOut();
-          if (error) say(error.message, "error");
+          if (error) {
+            say(error.message, "error");
+            return;
+          }
         }
         renderUser(null);
       });
 
+      $("user-profile").addEventListener("click", openAccount);
+      accountClose.addEventListener("click", closeAccount);
+      accountOverlay.addEventListener("click", (event) => {
+        if (event.target === accountOverlay) closeAccount();
+      });
+      $("account-signout").addEventListener("click", () => {
+        closeAccount();
+        toggleBtn.click();
+      });
       switchBtn.addEventListener("click", () => {
         setMode(mode === "signin" ? "signup" : "signin");
       });
@@ -808,7 +1020,9 @@ l.parentNode.insertBefore(s, l);
         if (e.target === overlay) close();
       });
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !overlay.hidden) close();
+        if (e.key !== "Escape") return;
+        if (!accountOverlay.hidden) closeAccount();
+        else if (!overlay.hidden) close();
       });
 
       form.addEventListener("submit", async (e) => {
