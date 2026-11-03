@@ -10,9 +10,9 @@
 (function () {
   "use strict";
 
- var SUPA_URL = "https://yerxoikcfeulgnrdjkyc.supabase.co";
-var SUPA_KEY = "sb_publishable_QX-XZw_wiRj_u0NXHGRkOA_Pq7rGK-p"; // Use your actual key
-var LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
+  var SUPA_URL = "https://yerxoikcfeulgnrdjkyc.supabase.co";
+  var SUPA_KEY = "sb_publishable_QX-XZw_wiRj_u0NXHGRkOA_Pq7rGK-p"; // Use your actual key
+  var LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
   // Leading URL segments to skip before the game folder:
   // 1 for https://name.github.io/games/blumgi-merge/   0 for https://name.github.io/blumgi-merge/
   var SKIP = 1;
@@ -33,7 +33,7 @@ var LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/su
   var BACKUP = "cloudsave:" + SLUG + ":backup";  // {uid, p, shown}: this device's copy before a restore
   var GUARD = "cloudsave:" + SLUG + ":restored"; // sessionStorage: stops a restore/reload loop
   var OWN = "cloudsave:own2";                    // {"ls|key" / "idb|name": [game slugs]}
-  var MAX = 1024 * 1024, DEBOUNCE = 4000, POLL = 10000;
+  var MAX = Infinity, DEBOUNCE = 4000, POLL = 10000; // MAX = Infinity: no size limit on saves
   // databases that are caches or other tools' data, never progress
   var IGNORE_DB = /cache|^\/idbfs-test$|^pzsync-backup$/i;
 
