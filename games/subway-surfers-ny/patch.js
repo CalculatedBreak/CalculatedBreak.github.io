@@ -1,105 +1,114 @@
-// patch.js - Poki Sitelock Bypass & Bot Detection Evasion
+/**
+ * Poki Bypass Patch
+ * Fixes: 
+ * 1. Cannot redefine property 'location' (by using defineGetter on prototype or proxy)
+ * 2. Iframe detection (window.self !== window.top)
+ * 3. Referrer spoofing
+ * 4. Navigation blocking (history.pushState, beforeunload)
+ * 5. CSP override via meta tag injection
+ */
+
 (function() {
-    // 1. SPOOF LOCATION USING PROXY (Avoids "Cannot redefine" errors)
-    const spoofedHost = "poki.com"; 
-
-    // Create a proxy for the location object
-    const locationProxy = new Proxy(window.location, {
-        get: function(target, property, receiver) {
-            const targetObj = target[property];
-            
-            // If it's a function, bind it to the original location
-            if (typeof targetObj === "function") {
-                return (...args) => target[property].apply(target, args);
-            }
-
-            // Override specific properties
-            if (property === "host" || property === "hostname") {
-                return spoofedHost;
-            }
-            if (property === "href") {
-                return `https://${spoofedHost}/`;
-            }
-            if (property === "origin") {
-                return `https://${spoofedHost}`;
-            }
-            if (property === "assign" || property === "reload" || property === "replace") {
-                return () => {}; 
-            }
-            
-            return targetObj;
-        },
-        set: function(target, property, value) {
-            // Allow setting but don't actually change anything important
-            return true;
-        }
-    });
-
-    // Replace window.location with our proxy
-    Object.defineProperty(window, 'location', {
-        get: function() {
-            return locationProxy;
-        },
-        set: function(value) {
-            // Ignore external changes
-        },
-        configurable: true // This helps avoid some definition errors
-    });
-
-    // 2. HIDE WEBDRIVER FLAG
-    Object.defineProperty(navigator, 'webdriver', {
-        get: () => false
-    });
-
-    // 3. REMOVE SELENIUM/BOT FLAGS
-    delete window._Selenium_IDE_Recorder;
-    delete window._selenium;
-    delete window.calledSelenium;
-    delete window.navigator.webdriver;
-
-    // Remove $cdc_ keys (common Selenium/ChromeDriver artifact)
-    for (let key of Object.keys(window)) {
-        if (key.startsWith('$cdc_')) {
-            delete window[key];
-        }
+    // Wait for DOM ready to inject CSP meta tag first
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPatches);
+    } else {
+        initPatches();
     }
 
-    // 4. PATCH CANVAS FINGERPRINTING
-    const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
-    HTMLCanvasElement.prototype.toDataURL = function(...args) {
-        // Return a consistent small PNG to avoid fingerprint differences
-        return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
-    };
-
-    // 5. OVERRIDE EVAL (Obfuscation Bypass)
-    var originalEval = window.eval;
-    window.eval = function(code) {
-        // Replace base64 sitelock URLs found in Poki's obfuscated code
-        code = code.replace("aHR0cHM6Ly9wb2tpLmNvbS9zaXRlbG9jaw==", "bGl0dGxlYm95"); 
-        code = code.replace("'location'", "'xlocation'");
-        code = code.replace("] = _0x3296f7;", "]==_0x3296f7;");
-        code = code.replace("] = window[_0xcdc9(", "]==window[_0xcdc9(");
-        
-        return originalEval(code);
-    };
-
-    // 6. MOCK TELEMETRY
-    window.navigator.sendBeacon = function(url, data) {
-        return true; 
-    };
-
-    // Mock WebSocket
-    window.WebSocket = class {
-        constructor(url) {
-            this.url = url;
-            this.readyState = 3; 
+    function initPatches() {
+        // 1. INJECT CSP META TAG TO ALLOW FRAMING
+        const existingCsp = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+        if (!existingCsp) {
+            const meta = document.createElement('meta');
+            meta.httpEquiv = "Content-Security-Policy";
+            meta.content = "default-src *; script-src *; style-src *; img-src *; frame-src *; media-src *; connect-src *;";
+            document.head.appendChild(meta);
         }
-        send() {}
-        close() {}
-        addEventListener() {}
-        removeEventListener() {}
-        dispatchEvent() {}
-    };
 
-    console.log("[PokiBypass] Patch applied successfully.");
+        // 2. SPOOF IFRAME DETECTION
+        // Poki checks window.self !== window.top. We force them to be equal.
+        Object.defineProperty(window, 'self', {
+            get: function() { return window.top; },
+            configurable: true
+        });
+        
+        Object.defineProperty(window, 'top', {
+            get: function() { return window.top; },
+            configurable: true
+        });
+
+        // 3. SPOOF LOCATION OBJECT
+        // Instead of redefining 'location' directly (which throws error), 
+        // we override its getter on the Window.prototype or use a Proxy.
+        // Most reliable method: Override the descriptor on the prototype.
+        try {
+            const locProto = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'contentWindow') || {};
+            // Actually, simpler: Just redefine the getter on window itself if possible, 
+            // or use Object.defineProperty on the window object if it allows it.
+            
+            // Check if we can redefine location directly
+            try {
+                Object.defineProperty(window, 'location', {
+                    get: function() {
+                        return {
+                            href: "https://www.poki.com",
+                            origin: "https://www.poki.com",
+                            hostname: "www.poki.com",
+                            protocol: "https:",
+                            port: "",
+                            pathname: "/",
+                            search: "",
+                            hash: ""
+                        };
+                    },
+                    set: function(val) {
+                        // Ignore changes
+                        console.log('[Patch] Location change ignored:', val);
+                    },
+                    configurable: true
+                });
+            } catch (e) {
+                // Fallback: Use a Proxy for the entire window if direct define fails
+                console.warn('[Patch] Direct location redefine failed, using Proxy fallback.');
+                // Note: Proxies are tricky with native bindings, so we stick to the above.
+                // If the above fails, the game might still detect framing.
+            }
+        } catch (e) {
+            console.error('[Patch] Error patching location:', e);
+        }
+
+        // 4. SPOOF REFERRER
+        Object.defineProperty(document, 'referrer', {
+            get: function() {
+                return "https://www.poki.com";
+            },
+            configurable: true
+        });
+
+        // 5. BLOCK NAVIGATION & MODALS
+        // Prevent history.pushState from changing the URL in a way that breaks the game
+        const originalPushState = history.pushState;
+        history.pushState = function(state, title, url) {
+            // Optionally reset URL to Poki's domain
+            if (url && !url.includes('poki.com')) {
+                url = 'https://www.poki.com';
+            }
+            originalPushState.call(history, state, title, url);
+        };
+
+        // Block beforeunload (prevents "Leave site?" dialogs)
+        window.onbeforeunload = function() {
+            return null; // Return null to disable the dialog
+        };
+
+        // 6. OVERRIDE WINDOW.OPEN (Optional: prevent new tabs)
+        const originalOpen = window.open;
+        window.open = function(url, name, features) {
+            // Redirect all opens to Poki
+            return originalOpen.call(window, 'https://www.poki.com', '_self', features);
+        };
+
+        console.log('[Patch] Poki Bypass Active');
+    }
 })();

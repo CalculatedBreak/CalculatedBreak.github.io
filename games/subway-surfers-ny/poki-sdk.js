@@ -25,7 +25,7 @@
     return params.get(name) || "";
   };
 
-  // ***** INIT *****
+  // ***** INIT *********
   PokiSDK.prototype.init = function (config) {
     consoleLog("--fx--PokiSDK--init--", config);
     this._config = config || {};
