@@ -104,6 +104,18 @@ a:hover {
   background: var(--accent);
 }
 
+:root[data-theme="dark"] .button--quiet {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+:root[data-theme="dark"] .button--quiet:hover {
+  color: var(--text);
+  background: var(--surface-raised);
+  border-color: var(--accent);
+}
+
 :root[data-theme="dark"] .text-link:hover {
   color: var(--accent);
 }
