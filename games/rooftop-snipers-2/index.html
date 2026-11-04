@@ -2,9 +2,54 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<link rel="icon" type="image/jpeg" href="895b299e7e49558ca383b23648314860.jpg">
 
 	<title>Rooftop Snipers 2</title>
+
+	<style>
+		#touch-controls {
+			position: fixed;
+			right: 0;
+			bottom: max(12px, env(safe-area-inset-bottom));
+			left: 0;
+			z-index: 9999;
+			display: none;
+			justify-content: space-between;
+			padding: 0 16px;
+			pointer-events: none;
+			box-sizing: border-box;
+			user-select: none;
+			-webkit-user-select: none;
+		}
+
+		.has-touch #touch-controls {
+			display: flex;
+		}
+
+		.touch-player {
+			display: flex;
+			gap: 10px;
+			pointer-events: auto;
+		}
+
+		.touch-player button {
+			width: 64px;
+			height: 68px;
+			border: 2px solid rgba(255, 255, 255, 0.8);
+			border-radius: 12px;
+			background: rgba(15, 25, 45, 0.72);
+			color: #fff;
+			font: bold 12px Arial, sans-serif;
+			touch-action: none;
+			-webkit-tap-highlight-color: transparent;
+			box-sizing: border-box;
+		}
+
+		.touch-player button:active {
+			background: rgba(70, 105, 160, 0.9);
+		}
+	</style>
 
 	<script>
 	window.config = {
@@ -34,6 +79,62 @@
 	</script> 
 </head>
 <body>
+	<div id="touch-controls" aria-label="Touch controls">
+		<div class="touch-player" aria-label="Player 1">
+			<button type="button" data-key="w" aria-label="Player 1 jump">P1 JUMP</button>
+			<button type="button" data-key="e" aria-label="Player 1 shoot">P1 SHOOT</button>
+		</div>
+		<div class="touch-player" aria-label="Player 2">
+			<button type="button" data-key="i" aria-label="Player 2 jump">P2 JUMP</button>
+			<button type="button" data-key="o" aria-label="Player 2 shoot">P2 SHOOT</button>
+		</div>
+	</div>
+	<script>
+		if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+			document.documentElement.classList.add('has-touch');
+		}
+
+		const keyCodes = { w: 87, e: 69, i: 73, o: 79 };
+		const pressedKeys = new Set();
+
+		function setKey(key, isDown) {
+			if (isDown === pressedKeys.has(key)) return;
+			if (isDown) pressedKeys.add(key);
+			else pressedKeys.delete(key);
+
+			const keyCode = keyCodes[key];
+			const target = document.querySelector('#game canvas') || document;
+			target.dispatchEvent(new KeyboardEvent(isDown ? 'keydown' : 'keyup', {
+				key: key,
+				code: 'Key' + key.toUpperCase(),
+				keyCode: keyCode,
+				which: keyCode,
+				bubbles: true,
+				cancelable: true
+			}));
+		}
+
+		document.querySelectorAll('#touch-controls button').forEach(function (button) {
+			const key = button.dataset.key;
+			button.addEventListener('touchstart', function (event) {
+				event.preventDefault();
+				setKey(key, true);
+			}, { passive: false });
+			button.addEventListener('touchend', function (event) {
+				event.preventDefault();
+				setKey(key, false);
+			}, { passive: false });
+			button.addEventListener('touchcancel', function () {
+				setKey(key, false);
+			});
+		});
+
+		window.addEventListener('blur', function () {
+			pressedKeys.forEach(function (key) {
+				setKey(key, false);
+			});
+		});
+	</script>
 	<script src="master-loader.js"></script>
 </body>
 </html>

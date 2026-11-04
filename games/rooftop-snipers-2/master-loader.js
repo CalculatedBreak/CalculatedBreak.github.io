@@ -25,7 +25,29 @@ if (!window.config.unityWebglLoaderUrl) {
     // }
 }
 var sdkScript = document.createElement("script");
-sdkScript.src = "./poki-sdk.js", sdkScript.onload = function() {
+var loaderStarted = false;
+var sdkTimeout;
+
+function startUnityLoader() {
+    if (loaderStarted) return;
+    loaderStarted = true;
+    clearTimeout(sdkTimeout);
     var i = document.createElement("script");
-    i.src = root + loader, document.body.appendChild(i)
-}, document.body.appendChild(sdkScript);
+    i.src = root + loader;
+    i.onerror = function() {
+        console.error("Failed to load Unity loader:", i.src);
+    };
+    document.body.appendChild(i);
+}
+
+sdkScript.src = "./poki-sdk.js";
+sdkScript.onload = startUnityLoader;
+sdkScript.onerror = function() {
+    console.error("Failed to load Poki SDK; loading the game without it.");
+    startUnityLoader();
+};
+sdkTimeout = setTimeout(function() {
+    console.error("Poki SDK did not load in time; loading the game without it.");
+    startUnityLoader();
+}, 5000);
+document.body.appendChild(sdkScript);
