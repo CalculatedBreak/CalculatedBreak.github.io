@@ -150,6 +150,7 @@ const GAME_MODULES = [
   { href: "games/perfect-landing-plane-pilot/", img: "/images/perfect-landing-plane-pilot.png", title: "Perfect Landing: Plane Pilot", cat: "simulation" },
   { href: "games/rooftop-snipers-2/", img: "/images/rooftop-snipers-2.jpg", title: "Rooftop Snipers 2", cat: "shooter" },
   { href: "games/4/", img: "/images/4.png", title: "Inca Cubes 2048", cat: "puzzle" },
+  { href: "games/world-guessr/", img: "/images/world-guessr.png", title: "World Guessr", cat: "puzzle" },
 ];
 
 
