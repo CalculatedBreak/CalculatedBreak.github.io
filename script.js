@@ -148,6 +148,7 @@ const GAME_MODULES = [
   { href: "games/stickman-climb/", img: "/images/stickman-climb.png", title: "Stickman Climb 3D", cat: "action" },
   { href: "games/stickman-climb-2/", img: "/images/stickman-climb-2.png", title: "Stickman Climb 2", cat: "action" },
   { href: "games/perfect-landing-plane-pilot/", img: "/images/perfect-landing-plane-pilot.png", title: "Perfect Landing: Plane Pilot", cat: "simulation" },
+  { href: "games/rooftop-snipers-2/", img: "/images/rooftop-snipers-2.jpg", title: "Rooftop Snipers 2", cat: "shooter" },
 ];
 
 
