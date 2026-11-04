@@ -54,9 +54,29 @@
 :root[data-theme="dark"] .module-tag,
 :root[data-theme="dark"] .game-card-tag,
 :root[data-theme="dark"] .sidebar-link--active,
+:root[data-theme="dark"] .sidebar-signout.is-cta,
 :root[data-theme="dark"] .status-badge,
 :root[data-theme="dark"] .account-avatar {
   color: #17211a;
+}
+
+:root[data-theme="dark"] .header-cta:hover,
+:root[data-theme="dark"] .button:hover,
+:root[data-theme="dark"] .btn:hover,
+:root[data-theme="dark"] .btn-play:hover,
+:root[data-theme="dark"] .module-play:hover,
+:root[data-theme="dark"] .sidebar-signout.is-cta:hover {
+  color: #17211a;
+  background: var(--accent);
+}
+
+:root[data-theme="dark"] .text-link:hover {
+  color: var(--accent);
+}
+
+:root[data-theme="dark"] .random-button:hover,
+:root[data-theme="dark"] .random-play:hover {
+  background: var(--surface-raised);
 }
 
 :root[data-theme="dark"] .browse-banner {

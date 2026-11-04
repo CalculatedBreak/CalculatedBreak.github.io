@@ -3,14 +3,18 @@
   const validThemes = ["light", "dark"];
   const root = document.documentElement;
 
-  function applyTheme(theme) {
-    root.dataset.theme = theme;
+  function updateThemeControls(theme) {
     document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
       const nextTheme = theme === "dark" ? "light" : "dark";
       button.textContent = nextTheme === "dark" ? "Dark mode" : "Light mode";
       button.setAttribute("aria-label", "Switch to " + nextTheme + " mode");
       button.setAttribute("aria-pressed", String(theme === "dark"));
     });
+  }
+
+  function applyTheme(theme) {
+    root.dataset.theme = theme;
+    updateThemeControls(theme);
   }
 
   let savedTheme = "light";
@@ -23,6 +27,7 @@
   applyTheme(savedTheme);
 
   document.addEventListener("DOMContentLoaded", () => {
+    updateThemeControls(root.dataset.theme);
     document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
       button.addEventListener("click", () => {
         const theme = root.dataset.theme === "dark" ? "light" : "dark";

@@ -145,6 +145,8 @@ const GAME_MODULES = [
   { href: "games/zombie-derby/", img: "/games/zombie-derby/zombie-derby.png", title: "Zombie Derby", cat: "action" },
   { href: "games/basketball-superstars/", img: "/images/basketball-superstars.png", title: "Basketball Superstars", cat: "sports" },
   { href: "games/aquapark/", img: "/games/aquapark/thumbnail.png", title: "Aquapark", cat: "racing" },
+  { href: "games/stickman-climb/", img: "/images/stickman-climb.png", title: "Stickman Climb 3D", cat: "action" },
+  { href: "games/stickman-climb-2/", img: "/images/stickman-climb-2.png", title: "Stickman Climb 2", cat: "action" },
 ];
 
 

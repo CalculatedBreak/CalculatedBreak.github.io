@@ -18,6 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
   <style>
     :root {
       color-scheme: light;
@@ -211,6 +212,9 @@
     .site-footer { margin-top: 84px; border-top: 1px solid var(--line); }
     .footer-inner { min-height: 86px; display: flex; align-items: center; justify-content: space-between; gap: 18px; color: var(--muted); font-size: .86rem; }
     .footer-inner p { margin: 0; }
+    :root[data-theme="dark"] .site-header { background: var(--surface); }
+    :root[data-theme="dark"] .browse-banner { border-color: var(--line); background: var(--surface-raised); }
+    :root[data-theme="dark"] .browse-banner::after { color: rgba(237,242,235,.035); }
 
     @media (max-width: 850px) {
       .hero-grid { grid-template-columns: 1fr; gap: 36px; }
@@ -227,6 +231,7 @@
       .brand-name { font-size: .72rem; }
       .main-nav { display: none; }
       .header-cta { min-height: 38px; padding-inline: 10px; font-size: .78rem; }
+      .theme-toggle { min-height: 38px; padding: 6px 8px; font-size: .75rem; }
       .hero { padding-top: 48px; }
       .hero-showcase { min-height: 300px; }
       .showcase-main { inset: 10px 43px 20px 0; border-radius: 17px; }
@@ -243,6 +248,7 @@
       .footer-inner { align-items: start; justify-content: center; flex-direction: column; padding-block: 20px; }
     }
     @media (max-width: 380px) {
+      .brand-name { display: none; }
       .game-grid { gap: 12px; }
       .game-card { flex-basis: 100%; }
       .game-card-body { padding: 11px; }
@@ -252,6 +258,7 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
     }
   </style>
+  <link rel="stylesheet" href="theme.css">
 </head>
 <body>
   <header class="site-header">
@@ -265,6 +272,7 @@
         <a href="allgames.html#modules">All games</a>
         <a href="allgames.html#chips">Browse by type</a>
       </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
       <a class="header-cta" href="allgames.html#modules">Browse library <span aria-hidden="true">↗</span></a>
     </div>
   </header>
@@ -273,14 +281,14 @@
     <section class="hero">
       <div class="container hero-grid">
         <div class="hero-content">
-          <p class="eyebrow">A fictional academy-themed collection</p>
+          <p class="eyebrow">Academy Module Collection</p>
           <h1>Welcome to <span>Edusphere Academy.</span></h1>
           <p class="hero-copy">Explore a thoughtfully arranged library of free modules and activities. Choose something new, take a break, and enjoy learning through play.</p>
           <div class="hero-actions">
             <a class="button" href="allgames.html#modules">Explore the collection <span aria-hidden="true">→</span></a>
             <a class="button button--quiet" href="#featured">View featured activities</a>
           </div>
-          <p class="hero-note"><span class="online-dot" aria-hidden="true"></span>Established in 1969.</p>
+          <p class="hero-note"><span class="online-dot" aria-hidden="true"></span>Real institution.</p>
         </div>
 
         <div class="hero-showcase" aria-label="Featured game: Drive Mad">

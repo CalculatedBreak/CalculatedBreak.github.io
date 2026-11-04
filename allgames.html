@@ -39,6 +39,7 @@ l.parentNode.insertBefore(s, l);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
 
   <style>
     :root {
@@ -129,6 +130,11 @@ l.parentNode.insertBefore(s, l);
       margin-bottom: 40px; padding: 22px 26px; border-radius: var(--radius);
       background: #e9efe7;
       border: 1px solid #cbd8cc; border-left: 4px solid var(--pink);
+    }
+    :root[data-theme="dark"] .dashboard-welcome {
+      background: var(--surface-raised);
+      border-color: var(--line);
+      border-left-color: var(--accent);
     }
     .dashboard-welcome p { margin: 0; max-width: 60ch; color: var(--muted); }
     .dashboard-welcome .welcome-title { color: var(--text); font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
@@ -318,6 +324,7 @@ l.parentNode.insertBefore(s, l);
     }
     .sidebar-signout.is-cta:hover { color: #fffefa; background: #28523f; }
     .sidebar-signout.is-cta:active { transform: none; }
+    :root[data-theme="dark"] .dashboard-sidebar { background: var(--surface); }
 
     @media (max-width: 1180px) {
       .dashboard-sidebar { position: static; flex-wrap: wrap; gap: 10px; }
@@ -342,6 +349,7 @@ l.parentNode.insertBefore(s, l);
       *,*::before,*::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
     }
   </style>
+  <link rel="stylesheet" href="theme.css">
 </head>
 
 <body class="dashboard-page">
@@ -367,6 +375,7 @@ l.parentNode.insertBefore(s, l);
         <button type="button" class="sidebar-link sidebar-button" id="open-daily"><span class="sidebar-icon" aria-hidden="true">✨</span>Today's message</button>
       </nav>
 
+      <button type="button" class="theme-toggle" data-theme-toggle>Dark mode</button>
       <button type="button" class="sidebar-signout" id="auth-toggle">Sign in</button>
     </aside>
 

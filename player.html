@@ -44,6 +44,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
 
   <style>
     /* ---- Theme tokens (shared with the game hub) ---- */
@@ -516,6 +517,7 @@
       *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
     }
   </style>
+  <link rel="stylesheet" href="theme.css">
 </head>
 
 <body>
@@ -533,6 +535,7 @@
           <span class="user-chip-name" id="user-name"></span>
         </button>
         <a href="allgames.html" class="btn btn--alt">&larr; All games</a>
+        <button type="button" class="theme-toggle" data-theme-toggle>Dark mode</button>
         <a class="btn btn--alt" id="direct-play-btn" hidden>Direct Play</a>
         <button type="button" class="btn" id="fs-btn">Fullscreen</button>
         <button type="button" class="btn btn--pink is-cta" id="auth-toggle">Sign in</button>
