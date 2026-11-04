@@ -1,3 +1,24 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f4ed;
+  --bg-deep: #f5f4ed;
+  --surface: #fffefa;
+  --surface-raised: #eeefe7;
+  --panel: #fffefa;
+  --panel-hi: #eeefe7;
+  --line: #d9ddd3;
+  --text: #24352f;
+  --muted: #63716a;
+  --accent: #376b56;
+  --accent-strong: #28523f;
+  --pink: #376b56;
+  --cyan: #376b56;
+  --sun: #376b56;
+  --radius: 9px;
+  --display: "Lora", Georgia, serif;
+  --body: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #1b211d;
@@ -39,6 +60,19 @@
 .theme-toggle:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
+}
+
+body {
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+a {
+  color: var(--accent);
+}
+
+a:hover {
+  color: var(--accent-strong);
 }
 
 :root[data-theme="dark"] .site-header,

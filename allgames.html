@@ -207,6 +207,11 @@ l.parentNode.insertBefore(s, l);
     .result-count { margin: 0; color: var(--muted); font-size: .9rem; }
     .no-results,.module-grid--empty { color: var(--muted); padding: 24px; border: 2px dashed var(--line); border-radius: var(--radius); }
     .module-grid--empty { display: block; }
+    .collection-notes { max-width: 760px; margin-top: 44px; color: var(--muted); line-height: 1.65; }
+    .collection-notes h2, .collection-notes h3 { color: var(--text); font-family: var(--display); }
+    .collection-notes h2 { margin: 0 0 10px; font-size: 1.55rem; }
+    .collection-notes h3 { margin: 24px 0 6px; font-size: 1.12rem; }
+    .collection-notes p { margin: 8px 0; }
 
     /* Daily message and authentication popups */
     .daily-overlay {
@@ -439,8 +444,18 @@ l.parentNode.insertBefore(s, l);
         <div id="module-grid" class="module-grid" role="list" aria-label="Games and simulations"></div>
       </section>
 
+      <section class="collection-notes" aria-labelledby="collection-notes-title">
+        <h2 id="collection-notes-title">A little help choosing</h2>
+        <p>The category chips are a quick way to narrow a large library, not a promise that every game in a category works the same way. Search by title if you know what you want to play. If you are browsing, try a category that matches your mood: racing and action games tend to ask for quick reactions, puzzle games give you more time to plan, and idle games are built around gradual progress.</p>
+        <h3>Before opening a game</h3>
+        <p>Most games run in the browser without a separate download. Once a game opens, wait for its own title screen and check for control instructions; keyboard, mouse, and touch support depend on the game. If a game does not load, check your connection and try a current browser with scripts enabled. Some games are provided by third parties, so an individual game may be unavailable even when the rest of the library works.</p>
+        <h3>Want a few pointers?</h3>
+        <p>Our <a href="game-guide.html">game guide</a> has specific starting tips for several titles in the collection, including 2048, Bloxorz, Drive Mad, and Cookie Clicker. These are suggestions, not walkthroughs, and the instructions shown inside each game take precedence if its version or controls differ.</p>
+      </section>
+
       <footer class="dashboard-footer">
         <p><a href="index.html">Back to Edusphere Academy home</a> · Fictional theme; this is a browser-game collection, not a real school or university.</p>
+        <p><a href="game-guide.html">Game guide</a> · <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></p>
       </footer>
     </div>
   </div>

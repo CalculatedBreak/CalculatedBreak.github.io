@@ -337,6 +337,19 @@
       border-radius: var(--radius);
     }
 
+    .play-help {
+      max-width: 960px;
+      margin: 48px auto 0;
+      padding: 22px 24px;
+      color: var(--muted);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      line-height: 1.6;
+    }
+    .play-help h2 { margin: 0 0 8px; color: var(--text); font-family: var(--display); font-size: 1.35rem; }
+    .play-help p { margin: 8px 0; }
+
     .footer {
       max-width: 960px;
       margin: 56px auto 0;
@@ -585,8 +598,15 @@
       <div class="game-grid" id="game-grid"></div>
     </section>
 
+    <section class="play-help" aria-labelledby="play-help-title">
+      <h2 id="play-help-title">Having trouble getting started?</h2>
+      <p>Wait for the game's opening screen and look there for controls or a tutorial. Controls are set by each game, so keyboard and touch support can differ. The fullscreen button enlarges the play area; it does not change how a game is controlled.</p>
+      <p>If the play area stays blank, check your connection and try reloading the page once. Some titles are hosted by third parties and may occasionally be unavailable. Visit the <a href="game-guide.html">game guide</a> for tips on several titles, or return to <a href="allgames.html">all games</a> to choose another.</p>
+    </section>
+
     <footer class="footer">
       <p>Need another game? <a href="allgames.html">Browse the activity library</a>. Edusphere Academy is fictional, not a real school or university.</p>
+      <p><a href="game-guide.html">Game guide</a> · <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></p>
     </footer>
 
   </div>

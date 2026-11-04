@@ -7,6 +7,9 @@
   <meta name="theme-color" content="#f5f4ed">
   <title>Edusphere Academy |  Module Library</title>
 
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4353830713556880"
+     crossorigin="anonymous"></script>
+
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV0H0442XN"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -186,6 +189,14 @@
     .random-button, .random-play { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 6px; color: var(--accent); background: var(--surface-raised); font: 700 .88rem var(--body); text-decoration: none; cursor: pointer; transition: background .2s ease; }
     .random-button:hover, .random-play:hover { background: #e3e9df; }
     .random-button:disabled { opacity: .6; cursor: wait; }
+    .collection-guide { padding: 18px 0 74px; }
+    .collection-guide > .container > h2 { margin: 0 0 22px; font: 600 clamp(1.5rem, 3vw, 2.15rem)/1.2 var(--display); }
+    .collection-guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .collection-guide-grid article { padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .collection-guide-grid h3 { margin: 0 0 8px; font: 600 1.1rem/1.3 var(--display); }
+    .collection-guide-grid p { margin: 0; color: var(--muted); line-height: 1.65; }
+    .collection-guide-grid a, .collection-guide-link a { color: var(--accent); font-weight: 700; }
+    .collection-guide-link { margin: 18px 0 0; }
     .faq-section { padding: 35px 0 88px; }
     .faq-layout { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(32px,8vw,100px); align-items: start; }
     .faq-intro h2 { margin: 0 0 12px; font: 600 clamp(1.7rem,3.8vw,2.6rem)/1.18 var(--display); }
@@ -221,6 +232,7 @@
       .hero-content { max-width: 700px; }
       .hero-showcase { width: min(100%, 600px); margin-inline: auto; }
       .game-card { flex-basis: calc((100% - 36px) / 3); }
+      .collection-guide-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .faq-layout { grid-template-columns: 1fr; gap: 20px; }
     }
     @media (max-width: 600px) {
@@ -241,6 +253,7 @@
       .section-heading { align-items: start; flex-direction: column; gap: 10px; }
       .section-heading .text-link { margin-top: 2px; }
       .game-card { flex-basis: calc((100% - 18px) / 2); }
+      .collection-guide-grid { grid-template-columns: 1fr; }
       .random-picker { align-items: flex-start; flex-wrap: wrap; }
       .random-picker-copy { flex-basis: calc(100% - 130px); }
       .carousel-controls { margin-top: -4px; }
@@ -288,7 +301,7 @@
             <a class="button" href="allgames.html#modules">Explore the collection <span aria-hidden="true">→</span></a>
             <a class="button button--quiet" href="#featured">View featured activities</a>
           </div>
-          <p class="hero-note"><span class="online-dot" aria-hidden="true"></span>Real institution.</p>
+          <p class="hero-note"><span class="online-dot" aria-hidden="true"></span>Independent browser-game collection.</p>
         </div>
 
         <div class="hero-showcase" aria-label="Featured game: Drive Mad">
@@ -384,6 +397,28 @@
       </div>
     </section>
 
+    <section class="collection-guide" aria-labelledby="collection-guide-title">
+      <div class="container">
+        <p class="eyebrow">A useful place to start</p>
+        <h2 id="collection-guide-title">Pick a game that fits your break.</h2>
+        <div class="collection-guide-grid">
+          <article>
+            <h3>Want quick action?</h3>
+            <p><a href="player.html?game=slope&amp;title=Slope">Slope</a> and <a href="player.html?game=moto-x3m&amp;title=Moto%20X3M">Moto X3M</a> get moving quickly and ask you to react to what is ahead. Make a few careful attempts before chasing a perfect run; getting a feel for the timing is often more useful than rushing.</p>
+          </article>
+          <article>
+            <h3>Feel like solving something?</h3>
+            <p><a href="player.html?game=2048&amp;title=2048">2048</a> and <a href="player.html?game=bloxorz&amp;title=Bloxorz">Bloxorz</a> reward thinking a move ahead. In 2048, keep track of where your largest tile is going. In Bloxorz, consider the block's orientation as it crosses the board.</p>
+          </article>
+          <article>
+            <h3>Prefer a slower pace?</h3>
+            <p><a href="player.html?game=cookie-clicker&amp;title=Cookie%20Clicker">Cookie Clicker</a> builds over time, while <a href="player.html?game=retro-bowl&amp;title=Retro%20Bowl">Retro Bowl</a> alternates between football decisions and managing a team. Check each game's instructions before you start; controls and features can vary by version.</p>
+          </article>
+        </div>
+        <p class="collection-guide-link"><a href="game-guide.html">Read the game guide for more specific tips <span aria-hidden="true">→</span></a></p>
+      </div>
+    </section>
+
     <section class="faq-section" id="faq">
       <div class="container faq-layout">
         <div class="faq-intro" data-reveal>
@@ -420,6 +455,7 @@
         <span class="brand-name">Edusphere <span>Academy</span></span>
       </a>
       <p>Edusphere Academy is fictional; this site is a browser-game collection.</p>
+      <p><a href="game-guide.html">Game guide</a> · <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></p>
     </div>
   </footer>
   <script src="script.js"></script>
