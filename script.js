@@ -142,15 +142,15 @@ const GAME_MODULES = [
   { href: "games/tomb-of-the-mask/", img: "/images/tomb-of-the-mask.png", title: "Tomb of the Mask", cat: "action" },
   { href: "games/raft-wars/", img: "/images/raft-wars.png", title: "Raft Wars", cat: "shooter" },
   { href: "games/raft-wars-2/", img: "/images/raft-wars-2.png", title: "Raft Wars 2", cat: "shooter" },
-  { href: "games/zombie-derby/", img: "/games/zombie-derby/zombie-derby.png", title: "Zombie Derby", cat: "action" },
+  //{ href: "games/zombie-derby/", img: "/games/zombie-derby/zombie-derby.png", title: "Zombie Derby", cat: "action" },
   { href: "games/basketball-superstars/", img: "/images/basketball-superstars.png", title: "Basketball Superstars", cat: "sports" },
   { href: "games/aquapark/", img: "/games/aquapark/thumbnail.png", title: "Aquapark", cat: "racing" },
   { href: "games/stickman-climb/", img: "/images/stickman-climb.png", title: "Stickman Climb 3D", cat: "action" },
   { href: "games/stickman-climb-2/", img: "/images/stickman-climb-2.png", title: "Stickman Climb 2", cat: "action" },
   { href: "games/perfect-landing-plane-pilot/", img: "/images/perfect-landing-plane-pilot.png", title: "Perfect Landing: Plane Pilot", cat: "simulation" },
-  { href: "games/rooftop-snipers-2/", img: "/images/rooftop-snipers-2.jpg", title: "Rooftop Snipers 2", cat: "shooter" },
+  //{ href: "games/rooftop-snipers-2/", img: "/images/rooftop-snipers-2.jpg", title: "Rooftop Snipers 2", cat: "shooter" },
   { href: "games/4/", img: "/images/4.png", title: "Inca Cubes 2048", cat: "puzzle" },
-  { href: "games/world-guessr/", img: "/images/world-guessr.png", title: "World Guessr", cat: "puzzle" },
+  //{ href: "games/world-guessr/", img: "/images/world-guessr.png", title: "World Guessr", cat: "puzzle" },
 ];
 
 
