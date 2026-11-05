@@ -152,6 +152,7 @@ const GAME_MODULES = [
   { href: "games/4/", img: "/images/4.png", title: "Inca Cubes 2048", cat: "puzzle" },
   //{ href: "games/world-guessr/", img: "/images/world-guessr.png", title: "World Guessr", cat: "puzzle" },
   { href: "games/redball4/", img: "/images/redball4.avif", title: "Red Ball 4", cat: "action" },
+  { href: "games/chess-pro/", img: "/images/chess-pro.jpg", title: "Chess Pro", cat: "multiplayer" },
 ];
 
 
