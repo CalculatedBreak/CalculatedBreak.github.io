@@ -1,6 +1,6 @@
 # ⚠️ PROPRIETARY CODE - DO NOT DISTRIBUTE
 
-**Copyright (c) 2026 Your Name. All rights reserved.**
+**Copyright (c) 2026 CalculatedBreak. All rights reserved.**
 
 This repository is kept **Public** strictly for the purpose of hosting via GitHub Pages. 
 
